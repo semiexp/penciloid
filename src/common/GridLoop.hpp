@@ -91,6 +91,7 @@ private:
 	void Join(int seg1, int seg2);
 
 	void CheckVertex(int y, int x);
+	inline void CheckCell(int y, int x) { if (0 <= y && y < height && 0 <= x && x < width) cells[CellId(y, x)](); }
 	void UpdateSegmentGroupStyle(int segment, int style);
 	void CheckNeighborhoodOfSegment(int segment);
 	void CheckNeighborhoodOfSegmentGroup(int segment);
@@ -216,9 +217,23 @@ void GridLoop<Vertex, Cell>::CheckNeighborhoodOfSegment(int segment)
 	if (y % 2 == 1) {
 		CheckVertex(y / 2, x / 2);
 		CheckVertex(y / 2 + 1, x / 2);
+
+		CheckCell(y / 2 - 1, x / 2 - 1);
+		CheckCell(y / 2 - 1, x / 2);
+		CheckCell(y / 2, x / 2 - 1);
+		CheckCell(y / 2, x / 2);
+		CheckCell(y / 2 + 1, x / 2 - 1);
+		CheckCell(y / 2 + 1, x / 2);
 	} else {
 		CheckVertex(y / 2, x / 2);
 		CheckVertex(y / 2, x / 2 + 1);
+
+		CheckCell(y / 2 - 1, x / 2 - 1);
+		CheckCell(y / 2, x / 2 - 1);
+		CheckCell(y / 2 - 1, x / 2);
+		CheckCell(y / 2, x / 2);
+		CheckCell(y / 2 - 1, x / 2 + 1);
+		CheckCell(y / 2, x / 2 + 1);
 	}
 }
 
