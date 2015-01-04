@@ -92,8 +92,8 @@ private:
 
 	void CheckVertex(int y, int x);
 	void UpdateSegmentGroupStyle(int segment, int style);
-	void CheckNeighborHoodOfSegment(int segment);
-	void CheckNeighborHoodOfSegmentGroup(int segment);
+	void CheckNeighborhoodOfSegment(int segment);
+	void CheckNeighborhoodOfSegmentGroup(int segment);
 
 	LoopSegment *segments;
 	Vertex *verteces;
@@ -183,7 +183,7 @@ int GridLoop<Vertex, Cell>::DetermineLine(int y, int x)
 	}
 
 	UpdateSegmentGroupStyle(segment_id, LOOP_LINE);
-	CheckNeighborHoodOfSegmentGroup(segment_id);
+	CheckNeighborhoodOfSegmentGroup(segment_id);
 
 	return UpdateStatus(0);
 }
@@ -201,13 +201,13 @@ int GridLoop<Vertex, Cell>::DetermineBlank(int y, int x)
 	}
 
 	UpdateSegmentGroupStyle(segment_id, LOOP_BLANK);
-	CheckNeighborHoodOfSegmentGroup(segment_id);
+	CheckNeighborhoodOfSegmentGroup(segment_id);
 
 	return UpdateStatus(0);
 }
 
 template <class Vertex, class Cell>
-void GridLoop<Vertex, Cell>::CheckNeighborHoodOfSegment(int segment)
+void GridLoop<Vertex, Cell>::CheckNeighborhoodOfSegment(int segment)
 {
 	int y = SegmentY(segment), x = SegmentX(segment);
 
@@ -223,12 +223,12 @@ void GridLoop<Vertex, Cell>::CheckNeighborHoodOfSegment(int segment)
 }
 
 template <class Vertex, class Cell>
-void GridLoop<Vertex, Cell>::CheckNeighborHoodOfSegmentGroup(int segment)
+void GridLoop<Vertex, Cell>::CheckNeighborhoodOfSegmentGroup(int segment)
 {
 	int segment_i = segment;
 
 	do {
-		CheckNeighborHoodOfSegment(segment_i);
+		CheckNeighborhoodOfSegment(segment_i);
 
 		segment_i = segments[segment_i].group_next;
 	} while (segment_i != segment);
@@ -405,7 +405,7 @@ void GridLoop<Vertex, Cell>::Join(int seg1, int seg2)
 	}
 
 	// TODO: potentially too slow
-	CheckNeighborHoodOfSegmentGroup(seg1);
+	CheckNeighborhoodOfSegmentGroup(seg1);
 }
 
 class LoopNullVertex;
