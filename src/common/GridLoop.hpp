@@ -91,7 +91,7 @@ private:
 	void Join(int seg1, int seg2);
 
 	void CheckVertex(int y, int x);
-	inline void CheckCell(int y, int x) { if (0 <= y && y < height && 0 <= x && x < width) cells[CellId(y, x)](); }
+	inline void CheckCell(int y, int x) { if (0 <= y && y < height && 0 <= x && x < width) cells[CellId(y, x)](*this); }
 	void UpdateSegmentGroupStyle(int segment, int style);
 	void CheckNeighborhoodOfSegment(int segment);
 	void CheckNeighborhoodOfSegmentGroup(int segment);
