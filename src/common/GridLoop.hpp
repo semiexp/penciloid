@@ -25,6 +25,7 @@ public:
 	inline int GetHeight() const { return height; }
 	inline int GetWidth() const { return width; }
 	inline int GetSegmentStyle(int y, int x) { return segments[SegmentId(y, x)].segment_style; }
+	inline int GetStatus() { return field_status; }
 
 	int DetermineLine(int y, int x);
 	int DetermineBlank(int y, int x);
