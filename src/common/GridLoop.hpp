@@ -184,6 +184,11 @@ int GridLoop<Vertex, Cell>::DetermineLine(int y, int x)
 		return UpdateStatus(0);
 	}
 
+	if (GetStatus() & SolverStatus::SUCCESS) {
+		// A closed cycle is already formed
+		return UpdateStatus(SolverStatus::INCONSISTENT);
+	}
+
 	UpdateSegmentGroupStyle(segment_id, LOOP_LINE);
 	CheckNeighborhoodOfSegmentGroup(segment_id);
 
@@ -254,6 +259,16 @@ template <class Vertex, class Cell>
 void GridLoop<Vertex, Cell>::UpdateSegmentGroupStyle(int segment, int style)
 {
 	int segment_i = segment;
+
+	if (style == LOOP_LINE && segments[segment_i].adj_vertex[0] == segments[segment_i].adj_vertex[1]) {
+		if (-segments[SegmentRoot(segment_i)].group_root < total_lines) {
+			UpdateStatus(SolverStatus::INCONSISTENT);
+			return;
+		} else {
+			UpdateStatus(SolverStatus::SUCCESS);
+			return;
+		}
+	}
 
 	do {
 		if (segments[segment_i].segment_style == LOOP_UNDECIDED && style == LOOP_LINE) ++total_lines;
@@ -397,6 +412,21 @@ void GridLoop<Vertex, Cell>::Join(int seg1, int seg2)
 		return;
 	}
 
+	// Update style of segments
+	if (segb1.segment_style == LOOP_UNDECIDED && segb2.segment_style != LOOP_UNDECIDED) {
+		UpdateSegmentGroupStyle(seg1, segb2.segment_style);
+	} else if (segb1.segment_style == LOOP_UNDECIDED && segb2.segment_style != LOOP_UNDECIDED) {
+		UpdateSegmentGroupStyle(seg2, segb1.segment_style);
+	}
+
+	if (segb1.segment_style == LOOP_LINE && segb1.adj_vertex[1] == segb2.adj_vertex[1]) {
+		if ((-segb1.group_root) + (-segb2.group_root) < total_lines) {
+			UpdateStatus(SolverStatus::INCONSISTENT);
+		} else {
+			UpdateStatus(SolverStatus::SUCCESS);
+		}
+	}
+
 	// Update linked list
 	std::swap(segb1.group_next, segb2.group_next);
 
@@ -409,15 +439,6 @@ void GridLoop<Vertex, Cell>::Join(int seg1, int seg2)
 		segb2.group_root += segb1.group_root;
 		segb1.group_root = seg2;
 		segb2.adj_vertex[0] = segb1.adj_vertex[1];
-	}
-
-	// TODO: check correctness of codes below
-
-	// Update style of segments
-	if (segb1.segment_style == LOOP_UNDECIDED && segb2.segment_style != LOOP_UNDECIDED) {
-		UpdateSegmentGroupStyle(seg1, segb2.segment_style);
-	} else if (segb1.segment_style == LOOP_UNDECIDED && segb2.segment_style != LOOP_UNDECIDED) {
-		UpdateSegmentGroupStyle(seg2, segb1.segment_style);
 	}
 
 	// TODO: potentially too slow
