@@ -6,6 +6,7 @@ void PenciloidTest::RunTestAll()
 {
 	GridLoopTest1();
 	GridLoopTest2();
+	GridLoopTest3();
 }
 
 }

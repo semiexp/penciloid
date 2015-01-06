@@ -32,5 +32,17 @@ void PenciloidTest::GridLoopTest2()
 	grid.DetermineLine(4, 1);
 	assert(grid.GetStatus() & SolverStatus::INCONSISTENT);
 }
+void PenciloidTest::GridLoopTest3()
+{
+	GridLoop<LoopNullVertex, LoopNullCell> grid;
+	grid.Init(3, 3);
+
+	grid.DetermineLine(0, 1);
+	grid.DetermineLine(2, 1);
+	grid.DetermineLine(5, 0);
+	grid.DetermineLine(1, 2);
+
+	assert(grid.GetStatus() & SolverStatus::INCONSISTENT);
+}
 
 }
