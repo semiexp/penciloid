@@ -5,7 +5,8 @@ namespace Penciloid
 void PenciloidTest::RunTestAll()
 {
 	GridLoopTest1();
-	GridLoopTest2();
+	GridLoopTest2a();
+	GridLoopTest2b();
 	GridLoopTest3();
 }
 
