@@ -8,6 +8,8 @@ void PenciloidTest::RunTestAll()
 	GridLoopTest2a();
 	GridLoopTest2b();
 	GridLoopTest3();
+
+	SlitherlinkTest1();
 }
 
 }

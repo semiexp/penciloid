@@ -7,6 +7,9 @@ public:
 	static void GridLoopTest2a();
 	static void GridLoopTest2b();
 	static void GridLoopTest3();
+
+	static void SlitherlinkTest1();
+
 	static void RunTestAll();
 };
 }
