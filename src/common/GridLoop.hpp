@@ -22,9 +22,13 @@ public:
 
 	void Init(int height_t, int width_t);
 
+	inline void SetAuxiliarySolver(AuxiliarySolver *auxiliary_t) { auxiliary = auxiliary_t; }
+	inline AuxiliarySolver* GetAuxiliarySolver() { return auxiliary; }
 	inline int GetHeight() const { return height; }
 	inline int GetWidth() const { return width; }
 	inline int GetSegmentStyle(int y, int x) { return segments[SegmentId(y, x)].segment_style; }
+
+	inline int UpdateStatus(int status) { return field_status |= status; }
 	inline int GetStatus() { return field_status; }
 
 	int DetermineLine(int y, int x);
@@ -78,7 +82,6 @@ private:
 		LoopSegment() {} 
 	};
 
-	inline int UpdateStatus(int status) { return field_status |= status; }
 	inline bool CheckSegmentRange(int y, int x) const { return 0 <= y && y <= 2 * height && 0 <= x && x <= 2 * width; }
 	inline int SegmentId(int y, int x) const { return y * (2 * width + 1) + x; }
 	inline int SegmentY(int segment) const { return segment / (2 * width + 1); }
