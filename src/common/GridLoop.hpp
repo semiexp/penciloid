@@ -7,7 +7,7 @@
 namespace Penciloid
 {
 
-template <class Vertex, class Cell>
+template <class AuxiliarySolver>
 class GridLoop
 {
 public:
@@ -92,26 +92,24 @@ private:
 	void Join(int seg1, int seg2);
 
 	void CheckVertex(int y, int x);
-	inline void CheckCell(int y, int x) { if (0 <= y && y < height && 0 <= x && x < width) cells[CellId(y, x)](*this); }
+	inline void CheckCell(int y, int x) { if (0 <= y && y < height && 0 <= x && x < width) auxiliary->CheckCell(*this, y, x); }
 	void UpdateSegmentGroupStyle(int segment, int style);
 	void CheckNeighborhoodOfSegment(int segment);
 	void CheckNeighborhoodOfSegmentGroup(int segment);
 
 	LoopSegment *segments;
-	Vertex *verteces;
-	Cell *cells;
+	AuxiliarySolver *auxiliary;
 
 	int height, width;
 	int total_lines;
 	int field_status;
 };
 
-template <class Vertex, class Cell>
-GridLoop<Vertex, Cell>::GridLoop()
+template <class AuxiliarySolver>
+GridLoop<AuxiliarySolver>::GridLoop()
 {
 	segments = nullptr;
-	verteces = nullptr;
-	cells = nullptr;
+	auxiliary = nullptr;
 
 	height = -1;
 	width = -1;
@@ -120,27 +118,21 @@ GridLoop<Vertex, Cell>::GridLoop()
 	field_status = SolverStatus::NORMAL;
 }
 
-template <class Vertex, class Cell>
-GridLoop<Vertex, Cell>::~GridLoop()
+template <class AuxiliarySolver>
+GridLoop<AuxiliarySolver>::~GridLoop()
 {
 	if (segments) delete[] segments;
-	if (verteces) delete[] verteces;
-	if (cells) delete[] cells;
 }
 
-template <class Vertex, class Cell>
-void GridLoop<Vertex, Cell>::Init(int height_t, int width_t)
+template <class AuxiliarySolver>
+void GridLoop<AuxiliarySolver>::Init(int height_t, int width_t)
 {
 	height = height_t;
 	width = width_t;
 
 	if (segments) delete[] segments;
-	if (verteces) delete[] verteces;
-	if (cells) delete[] cells;
 
 	segments = new LoopSegment[(height * 2 + 1) * (width * 2 + 1)];
-	verteces = new Vertex[(height + 1) * (width + 1)];
-	cells = new Cell[height * width];
 
 	for (int i = 0; i < height * 2 + 1; ++i) {
 		for (int j = 0; j < width * 2 + 1; ++j) {
@@ -172,8 +164,8 @@ void GridLoop<Vertex, Cell>::Init(int height_t, int width_t)
 	Join(SegmentId(height * 2 - 1, width * 2), SegmentId(height * 2, width * 2 - 1));
 }
 
-template <class Vertex, class Cell>
-int GridLoop<Vertex, Cell>::DetermineLine(int y, int x)
+template <class AuxiliarySolver>
+int GridLoop<AuxiliarySolver>::DetermineLine(int y, int x)
 {
 	int segment_id = SegmentRoot(SegmentId(y, x));
 	LoopSegment &segment = segments[segment_id];
@@ -195,8 +187,8 @@ int GridLoop<Vertex, Cell>::DetermineLine(int y, int x)
 	return UpdateStatus(0);
 }
 
-template <class Vertex, class Cell>
-int GridLoop<Vertex, Cell>::DetermineBlank(int y, int x)
+template <class AuxiliarySolver>
+int GridLoop<AuxiliarySolver>::DetermineBlank(int y, int x)
 {
 	int segment_id = SegmentRoot(SegmentId(y, x));
 	LoopSegment &segment = segments[segment_id];
@@ -213,8 +205,8 @@ int GridLoop<Vertex, Cell>::DetermineBlank(int y, int x)
 	return UpdateStatus(0);
 }
 
-template <class Vertex, class Cell>
-void GridLoop<Vertex, Cell>::CheckNeighborhoodOfSegment(int segment)
+template <class AuxiliarySolver>
+void GridLoop<AuxiliarySolver>::CheckNeighborhoodOfSegment(int segment)
 {
 	int y = SegmentY(segment), x = SegmentX(segment);
 
@@ -243,8 +235,8 @@ void GridLoop<Vertex, Cell>::CheckNeighborhoodOfSegment(int segment)
 	}
 }
 
-template <class Vertex, class Cell>
-void GridLoop<Vertex, Cell>::CheckNeighborhoodOfSegmentGroup(int segment)
+template <class AuxiliarySolver>
+void GridLoop<AuxiliarySolver>::CheckNeighborhoodOfSegmentGroup(int segment)
 {
 	int segment_i = segment;
 
@@ -255,8 +247,8 @@ void GridLoop<Vertex, Cell>::CheckNeighborhoodOfSegmentGroup(int segment)
 	} while (segment_i != segment);
 }
 
-template <class Vertex, class Cell>
-void GridLoop<Vertex, Cell>::UpdateSegmentGroupStyle(int segment, int style)
+template <class AuxiliarySolver>
+void GridLoop<AuxiliarySolver>::UpdateSegmentGroupStyle(int segment, int style)
 {
 	int segment_i = segment;
 
@@ -278,14 +270,14 @@ void GridLoop<Vertex, Cell>::UpdateSegmentGroupStyle(int segment, int style)
 	} while (segment_i != segment);
 }
 
-template <class Vertex, class Cell>
-void GridLoop<Vertex, Cell>::CheckVertex(int y, int x)
+template <class AuxiliarySolver>
+void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 {
 	int vertex_id = VertexId(y, x);
 	int dest[4], style[4], weight[4];
 	int line_count = 0, undecided_count = 0;
 
-	verteces[vertex_id](*this);
+	auxiliary->CheckVertex(*this, y, x);
 
 	for (int i = 0; i < 4; ++i) {
 		int y2 = 2 * y + GridConstant::GRID_DY[i], x2 = 2 * x + GridConstant::GRID_DX[i];
@@ -381,8 +373,8 @@ void GridLoop<Vertex, Cell>::CheckVertex(int y, int x)
 	}
 }
 
-template <class Vertex, class Cell>
-void GridLoop<Vertex, Cell>::Join(int seg1, int seg2)
+template <class AuxiliarySolver>
+void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 {
 	seg1 = SegmentRoot(seg1);
 	seg2 = SegmentRoot(seg2);
@@ -445,19 +437,13 @@ void GridLoop<Vertex, Cell>::Join(int seg1, int seg2)
 	CheckNeighborhoodOfSegmentGroup(seg1);
 }
 
-class LoopNullVertex;
-class LoopNullCell;
+class LoopNullAuxiliarySolver;
 
-class LoopNullVertex
+class LoopNullAuxiliarySolver
 {
 public:
-	inline void operator()(GridLoop<LoopNullVertex, LoopNullCell> &grid) {}
-};
-
-class LoopNullCell
-{
-public:
-	inline void operator()(GridLoop<LoopNullVertex, LoopNullCell> &grid) {}
+	void CheckVertex(GridLoop<LoopNullAuxiliarySolver> &grid, int y, int x) {}
+	void CheckCell(GridLoop<LoopNullAuxiliarySolver> &grid, int y, int x) {}
 };
 
 }

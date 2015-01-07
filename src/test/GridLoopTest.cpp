@@ -8,7 +8,7 @@ namespace Penciloid
 {
 void PenciloidTest::GridLoopTest1()
 {
-	GridLoop<LoopNullVertex, LoopNullCell> grid;
+	GridLoop<LoopNullAuxiliarySolver> grid;
 	grid.Init(3, 3);
 
 	grid.DetermineBlank(0, 3);
@@ -20,7 +20,7 @@ void PenciloidTest::GridLoopTest1()
 }
 void PenciloidTest::GridLoopTest2a()
 {
-	GridLoop<LoopNullVertex, LoopNullCell> grid;
+	GridLoop<LoopNullAuxiliarySolver> grid;
 	grid.Init(3, 3);
 
 	grid.DetermineBlank(0, 3);
@@ -33,7 +33,7 @@ void PenciloidTest::GridLoopTest2a()
 }
 void PenciloidTest::GridLoopTest2b()
 {
-	GridLoop<LoopNullVertex, LoopNullCell> grid;
+	GridLoop<LoopNullAuxiliarySolver> grid;
 	grid.Init(3, 3);
 
 	grid.DetermineBlank(0, 3);
@@ -46,7 +46,7 @@ void PenciloidTest::GridLoopTest2b()
 }
 void PenciloidTest::GridLoopTest3()
 {
-	GridLoop<LoopNullVertex, LoopNullCell> grid;
+	GridLoop<LoopNullAuxiliarySolver> grid;
 	grid.Init(3, 3);
 
 	grid.DetermineLine(0, 1);
