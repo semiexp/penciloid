@@ -1,5 +1,7 @@
 namespace Penciloid
 {
+class SlitherlinkField;
+
 class PenciloidTest
 {
 public:
@@ -8,7 +10,9 @@ public:
 	static void GridLoopTest2b();
 	static void GridLoopTest3();
 
+	static bool SlitherlinkCheckGrid(SlitherlinkField &field, const int *expected);
 	static void SlitherlinkTest1();
+	static void SlitherlinkTest2();
 
 	static void RunTestAll();
 };
