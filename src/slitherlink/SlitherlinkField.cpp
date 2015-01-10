@@ -108,18 +108,12 @@ void SlitherlinkField::CheckCell(int y, int x)
 			if (i & (1 << ((j + 1) & 3))) ++num_lines;
 			else ++num_blanks;
 
-			int style1 = LOOP_BLANK;
-			if (0 <= y * 2 + 1 + dy1 + dy2 * 2 && y * 2 + 1 + dy1 + dy2 * 2 <= height * 2 && 0 <= x * 2 + 1 + dx1 + dx2 * 2 && x * 2 + 1 + dx1 + dx2 * 2 <= width * 2) {
-				style1 = grid.GetSegmentStyle(y * 2 + 1 + dy1 + dy2 * 2, x * 2 + 1 + dx1 + dx2 * 2);
-			}
+			int style1 = grid.GetSegmentStyleSafe(y * 2 + 1 + dy1 + dy2 * 2, x * 2 + 1 + dx1 + dx2 * 2);
 
 			if (style1 == LOOP_LINE) ++num_lines;
 			else if (style1 == LOOP_BLANK) ++num_blanks;
 
-			int style2 = LOOP_BLANK;
-			if (0 <= y * 2 + 1 + dy2 + dy1 * 2 && y * 2 + 1 + dy2 + dy1 * 2 <= height * 2 && 0 <= x * 2 + 1 + dx2 + dx1 * 2 && x * 2 + 1 + dx2 + dx1 * 2 <= width * 2) {
-				style2 = grid.GetSegmentStyle(y * 2 + 1 + dy2 + dy1 * 2, x * 2 + 1 + dx2 + dx1 * 2);
-			}
+			int style2 = grid.GetSegmentStyleSafe(y * 2 + 1 + dy2 + dy1 * 2, x * 2 + 1 + dx2 + dx1 * 2);
 
 			if (style2 == LOOP_LINE) ++num_lines;
 			else if (style2 == LOOP_BLANK) ++num_blanks;
