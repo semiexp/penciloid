@@ -27,6 +27,7 @@ public:
 	inline int GetHeight() const { return height; }
 	inline int GetWidth() const { return width; }
 	inline int GetSegmentStyle(int y, int x) { return segments[SegmentId(y, x)].segment_style; }
+	inline int GetSegmentStyleSafe(int y, int x) { return (CheckSegmentRange(y, x) ? segments[SegmentId(y, x)].segment_style : LOOP_BLANK); }
 
 	inline int UpdateStatus(int status) { return field_status |= status; }
 	inline int GetStatus() { return field_status; }
@@ -173,6 +174,8 @@ int GridLoop<AuxiliarySolver>::DetermineLine(int y, int x)
 	int segment_id = SegmentRoot(SegmentId(y, x));
 	LoopSegment &segment = segments[segment_id];
 
+	if (!CheckSegmentRange(y, x)) return UpdateStatus(SolverStatus::UNEXPECTED);
+
 	if (segment.segment_style == LOOP_BLANK) {
 		return UpdateStatus(SolverStatus::INCONSISTENT);
 	} else if (segment.segment_style == LOOP_LINE) {
@@ -195,6 +198,8 @@ int GridLoop<AuxiliarySolver>::DetermineBlank(int y, int x)
 {
 	int segment_id = SegmentRoot(SegmentId(y, x));
 	LoopSegment &segment = segments[segment_id];
+
+	if (!CheckSegmentRange(y, x)) return UpdateStatus(0);
 
 	if (segment.segment_style == LOOP_LINE) {
 		return UpdateStatus(SolverStatus::INCONSISTENT);
