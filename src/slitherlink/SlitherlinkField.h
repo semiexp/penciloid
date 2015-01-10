@@ -51,6 +51,7 @@ private:
 	};
 
 	void CheckCell(int y, int x);
+	void CheckTheorem(int y, int x);
 	inline int CellId(int y, int x) { return y * width + x; }
 
 	GridLoop<SlitherlinkAuxiliarySolver> grid;
