@@ -29,6 +29,10 @@ public:
 	inline int GetSegmentStyle(int y, int x) { return segments[SegmentId(y, x)].segment_style; }
 	inline int GetSegmentStyleSafe(int y, int x) { return (CheckSegmentRange(y, x) ? segments[SegmentId(y, x)].segment_style : LOOP_BLANK); }
 
+	inline bool CheckSegmentRange(int y, int x) const { return 0 <= y && y <= 2 * height && 0 <= x && x <= 2 * width; }
+	inline bool CheckCellRange(int y, int x) const { return 0 <= y && y < height && 0 <= x && x < width; }
+	inline bool CheckVertexRange(int y, int x) const { return 0 <= y && y <= height && 0 <= x && x <= width; }
+
 	inline int UpdateStatus(int status) { return field_status |= status; }
 	inline int GetStatus() { return field_status; }
 
@@ -83,7 +87,6 @@ private:
 		LoopSegment() {} 
 	};
 
-	inline bool CheckSegmentRange(int y, int x) const { return 0 <= y && y <= 2 * height && 0 <= x && x <= 2 * width; }
 	inline int SegmentId(int y, int x) const { return y * (2 * width + 1) + x; }
 	inline int SegmentY(int segment) const { return segment / (2 * width + 1); }
 	inline int SegmentX(int segment) const { return segment % (2 * width + 1); }
