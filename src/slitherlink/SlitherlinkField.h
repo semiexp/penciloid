@@ -4,6 +4,8 @@
 
 namespace Penciloid
 {
+class SlitherlinkProblem;
+
 class SlitherlinkField
 {
 public:
@@ -18,6 +20,7 @@ public:
 	~SlitherlinkField();
 
 	void Init(int height_t, int width_t);
+	void Init(SlitherlinkProblem &prob);
 
 	inline int GetHeight() { return height; }
 	inline int GetWidth() { return width; }

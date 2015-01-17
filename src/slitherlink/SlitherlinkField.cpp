@@ -1,4 +1,5 @@
 #include "SlitherlinkField.h"
+#include "SlitherlinkProblem.h"
 
 namespace Penciloid
 {
@@ -28,6 +29,19 @@ void SlitherlinkField::Init(int height_t, int width_t)
 	auxiliary.Init(this);
 	grid.SetAuxiliarySolver(&auxiliary);
 	grid.Init(height, width);
+}
+
+void SlitherlinkField::Init(SlitherlinkProblem &prob)
+{
+	Init(prob.GetHeight(), prob.GetWidth());
+
+	for (int i = 0; i < height; ++i) {
+		for (int j = 0; j < width; ++j) {
+			int hint = prob.GetHint(i, j);
+
+			if (hint != HINT_NONE) SetHint(i, j, hint);
+		}
+	}
 }
 
 int SlitherlinkField::SetHint(int y, int x, int hint)
