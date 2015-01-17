@@ -1,6 +1,7 @@
 #include <cassert>
 
 #include "../slitherlink/SlitherlinkField.h"
+#include "../slitherlink/SlitherlinkProblem.h"
 #include "Test.h"
 
 namespace Penciloid
@@ -66,6 +67,21 @@ void PenciloidTest::SlitherlinkTest2()
 
 	assert(field.GetStatus() == SolverStatus::SUCCESS);
 	assert(SlitherlinkCheckGrid(field, expected));
+}
+
+void PenciloidTest::SlitherlinkTest3()
+{
+	for (int i = 1; i <= NUMBER_OF_SLITHERLINK_PROBLEM; ++i) {
+		SlitherlinkProblem prob;
+
+		SlitherlinkLoadProblem(prob, i);
+
+		SlitherlinkField field;
+		field.Init(prob);
+
+		field.Debug();
+		fprintf(stderr, "%d\n", field.GetStatus());
+	}
 }
 
 }

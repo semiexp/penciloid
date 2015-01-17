@@ -11,6 +11,7 @@ void PenciloidTest::RunTestAll()
 
 	SlitherlinkTest1();
 	SlitherlinkTest2();
+	SlitherlinkTest3();
 }
 
 }
