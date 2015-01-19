@@ -69,7 +69,7 @@ void SlitherlinkField::CheckTheorem(int y, int x)
 
 		for (int i = 0; i < 4; ++i) {
 			int dy = GridConstant::GRID_DY[i], dx = GridConstant::GRID_DX[i];
-			if (grid.CheckCellRange(y + dy, x + dx) && GetHint(y + dy, x + dx) == 3) {
+			if (GetHintSafe(y + dy, x + dx) == 3) {
 				grid.DetermineLine(y * 2 + 1 - dy, x * 2 + 1 - dx);
 				grid.DetermineLine(y * 2 + 1 + dy, x * 2 + 1 + dx);
 				grid.DetermineBlank(y * 2 + 1 + dy + 2 * dx, x * 2 + 1 + dx + 2 * dy);
@@ -78,7 +78,7 @@ void SlitherlinkField::CheckTheorem(int y, int x)
 			}
 
 			int dy2 = GridConstant::GRID_DY[(i + 1) % 4], dx2 = GridConstant::GRID_DX[(i + 1) % 4];
-			if (grid.CheckCellRange(y + dy + dy2, x + dx + dx2) && GetHint(y + dy + dy2, x + dx + dx2) == 3) {
+			if (GetHintSafe(y + dy + dy2, x + dx + dx2) == 3) {
 				grid.DetermineLine(y * 2 + 1 - dy, x * 2 + 1 - dx);
 				grid.DetermineLine(y * 2 + 1 - dy2, x * 2 + 1 - dx2);
 				grid.DetermineLine(y * 2 + 1 + dy * 3 + dy2 * 2, x * 2 + 1 + dx * 3 + dx2 * 2);

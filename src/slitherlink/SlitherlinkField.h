@@ -28,6 +28,7 @@ public:
 	inline int GetSegmentStyle(int y, int x) { return grid.GetSegmentStyle(y, x); }
 
 	inline int GetHint(int y, int x) { return hints[CellId(y, x)]; }
+	inline int GetHintSafe(int y, int x) { return grid.CheckCellRange(y, x) ? GetHint(y, x) : HINT_NONE; }
 	int SetHint(int y, int x, int hint);
 
 	void Debug();
@@ -47,7 +48,6 @@ private:
 		inline void CheckCell(GridLoop<SlitherlinkAuxiliarySolver> &grid, int y, int x) {
 			slither->CheckCell(y, x);
 		}
-		inline void CheckVertex(GridLoop<SlitherlinkAuxiliarySolver> &grid, int y, int x) {}
 
 	private:
 		SlitherlinkField *slither;
