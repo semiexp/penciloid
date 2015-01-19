@@ -56,33 +56,33 @@ int SlitherlinkField::SetHint(int y, int x, int hint)
 	}
 
 	hints[id] = hint;
-	CheckTheorem(y, x);
-	CheckCell(y, x);
+	CheckTheorem(y * 2 + 1, x * 2 + 1);
+	CheckCell(y * 2 + 1, x * 2 + 1);
 
 	return grid.GetStatus();
 }
 
 void SlitherlinkField::CheckTheorem(int y, int x)
 {
-	if (GetHint(y, x) == 3) {
+	if (GetHint(y / 2, x / 2) == 3) {
 		// vertically or horizontally adjacent 3
 
 		for (int i = 0; i < 4; ++i) {
 			int dy = GridConstant::GRID_DY[i], dx = GridConstant::GRID_DX[i];
-			if (GetHintSafe(y + dy, x + dx) == 3) {
-				grid.DetermineLine(y * 2 + 1 - dy, x * 2 + 1 - dx);
-				grid.DetermineLine(y * 2 + 1 + dy, x * 2 + 1 + dx);
-				grid.DetermineBlank(y * 2 + 1 + dy + 2 * dx, x * 2 + 1 + dx + 2 * dy);
-				grid.DetermineBlank(y * 2 + 1 + dy - 2 * dx, x * 2 + 1 + dx - 2 * dy);
-				grid.DetermineLine(y * 2 + 1 + 3 * dy, x * 2 + 1 + 3 * dx);
+			if (GetHintSafe(y / 2 + dy, x / 2 + dx) == 3) {
+				grid.DetermineLine(y - dy, x - dx);
+				grid.DetermineLine(y + dy, x + dx);
+				grid.DetermineBlank(y + dy + 2 * dx, x + dx + 2 * dy);
+				grid.DetermineBlank(y + dy - 2 * dx, x + dx - 2 * dy);
+				grid.DetermineLine(y + 3 * dy, x + 3 * dx);
 			}
 
 			int dy2 = GridConstant::GRID_DY[(i + 1) % 4], dx2 = GridConstant::GRID_DX[(i + 1) % 4];
-			if (GetHintSafe(y + dy + dy2, x + dx + dx2) == 3) {
-				grid.DetermineLine(y * 2 + 1 - dy, x * 2 + 1 - dx);
-				grid.DetermineLine(y * 2 + 1 - dy2, x * 2 + 1 - dx2);
-				grid.DetermineLine(y * 2 + 1 + dy * 3 + dy2 * 2, x * 2 + 1 + dx * 3 + dx2 * 2);
-				grid.DetermineLine(y * 2 + 1 + dy2 * 3 + dy * 2, x * 2 + 1 + dx2 * 3 + dx * 2);
+			if (GetHintSafe(y / 2 + dy + dy2, x / 2 + dx + dx2) == 3) {
+				grid.DetermineLine(y - dy, x - dx);
+				grid.DetermineLine(y - dy2, x - dx2);
+				grid.DetermineLine(y + dy * 3 + dy2 * 2, x + dx * 3 + dx2 * 2);
+				grid.DetermineLine(y + dy2 * 3 + dy * 2, x + dx2 * 3 + dx * 2);
 			}
 		}
 	}
@@ -90,7 +90,7 @@ void SlitherlinkField::CheckTheorem(int y, int x)
 
 void SlitherlinkField::CheckCell(int y, int x)
 {
-	int id = CellId(y, x);
+	int id = CellId(y / 2, x / 2);
 
 	if (hints[id] == HINT_NONE) return;
 
@@ -106,7 +106,7 @@ void SlitherlinkField::CheckCell(int y, int x)
 		// checking the consistency with the current status
 
 		for (int j = 0; j < 4; ++j) {
-			int style = grid.GetSegmentStyle(y * 2 + 1 + GridConstant::GRID_DY[j], x * 2 + 1 + GridConstant::GRID_DX[j]);
+			int style = grid.GetSegmentStyle(y + GridConstant::GRID_DY[j], x + GridConstant::GRID_DX[j]);
 			if ((style == LOOP_LINE && ((i & (1 << j)) == 0)) || (style == LOOP_BLANK && ((i & (1 << j)) != 0))) goto fail;
 		}
 
@@ -122,12 +122,12 @@ void SlitherlinkField::CheckCell(int y, int x)
 			if (i & (1 << ((j + 1) & 3))) ++num_lines;
 			else ++num_blanks;
 
-			int style1 = grid.GetSegmentStyleSafe(y * 2 + 1 + dy1 + dy2 * 2, x * 2 + 1 + dx1 + dx2 * 2);
+			int style1 = grid.GetSegmentStyleSafe(y + dy1 + dy2 * 2, x + dx1 + dx2 * 2);
 
 			if (style1 == LOOP_LINE) ++num_lines;
 			else if (style1 == LOOP_BLANK) ++num_blanks;
 
-			int style2 = grid.GetSegmentStyleSafe(y * 2 + 1 + dy2 + dy1 * 2, x * 2 + 1 + dx2 + dx1 * 2);
+			int style2 = grid.GetSegmentStyleSafe(y + dy2 + dy1 * 2, x + dx2 + dx1 * 2);
 
 			if (style2 == LOOP_LINE) ++num_lines;
 			else if (style2 == LOOP_BLANK) ++num_blanks;
@@ -149,11 +149,11 @@ void SlitherlinkField::CheckCell(int y, int x)
 
 	for (int i = 0; i < 4; ++i) {
 		if (segment_line & (1 << i)) {
-			grid.DetermineLine(y * 2 + 1 + GridConstant::GRID_DY[i], x * 2 + 1 + GridConstant::GRID_DX[i]);
+			grid.DetermineLine(y + GridConstant::GRID_DY[i], x + GridConstant::GRID_DX[i]);
 		}
 
 		if (segment_blank & (1 << i)) {
-			grid.DetermineBlank(y * 2 + 1 + GridConstant::GRID_DY[i], x * 2 + 1 + GridConstant::GRID_DX[i]);
+			grid.DetermineBlank(y + GridConstant::GRID_DY[i], x + GridConstant::GRID_DX[i]);
 		}
 	}
 }

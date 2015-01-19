@@ -90,8 +90,8 @@ private:
 	inline int SegmentId(int y, int x) const { return y * (2 * width + 1) + x; }
 	inline int SegmentY(int segment) const { return segment / (2 * width + 1); }
 	inline int SegmentX(int segment) const { return segment % (2 * width + 1); }
-	inline int VertexId(int y, int x) const { return y * (width + 1) + x; }
-	inline int CellId(int y, int x) const { return y * width + x; }
+	inline int VertexId(int y, int x) const { return SegmentId(y, x); }
+	inline int CellId(int y, int x) const { return SegmentId(y, x); }
 
 	int SegmentRoot(int seg) { 
 		return segments[seg].group_root < 0 ? seg : (segments[seg].group_root = SegmentRoot(segments[seg].group_root));
@@ -99,7 +99,7 @@ private:
 	void Join(int seg1, int seg2);
 
 	void CheckVertex(int y, int x);
-	inline void CheckCell(int y, int x) { if (0 <= y && y < height && 0 <= x && x < width) auxiliary->CheckCell(*this, y, x); }
+	inline void CheckCell(int y, int x) { if (0 <= y && y <= 2 * height && 0 <= x && x <= 2 * width) auxiliary->CheckCell(*this, y, x); }
 	void UpdateSegmentGroupStyle(int segment, int style);
 	void CheckNeighborhoodOfSegment(int segment);
 	void CheckNeighborhoodOfSegmentGroup(int segment);
@@ -147,15 +147,15 @@ void GridLoop<AuxiliarySolver>::Init(int height_t, int width_t)
 				// vertex (i / 2, j / 2)
 			} else if (i % 2 == 0 && j % 2 == 1) {
 				LoopSegment &seg = segments[SegmentId(i, j)];
-				seg.adj_vertex[0] = VertexId(i / 2, j / 2);
-				seg.adj_vertex[1] = VertexId(i / 2, j / 2 + 1);
+				seg.adj_vertex[0] = VertexId(i, j - 1);
+				seg.adj_vertex[1] = VertexId(i, j + 1);
 				seg.group_root = -1;
 				seg.group_next = SegmentId(i, j);
 				seg.segment_style = LOOP_UNDECIDED;
 			} else if (i % 2 == 1 && j % 2 == 0) {
 				LoopSegment &seg = segments[SegmentId(i, j)];
-				seg.adj_vertex[0] = VertexId(i / 2, j / 2);
-				seg.adj_vertex[1] = VertexId(i / 2 + 1, j / 2);
+				seg.adj_vertex[0] = VertexId(i - 1, j);
+				seg.adj_vertex[1] = VertexId(i + 1, j);
 				seg.group_root = -1;
 				seg.group_next = SegmentId(i, j);
 				seg.segment_style = LOOP_UNDECIDED;
@@ -224,25 +224,25 @@ void GridLoop<AuxiliarySolver>::CheckNeighborhoodOfSegment(int segment)
 	// TODO : solve cells
 
 	if (y % 2 == 1) {
-		CheckVertex(y / 2, x / 2);
-		CheckVertex(y / 2 + 1, x / 2);
+		CheckVertex(y - 1, x);
+		CheckVertex(y + 1, x);
 
-		CheckCell(y / 2 - 1, x / 2 - 1);
-		CheckCell(y / 2 - 1, x / 2);
-		CheckCell(y / 2, x / 2 - 1);
-		CheckCell(y / 2, x / 2);
-		CheckCell(y / 2 + 1, x / 2 - 1);
-		CheckCell(y / 2 + 1, x / 2);
+		CheckCell(y, x - 1);
+		CheckCell(y, x + 1);
+		CheckCell(y - 2, x - 1);
+		CheckCell(y - 2, x + 1);
+		CheckCell(y + 2, x - 1);
+		CheckCell(y + 2, x + 1);
 	} else {
-		CheckVertex(y / 2, x / 2);
-		CheckVertex(y / 2, x / 2 + 1);
+		CheckVertex(y, x - 1);
+		CheckVertex(y, x + 1);
 
-		CheckCell(y / 2 - 1, x / 2 - 1);
-		CheckCell(y / 2, x / 2 - 1);
-		CheckCell(y / 2 - 1, x / 2);
-		CheckCell(y / 2, x / 2);
-		CheckCell(y / 2 - 1, x / 2 + 1);
-		CheckCell(y / 2, x / 2 + 1);
+		CheckCell(y - 1, x);
+		CheckCell(y + 1, x);
+		CheckCell(y - 1, x - 2);
+		CheckCell(y + 1, x - 2);
+		CheckCell(y - 1, x + 2);
+		CheckCell(y + 1, x + 2);
 	}
 }
 
@@ -291,7 +291,7 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 	auxiliary->CheckVertex(*this, y, x);
 
 	for (int i = 0; i < 4; ++i) {
-		int y2 = 2 * y + GridConstant::GRID_DY[i], x2 = 2 * x + GridConstant::GRID_DX[i];
+		int y2 = y + GridConstant::GRID_DY[i], x2 = x + GridConstant::GRID_DX[i];
 
 		if (!CheckSegmentRange(y2, x2)) {
 			dest[i] = -1;
@@ -318,10 +318,10 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 
 		for (int i = 0; i < 4; ++i) {
 			if (style[i] == LOOP_UNDECIDED) {
-				DetermineBlank(2 * y + GridConstant::GRID_DY[i], 2 * x + GridConstant::GRID_DX[i]);
+				DetermineBlank(y + GridConstant::GRID_DY[i], x + GridConstant::GRID_DX[i]);
 			} else if (style[i] == LOOP_LINE) {
-				if (seg1 == -1) seg1 = SegmentId(2 * y + GridConstant::GRID_DY[i], 2 * x + GridConstant::GRID_DX[i]);
-				else seg2 = SegmentId(2 * y + GridConstant::GRID_DY[i], 2 * x + GridConstant::GRID_DX[i]);
+				if (seg1 == -1) seg1 = SegmentId(y + GridConstant::GRID_DY[i], x + GridConstant::GRID_DX[i]);
+				else seg2 = SegmentId(y + GridConstant::GRID_DY[i], x + GridConstant::GRID_DX[i]);
 			}
 		}
 
@@ -344,7 +344,7 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 		for (int i = 0; i < 4; ++i) {
 			if (style[i] == LOOP_UNDECIDED) {
 				if (dest[i] == line_dest && line_weight < total_lines) {
-					DetermineBlank(2 * y + GridConstant::GRID_DY[i], 2 * x + GridConstant::GRID_DX[i]);
+					DetermineBlank(y + GridConstant::GRID_DY[i], x + GridConstant::GRID_DX[i]);
 				} else {
 					if (valid_id == -1) valid_id = i;
 					else valid_id = -2;
@@ -356,7 +356,7 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 			UpdateStatus(SolverStatus::INCONSISTENT);
 			return;
 		} else if (valid_id != -2) {
-			DetermineLine(2 * y + GridConstant::GRID_DY[valid_id], 2 * x + GridConstant::GRID_DX[valid_id]);
+			DetermineLine(y + GridConstant::GRID_DY[valid_id], x + GridConstant::GRID_DX[valid_id]);
 		}
 
 		return;
@@ -368,8 +368,8 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 
 			for (int i = 0; i < 4; ++i) {
 				if (style[i] == LOOP_UNDECIDED) {
-					if (seg1 == -1) seg1 = SegmentId(2 * y + GridConstant::GRID_DY[i], 2 * x + GridConstant::GRID_DX[i]);
-					else seg2 = SegmentId(2 * y + GridConstant::GRID_DY[i], 2 * x + GridConstant::GRID_DX[i]);
+					if (seg1 == -1) seg1 = SegmentId(y + GridConstant::GRID_DY[i], x + GridConstant::GRID_DX[i]);
+					else seg2 = SegmentId(y + GridConstant::GRID_DY[i], x + GridConstant::GRID_DX[i]);
 				}
 			}
 
@@ -377,7 +377,7 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 		} else if (undecided_count == 1) {
 			for (int i = 0; i < 4; ++i) {
 				if (style[i] == LOOP_UNDECIDED) {
-					DetermineBlank(2 * y + GridConstant::GRID_DY[i], 2 * x + GridConstant::GRID_DX[i]);
+					DetermineBlank(y + GridConstant::GRID_DY[i], x + GridConstant::GRID_DX[i]);
 				}
 			}
 		}
