@@ -48,6 +48,8 @@ private:
 		inline void CheckCell(GridLoop<SlitherlinkAuxiliarySolver> &grid, int y, int x) {
 			slither->CheckCell(y, x);
 		}
+		inline void CheckVertex(GridLoop<SlitherlinkAuxiliarySolver> &grid, int y, int x) {
+		}
 
 	private:
 		SlitherlinkField *slither;
