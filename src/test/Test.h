@@ -10,6 +10,8 @@ public:
 	static void GridLoopTest2a();
 	static void GridLoopTest2b();
 	static void GridLoopTest3();
+	static void GridLoopTest4a();
+	static void GridLoopTest4b();
 
 	static bool SlitherlinkCheckGrid(SlitherlinkField &field, const int *expected);
 	static void SlitherlinkTest1();

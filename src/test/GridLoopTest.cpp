@@ -56,5 +56,30 @@ void PenciloidTest::GridLoopTest3()
 
 	assert(grid.GetStatus() & SolverStatus::INCONSISTENT);
 }
+void PenciloidTest::GridLoopTest4a()
+{
+	GridLoop<LoopNullAuxiliarySolver> grid;
+	grid.Init(3, 3);
+
+	grid.DetermineLine(5, 6);
+	grid.DetermineLine(1, 4);
+	grid.DetermineLine(2, 3);
+	grid.DetermineLine(0, 1);
+
+	assert(!(grid.GetStatus() & SolverStatus::INCONSISTENT));
+	assert(grid.GetSegmentStyle(3, 0) == GridLoop<LoopNullAuxiliarySolver>::LOOP_LINE);
+}
+void PenciloidTest::GridLoopTest4b()
+{
+	GridLoop<LoopNullAuxiliarySolver> grid;
+	grid.Init(3, 3);
+
+	grid.DetermineLine(1, 4);
+	grid.DetermineLine(2, 3);
+	grid.DetermineLine(0, 1);
+
+	assert(!(grid.GetStatus() & SolverStatus::INCONSISTENT));
+	assert(grid.GetSegmentStyle(3, 0) == GridLoop<LoopNullAuxiliarySolver>::LOOP_UNDECIDED);
+}
 
 }
