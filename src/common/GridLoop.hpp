@@ -79,11 +79,24 @@ private:
 	{
 		// NOTE: unsafe method (it assumes that vertex equals to adj_vertex[0] or adj_vertex[1])
 		int GetAnotherEnd(int vertex) { return adj_vertex[0] + adj_vertex[1] - vertex; }
+		int GetAnotherEndSafe(int vertex) {
+			if (adj_vertex[0] == vertex) return adj_vertex[1];
+			if (adj_vertex[1] == vertex) return adj_vertex[0];
+			return -1;
+		}
 
-		int segment_style;
-		int adj_vertex[2];
-		int group_root, group_next;
+		union {
+			struct { // As a segment
+				int segment_style;
+				int adj_vertex[2];
+				int group_root, group_next;
+			};
 
+			struct { // As a vertex
+				int line_destination;
+				int line_weight;
+			};
+		};
 		LoopSegment() {} 
 	};
 
@@ -145,6 +158,9 @@ void GridLoop<AuxiliarySolver>::Init(int height_t, int width_t)
 		for (int j = 0; j < width * 2 + 1; ++j) {
 			if (i % 2 == 0 && j % 2 == 0) {
 				// vertex (i / 2, j / 2)
+				LoopSegment &seg = segments[SegmentId(i, j)];
+				seg.line_destination = -1;
+				seg.line_weight = -1;
 			} else if (i % 2 == 0 && j % 2 == 1) {
 				LoopSegment &seg = segments[SegmentId(i, j)];
 				seg.adj_vertex[0] = VertexId(i, j - 1);
@@ -189,6 +205,10 @@ int GridLoop<AuxiliarySolver>::DetermineLine(int y, int x)
 		// A closed cycle is already formed
 		return UpdateStatus(SolverStatus::INCONSISTENT);
 	}
+
+	segments[segment.adj_vertex[0]].line_destination = segment.adj_vertex[1];
+	segments[segment.adj_vertex[1]].line_destination = segment.adj_vertex[0];
+	segments[segment.adj_vertex[0]].line_weight = segments[segment.adj_vertex[1]].line_weight = -segment.group_root;
 
 	UpdateSegmentGroupStyle(segment_id, LOOP_LINE);
 	CheckNeighborhoodOfSegmentGroup(segment_id);
@@ -359,6 +379,33 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 			DetermineLine(y + GridConstant::GRID_DY[valid_id], x + GridConstant::GRID_DX[valid_id]);
 		}
 
+		if (undecided_count == 2 && segments[vertex_id].line_destination != -1) {
+			int undecided[2] = { -1, -1 };
+
+			for (int i = 0; i < 4; ++i) {
+				if (style[i] == LOOP_UNDECIDED) {
+					if (undecided[0] == -1) undecided[0] = dest[i];
+					else undecided[1] = dest[i];
+				}
+			}
+
+			if (segments[undecided[0]].line_destination == undecided[1] && segments[undecided[0]].line_weight + segments[vertex_id].line_weight < total_lines) {
+				int y2 = SegmentY(segments[vertex_id].line_destination), x2 = SegmentX(segments[vertex_id].line_destination);
+
+				for (int i = 0; i < 4; ++i) {
+					int current_segment_id = SegmentId(y2 + GridConstant::GRID_DY[i], x2 + GridConstant::GRID_DX[i]);
+
+					if (segments[current_segment_id].segment_style == LOOP_UNDECIDED) {
+						int current_destination = segments[current_segment_id].GetAnotherEndSafe(segments[vertex_id].line_destination);
+
+						if (current_destination == undecided[0] || current_destination == undecided[1]) {
+							DetermineBlank(y2 + GridConstant::GRID_DY[i], x2 + GridConstant::GRID_DX[i]);
+						}
+					}
+				}
+			}
+		}
+
 		return;
 	}
 
@@ -433,15 +480,25 @@ void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 	// Update linked list
 	std::swap(segb1.group_next, segb2.group_next);
 
+	segments[segb1.adj_vertex[0]].line_destination = -1;
+
 	// Update UnionFind
 	if (segb1.group_root < segb2.group_root) {
 		segb1.group_root += segb2.group_root;
 		segb2.group_root = seg1;
 		segb1.adj_vertex[0] = segb2.adj_vertex[1];
+
+		segments[segb1.adj_vertex[0]].line_destination = segb1.adj_vertex[1];
+		segments[segb1.adj_vertex[1]].line_destination = segb1.adj_vertex[0];
+		segments[segb1.adj_vertex[0]].line_weight = segments[segb1.adj_vertex[1]].line_weight = -segb1.group_root;
 	} else {
 		segb2.group_root += segb1.group_root;
 		segb1.group_root = seg2;
 		segb2.adj_vertex[0] = segb1.adj_vertex[1];
+
+		segments[segb2.adj_vertex[0]].line_destination = segb2.adj_vertex[1];
+		segments[segb2.adj_vertex[1]].line_destination = segb2.adj_vertex[0];
+		segments[segb2.adj_vertex[0]].line_weight = segments[segb2.adj_vertex[1]].line_weight = -segb2.group_root;
 	}
 
 	// TODO: potentially too slow
