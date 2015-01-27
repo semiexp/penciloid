@@ -156,6 +156,20 @@ void SlitherlinkField::CheckCell(int y, int x)
 			grid.DetermineBlank(y + GridConstant::GRID_DY[i], x + GridConstant::GRID_DX[i]);
 		}
 	}
+
+	if (hints[id] == 3) {
+		for (int i = 0; i < 4; ++i) {
+			int dy1 = GridConstant::GRID_DY[i], dx1 = GridConstant::GRID_DX[i];
+			int dy2 = GridConstant::GRID_DY[(i + 1) & 3], dx2 = GridConstant::GRID_DX[(i + 1) & 3];
+
+			if (grid.GetSegmentStyleSafe(y + dy1 + dy2 * 2, x + dx1 + dx2 * 2) == LOOP_LINE) {
+				grid.DetermineBlank(y + dy2 + dy1 * 2, x + dx2 + dx1 * 2);
+			}
+			if (grid.GetSegmentStyleSafe(y + dy2 + dy1 * 2, x + dx2 + dx1 * 2) == LOOP_LINE) {
+				grid.DetermineBlank(y + dy1 + dy2 * 2, x + dx1 + dx2 * 2);
+			}
+		}
+	}
 }
 
 void SlitherlinkField::Debug()
