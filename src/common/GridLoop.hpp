@@ -190,10 +190,10 @@ void GridLoop<AuxiliarySolver>::Init(int height_t, int width_t)
 template <class AuxiliarySolver>
 int GridLoop<AuxiliarySolver>::DetermineLine(int y, int x)
 {
+	if (!CheckSegmentRange(y, x)) return UpdateStatus(SolverStatus::UNEXPECTED);
+
 	int segment_id = SegmentRoot(SegmentId(y, x));
 	LoopSegment &segment = segments[segment_id];
-
-	if (!CheckSegmentRange(y, x)) return UpdateStatus(SolverStatus::UNEXPECTED);
 
 	if (segment.segment_style == LOOP_BLANK) {
 		return UpdateStatus(SolverStatus::INCONSISTENT);
@@ -219,10 +219,10 @@ int GridLoop<AuxiliarySolver>::DetermineLine(int y, int x)
 template <class AuxiliarySolver>
 int GridLoop<AuxiliarySolver>::DetermineBlank(int y, int x)
 {
+	if (!CheckSegmentRange(y, x)) return UpdateStatus(0);
+
 	int segment_id = SegmentRoot(SegmentId(y, x));
 	LoopSegment &segment = segments[segment_id];
-
-	if (!CheckSegmentRange(y, x)) return UpdateStatus(0);
 
 	if (segment.segment_style == LOOP_LINE) {
 		return UpdateStatus(SolverStatus::INCONSISTENT);
