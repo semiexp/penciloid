@@ -469,11 +469,12 @@ void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 		UpdateSegmentGroupStyle(seg2, segb1.segment_style);
 	}
 
-	if (segb1.segment_style == LOOP_LINE && segb1.adj_vertex[1] == segb2.adj_vertex[1]) {
+	if (segb1.adj_vertex[1] == segb2.adj_vertex[1]) {
 		if ((-segb1.group_root) + (-segb2.group_root) < total_lines) {
-			UpdateStatus(SolverStatus::INCONSISTENT);
+			if (segb1.segment_style == LOOP_LINE) UpdateStatus(SolverStatus::INCONSISTENT);
+			else DetermineBlank(SegmentY(seg1), SegmentX(seg1));
 		} else {
-			UpdateStatus(SolverStatus::SUCCESS);
+			if (segb1.segment_style == LOOP_LINE) UpdateStatus(SolverStatus::SUCCESS);
 		}
 	}
 
