@@ -3,7 +3,7 @@
 
 namespace Penciloid
 {
-const int PenciloidTest::NUMBER_OF_SLITHERLINK_PROBLEM = 5;
+const int PenciloidTest::NUMBER_OF_SLITHERLINK_PROBLEM = 7;
 
 void PenciloidTest::SlitherlinkLoadProblem(SlitherlinkProblem &problem, int problem_id)
 {
@@ -87,6 +87,42 @@ void PenciloidTest::SlitherlinkLoadProblem(SlitherlinkProblem &problem, int prob
 		"-02-1-3-10-3-0-10-",
 	};
 
+	/*
+	Source: http://www.nikoli.com/ja/puzzles/slitherlink/ Sample Problem 6
+	*/
+	static const char *problem_6[] = {
+		"3-1--3--22--3--2-1",
+		"3-1102------3133-2",
+		"-------3--2-------",
+		"-03-11-1322-21-31-",
+		"-3---3------3---1-",
+		"-1---1------0---3-",
+		"-32-32-2323-33-23-",
+		"-------1--3-------",
+		"3-1230------0212-0",
+		"3-2--2--31--2--1-1",
+	};
+
+	/*
+	Source: http://www.nikoli.com/ja/puzzles/slitherlink/ Sample Problem 7
+	*/
+	static const char *problem_7[] = {
+		"1-0-0--2-2---3---0--1112",
+		"-------2-2-3---1----1111",
+		"-23133-1-0---3---1------",
+		"-------3-2-2---0--2-3--1",
+		"-11131-3-2--------0-1---",
+		"------0-----11312-3-0--3",
+		"0--3-1-20223------1-2---",
+		"---3-1------11112-2-3--0",
+		"3--1-2-01111-----0------",
+		"---2-3--------2-1-11122-",
+		"0--2-2--0---0-1-2-------",
+		"------3---0---0-3-22333-",
+		"2222----0---0-1-1-------",
+		"2122--3---0---0-1--2-1-1",
+	};
+
 	switch (problem_id)
 	{
 	case 1:
@@ -103,6 +139,12 @@ void PenciloidTest::SlitherlinkLoadProblem(SlitherlinkProblem &problem, int prob
 		break;
 	case 5:
 		problem.Init(10, 18, (char**)problem_5);
+		break;
+	case 6:
+		problem.Init(10, 18, (char**)problem_6);
+		break;
+	case 7:
+		problem.Init(14, 24, (char**)problem_7);
 		break;
 	}
 }
