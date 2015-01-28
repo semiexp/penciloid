@@ -32,6 +32,7 @@ public:
 	int SetHint(int y, int x, int hint);
 
 	void Debug();
+	void Debug2() { grid.Debug2(); }
 
 private:
 
