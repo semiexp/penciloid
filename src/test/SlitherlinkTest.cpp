@@ -1,5 +1,6 @@
 #include <cassert>
 
+#include "../slitherlink/SlitherlinkDatabase.h"
 #include "../slitherlink/SlitherlinkField.h"
 #include "../slitherlink/SlitherlinkProblem.h"
 #include "Test.h"
@@ -71,6 +72,8 @@ void PenciloidTest::SlitherlinkTest2()
 
 void PenciloidTest::SlitherlinkTest3()
 {
+	SlitherlinkDatabase::CreateDatabase();
+
 	for (int i = 1; i <= NUMBER_OF_SLITHERLINK_PROBLEM; ++i) {
 		SlitherlinkProblem prob;
 

@@ -1,5 +1,6 @@
 #include "SlitherlinkField.h"
 #include "SlitherlinkProblem.h"
+#include "SlitherlinkDatabase.h"
 
 namespace Penciloid
 {
@@ -94,7 +95,32 @@ void SlitherlinkField::CheckCell(int y, int x)
 
 	if (hints[id] == HINT_NONE) return;
 
-	// TODO: faster checker is required
+	if (SlitherlinkDatabase::IsCreated()) {
+		int db_index = hints[id];
+
+		for (int i = 11; i >= 0; --i) {
+			db_index = db_index * 3 + grid.GetSegmentStyleSafe(y + SlitherlinkDatabase::DATABASE_DY[i], x + SlitherlinkDatabase::DATABASE_DX[i]);
+		}
+
+		int new_status = SlitherlinkDatabase::database[db_index];
+
+		if (new_status == -1) {
+			grid.UpdateStatus(SolverStatus::INCONSISTENT);
+			return;
+		}
+
+		for (int i = 0; i < 12; ++i) {
+			if ((new_status & 3) == 1) {
+				grid.DetermineLine(y + SlitherlinkDatabase::DATABASE_DY[i], x + SlitherlinkDatabase::DATABASE_DX[i]);
+			} else if ((new_status & 3) == 2) {
+				grid.DetermineBlank(y + SlitherlinkDatabase::DATABASE_DY[i], x + SlitherlinkDatabase::DATABASE_DX[i]);
+			}
+
+			new_status >>= 2;
+		}
+
+		return;
+	}
 
 	static const int bits[] = { 0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3};
 
