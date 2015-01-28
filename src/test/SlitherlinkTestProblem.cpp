@@ -3,7 +3,7 @@
 
 namespace Penciloid
 {
-const int PenciloidTest::NUMBER_OF_SLITHERLINK_PROBLEM = 4;
+const int PenciloidTest::NUMBER_OF_SLITHERLINK_PROBLEM = 5;
 
 void PenciloidTest::SlitherlinkLoadProblem(SlitherlinkProblem &problem, int problem_id)
 {
@@ -71,6 +71,22 @@ void PenciloidTest::SlitherlinkLoadProblem(SlitherlinkProblem &problem, int prob
 		"x3x1xx2xxxx2xx1x2x",
 	};
 
+	/*
+	Source: http://www.nikoli.com/ja/puzzles/slitherlink/ Sample Problem 5
+	*/
+	static const char *problem_5[] = {
+		"-01-1-0-33-2-2-12-",
+		"1---2--3--2--0---2",
+		"---1-2------2-3---",
+		"-2-2--3-03-3--3-1-",
+		"2--0-1-1--2-2-1--1",
+		"2--3-2-1--1-1-2--1",
+		"-3-2--2-11-3--0-1-",
+		"---1-2------1-2---",
+		"3---1--1--3--2---3",
+		"-02-1-3-10-3-0-10-",
+	};
+
 	switch (problem_id)
 	{
 	case 1:
@@ -84,6 +100,9 @@ void PenciloidTest::SlitherlinkLoadProblem(SlitherlinkProblem &problem, int prob
 		break;
 	case 4:
 		problem.Init(10, 18, (char**)problem_4);
+		break;
+	case 5:
+		problem.Init(10, 18, (char**)problem_5);
 		break;
 	}
 }
