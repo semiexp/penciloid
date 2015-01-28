@@ -489,17 +489,21 @@ void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 		segb2.group_root = seg1;
 		segb1.adj_vertex[0] = segb2.adj_vertex[1];
 
-		segments[segb1.adj_vertex[0]].line_destination = segb1.adj_vertex[1];
-		segments[segb1.adj_vertex[1]].line_destination = segb1.adj_vertex[0];
-		segments[segb1.adj_vertex[0]].line_weight = segments[segb1.adj_vertex[1]].line_weight = -segb1.group_root;
+		if (segb1.segment_style == LOOP_LINE) {
+			segments[segb1.adj_vertex[0]].line_destination = segb1.adj_vertex[1];
+			segments[segb1.adj_vertex[1]].line_destination = segb1.adj_vertex[0];
+			segments[segb1.adj_vertex[0]].line_weight = segments[segb1.adj_vertex[1]].line_weight = -segb1.group_root;
+		}
 	} else {
 		segb2.group_root += segb1.group_root;
 		segb1.group_root = seg2;
 		segb2.adj_vertex[0] = segb1.adj_vertex[1];
 
-		segments[segb2.adj_vertex[0]].line_destination = segb2.adj_vertex[1];
-		segments[segb2.adj_vertex[1]].line_destination = segb2.adj_vertex[0];
-		segments[segb2.adj_vertex[0]].line_weight = segments[segb2.adj_vertex[1]].line_weight = -segb2.group_root;
+		if (segb1.segment_style == LOOP_LINE) {
+			segments[segb2.adj_vertex[0]].line_destination = segb2.adj_vertex[1];
+			segments[segb2.adj_vertex[1]].line_destination = segb2.adj_vertex[0];
+			segments[segb2.adj_vertex[0]].line_weight = segments[segb2.adj_vertex[1]].line_weight = -segb2.group_root;
+		}
 	}
 
 	// TODO: potentially too slow
