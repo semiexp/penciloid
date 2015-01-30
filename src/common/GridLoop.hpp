@@ -38,6 +38,7 @@ public:
 
 	int DetermineLine(int y, int x);
 	int DetermineBlank(int y, int x);
+	int CheckAll();
 
 	void Debug() {
 		for (int i = 0; i <= height * 2; ++i) {
@@ -232,6 +233,19 @@ int GridLoop<AuxiliarySolver>::DetermineBlank(int y, int x)
 
 	UpdateSegmentGroupStyle(segment_id, LOOP_BLANK);
 	CheckNeighborhoodOfSegmentGroup(segment_id);
+
+	return UpdateStatus(0);
+}
+
+template <class AuxiliarySolver>
+int GridLoop<AuxiliarySolver>::CheckAll()
+{
+	for (int i = 0; i <= height * 2; ++i) {
+		for (int j = 0; j <= width * 2; ++j) {
+			if (i % 2 == 0 && j % 2 == 0) CheckVertex(i, j);
+			if (i % 2 == 1 && j % 2 == 1) CheckCell(i, j);
+		}
+	}
 
 	return UpdateStatus(0);
 }

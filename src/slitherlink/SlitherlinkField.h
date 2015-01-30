@@ -30,6 +30,7 @@ public:
 	inline int GetHint(int y, int x) { return hints[CellId(y, x)]; }
 	inline int GetHintSafe(int y, int x) { return grid.CheckCellRange(y, x) ? GetHint(y, x) : HINT_NONE; }
 	int SetHint(int y, int x, int hint);
+	inline int CheckAll() { return grid.CheckAll(); }
 
 	void Debug();
 	void Debug2() { grid.Debug2(); }

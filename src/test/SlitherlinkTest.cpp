@@ -82,6 +82,8 @@ void PenciloidTest::SlitherlinkTest3()
 		SlitherlinkField field;
 		field.Init(prob);
 
+		field.CheckAll();
+
 		field.Debug();
 		fprintf(stderr, "%d\n", field.GetStatus());
 	}
