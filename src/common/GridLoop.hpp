@@ -391,6 +391,7 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 
 			if (segments[undecided[0]].line_destination == undecided[1] && segments[undecided[0]].line_weight + segments[vertex_id].line_weight < total_lines) {
 				int y2 = SegmentY(segments[vertex_id].line_destination), x2 = SegmentX(segments[vertex_id].line_destination);
+				int undecided_rev[2] = { -1, -1 };
 
 				for (int i = 0; i < 4; ++i) {
 					int current_segment_id = SegmentId(y2 + GridConstant::GRID_DY[i], x2 + GridConstant::GRID_DX[i]);
@@ -400,6 +401,29 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 
 						if (current_destination == undecided[0] || current_destination == undecided[1]) {
 							DetermineBlank(y2 + GridConstant::GRID_DY[i], x2 + GridConstant::GRID_DX[i]);
+						} else if (current_destination != -1) {
+							if (undecided_rev[1] != -1) return;
+							else if (undecided_rev[0] == -1) undecided_rev[0] = current_destination;
+							else undecided_rev[1] = current_destination;
+						}
+					}
+				}
+
+				if (undecided_rev[1] != -1 && segments[undecided_rev[1]].line_destination == undecided_rev[0]) {
+					if (segments[undecided[0]].line_weight + segments[undecided_rev[0]].line_weight + segments[vertex_id].line_weight >= total_lines) return;
+
+					for (int j = 0; j < 2; ++j) {
+						int y3 = SegmentY(undecided_rev[j]), x3 = SegmentX(undecided_rev[j]);
+						for (int i = 0; i < 4; ++i) {
+							int current_segment_id = SegmentId(y3 + GridConstant::GRID_DY[i], x3 + GridConstant::GRID_DX[i]);
+
+							if (segments[current_segment_id].segment_style == LOOP_UNDECIDED) {
+								int current_destination = segments[current_segment_id].GetAnotherEndSafe(undecided_rev[j]);
+
+								if (current_destination == undecided[0] || current_destination == undecided[1]) {
+									DetermineBlank(y3 + GridConstant::GRID_DY[i], x3 + GridConstant::GRID_DX[i]);
+								}
+							}
 						}
 					}
 				}
