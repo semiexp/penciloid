@@ -392,7 +392,6 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 		} else if (valid_id != -2) {
 			DetermineLine(y + GridConstant::GRID_DY[valid_id], x + GridConstant::GRID_DX[valid_id]);
 		}
-
 		if (undecided_count == 2 && segments[vertex_id].line_destination != -1) {
 			int undecided[2] = { -1, -1 };
 
@@ -510,7 +509,11 @@ void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 	if (segb1.adj_vertex[1] == segb2.adj_vertex[1]) {
 		if ((-segb1.group_root) + (-segb2.group_root) < total_lines) {
 			if (segb1.segment_style == LOOP_LINE) UpdateStatus(SolverStatus::INCONSISTENT);
-			else DetermineBlank(SegmentY(seg1), SegmentX(seg1));
+			else {
+				// DetermineBlank(SegmentY(seg1), SegmentX(seg1));
+				UpdateSegmentGroupStyle(seg1, LOOP_BLANK);
+				UpdateSegmentGroupStyle(seg2, LOOP_BLANK);
+			}
 		} else {
 			if (segb1.segment_style == LOOP_LINE) UpdateStatus(SolverStatus::SUCCESS);
 		}
@@ -528,6 +531,7 @@ void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 		segb1.adj_vertex[0] = segb2.adj_vertex[1];
 
 		if (segb1.segment_style == LOOP_LINE) {
+			segments[segb2.adj_vertex[0]].line_destination = -1;
 			segments[segb1.adj_vertex[0]].line_destination = segb1.adj_vertex[1];
 			segments[segb1.adj_vertex[1]].line_destination = segb1.adj_vertex[0];
 			segments[segb1.adj_vertex[0]].line_weight = segments[segb1.adj_vertex[1]].line_weight = -segb1.group_root;
@@ -537,7 +541,8 @@ void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 		segb1.group_root = seg2;
 		segb2.adj_vertex[0] = segb1.adj_vertex[1];
 
-		if (segb1.segment_style == LOOP_LINE) {
+		if (segb2.segment_style == LOOP_LINE) {
+			segments[segb1.adj_vertex[0]].line_destination = -1;
 			segments[segb2.adj_vertex[0]].line_destination = segb2.adj_vertex[1];
 			segments[segb2.adj_vertex[1]].line_destination = segb2.adj_vertex[0];
 			segments[segb2.adj_vertex[0]].line_weight = segments[segb2.adj_vertex[1]].line_weight = -segb2.group_root;
