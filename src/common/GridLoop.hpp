@@ -66,9 +66,9 @@ public:
 		for (int i = 0; i <= height * 2; ++i) {
 			for (int j = 0; j <= width * 2; ++j) {
 				if (i % 2 != j % 2) {
-					fprintf(stderr, "%3d ", SegmentRoot(SegmentId(i, j)));
+					fprintf(stderr, "%4d ", SegmentRoot(SegmentId(i, j)));
 				} else {
-					fprintf(stderr, "    ");
+					fprintf(stderr, "     ");
 				}
 			}
 			fprintf(stderr, "\n");
@@ -407,11 +407,11 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 				int y2 = SegmentY(segments[vertex_id].line_destination), x2 = SegmentX(segments[vertex_id].line_destination);
 				int undecided_rev[2] = { -1, -1 };
 
-				for (int i = 0; i < 4; ++i) {
+				for (int i = 0; i < 4; ++i) if (CheckSegmentRange(y2 + GridConstant::GRID_DY[i], x2 + GridConstant::GRID_DX[i])) {
 					int current_segment_id = SegmentId(y2 + GridConstant::GRID_DY[i], x2 + GridConstant::GRID_DX[i]);
 
 					if (segments[current_segment_id].segment_style == LOOP_UNDECIDED) {
-						int current_destination = segments[current_segment_id].GetAnotherEndSafe(segments[vertex_id].line_destination);
+						int current_destination = segments[SegmentRoot(current_segment_id)].GetAnotherEndSafe(segments[vertex_id].line_destination);
 
 						if (current_destination == undecided[0] || current_destination == undecided[1]) {
 							DetermineBlank(y2 + GridConstant::GRID_DY[i], x2 + GridConstant::GRID_DX[i]);
@@ -428,11 +428,11 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 
 					for (int j = 0; j < 2; ++j) {
 						int y3 = SegmentY(undecided_rev[j]), x3 = SegmentX(undecided_rev[j]);
-						for (int i = 0; i < 4; ++i) {
+						for (int i = 0; i < 4; ++i) if (CheckSegmentRange(y3 + GridConstant::GRID_DY[i], x3 + GridConstant::GRID_DX[i])) {
 							int current_segment_id = SegmentId(y3 + GridConstant::GRID_DY[i], x3 + GridConstant::GRID_DX[i]);
 
 							if (segments[current_segment_id].segment_style == LOOP_UNDECIDED) {
-								int current_destination = segments[current_segment_id].GetAnotherEndSafe(undecided_rev[j]);
+								int current_destination = segments[SegmentRoot(current_segment_id)].GetAnotherEndSafe(undecided_rev[j]);
 
 								if (current_destination == undecided[0] || current_destination == undecided[1]) {
 									DetermineBlank(y3 + GridConstant::GRID_DY[i], x3 + GridConstant::GRID_DX[i]);
