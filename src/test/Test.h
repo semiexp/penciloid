@@ -23,6 +23,8 @@ public:
 	static void SlitherlinkProblemTest(SlitherlinkProblem &problem);
 	static void SlitherlinkLoadProblem(SlitherlinkProblem &storage, int problem_id);
 
+	static void MasyuTest1();
+
 	static void RunTestAll();
 
 	static const int NUMBER_OF_SLITHERLINK_PROBLEM;
