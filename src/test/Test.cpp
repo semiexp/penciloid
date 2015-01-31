@@ -18,6 +18,7 @@ void PenciloidTest::RunTestAll()
 	SlitherlinkTest3();
 
 	MasyuTest1();
+	MasyuTest2();
 }
 
 }

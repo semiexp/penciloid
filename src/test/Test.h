@@ -24,6 +24,7 @@ public:
 	static void SlitherlinkLoadProblem(SlitherlinkProblem &storage, int problem_id);
 
 	static void MasyuTest1();
+	static void MasyuTest2();
 
 	static void RunTestAll();
 
