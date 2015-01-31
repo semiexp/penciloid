@@ -58,7 +58,92 @@ void MasyuField::CheckVertex(int y, int x)
 	int hint = hints[VertexId(y/ 2, x / 2)];
 
 	if (hint == HINT_WHITE) {
-		// TODO: implement rule for hint of white circle
+		// TODO: faster checker
+		int neighborhood_segment_style[16];
+
+		for (int i = 0; i < 16; ++i) {
+			neighborhood_segment_style[i] = grid.GetSegmentStyleSafe(
+				y + GridConstant::GRID_DY[i / 4] * 2 + GridConstant::GRID_DY[i % 4],
+				x + GridConstant::GRID_DX[i / 4] * 2 + GridConstant::GRID_DX[i % 4]
+				);
+		}
+
+		int segment_line_candidate = (1 << 16) - 1;
+		int segment_blank_candidate = (1 << 16) - 1;
+
+		do {
+			if (neighborhood_segment_style[2] == LOOP_BLANK) break;
+			if (neighborhood_segment_style[8] == LOOP_BLANK) break;
+			if (neighborhood_segment_style[7] == LOOP_LINE) break;
+			if (neighborhood_segment_style[13] == LOOP_LINE) break;
+
+			int end1[] = { 0, 1, 3 };
+			int end2[] = { 10, 9, 11 };
+
+			for (int i = 0; i < 3; ++i) {
+				for (int j = 0; j < 3; ++j) {
+					if (i == 0 && j == 0) continue;
+
+					if (neighborhood_segment_style[end1[i]] == LOOP_BLANK) continue;
+					if (neighborhood_segment_style[end2[j]] == LOOP_BLANK) continue;
+					if (neighborhood_segment_style[end1[(i + 1) % 3]] == LOOP_LINE) continue;
+					if (neighborhood_segment_style[end2[(j + 1) % 3]] == LOOP_LINE) continue;
+					if (neighborhood_segment_style[end1[(i + 2) % 3]] == LOOP_LINE) continue;
+					if (neighborhood_segment_style[end2[(j + 2) % 3]] == LOOP_LINE) continue;
+
+					int line_location = (1 << 2) | (1 << 8) | (1 << end1[i]) | (1 << end2[j]);
+					int blank_location = ((15 << 0) | (15 << 8)) ^ line_location;
+
+					segment_line_candidate &= line_location;
+					segment_blank_candidate &= blank_location;
+				}
+			}
+		} while (false);
+
+		do {
+			if (neighborhood_segment_style[7] == LOOP_BLANK) break;
+			if (neighborhood_segment_style[13] == LOOP_BLANK) break;
+			if (neighborhood_segment_style[2] == LOOP_LINE) break;
+			if (neighborhood_segment_style[8] == LOOP_LINE) break;
+
+			int end1[] = { 5, 4, 6 };
+			int end2[] = { 15, 12, 14 };
+
+			for (int i = 0; i < 3; ++i) {
+				for (int j = 0; j < 3; ++j) {
+					if (i == 0 && j == 0) continue;
+
+					if (neighborhood_segment_style[end1[i]] == LOOP_BLANK) continue;
+					if (neighborhood_segment_style[end2[j]] == LOOP_BLANK) continue;
+					if (neighborhood_segment_style[end1[(i + 1) % 3]] == LOOP_LINE) continue;
+					if (neighborhood_segment_style[end2[(j + 1) % 3]] == LOOP_LINE) continue;
+					if (neighborhood_segment_style[end1[(i + 2) % 3]] == LOOP_LINE) continue;
+					if (neighborhood_segment_style[end2[(j + 2) % 3]] == LOOP_LINE) continue;
+
+					int line_location = (1 << 7) | (1 << 13) | (1 << end1[i]) | (1 << end2[j]);
+					int blank_location = ((15 << 4) | (15 << 12)) ^ line_location;
+
+					segment_line_candidate &= line_location;
+					segment_blank_candidate &= blank_location;
+				}
+			}
+		} while (false);
+
+		for (int i = 0; i < 16; ++i) {
+			if (segment_line_candidate & (1 << i)) {
+				grid.DetermineLine(
+					y + GridConstant::GRID_DY[i / 4] * 2 + GridConstant::GRID_DY[i % 4],
+					x + GridConstant::GRID_DX[i / 4] * 2 + GridConstant::GRID_DX[i % 4]
+					);
+			}
+
+			if (segment_blank_candidate & (1 << i)) {
+				grid.DetermineBlank(
+					y + GridConstant::GRID_DY[i / 4] * 2 + GridConstant::GRID_DY[i % 4],
+					x + GridConstant::GRID_DX[i / 4] * 2 + GridConstant::GRID_DX[i % 4]
+					);
+			}
+		}
 
 	} else if (hint == HINT_BLACK) {
 		int line_direction_candidate = 15;
