@@ -25,6 +25,7 @@ public:
 
 	static void MasyuTest1();
 	static void MasyuTest2();
+	static void MasyuTest3();
 
 	static void RunTestAll();
 

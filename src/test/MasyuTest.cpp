@@ -39,4 +39,17 @@ void PenciloidTest::MasyuTest2()
 	assert(field.GetStatus() == SolverStatus::NORMAL);
 }
 
+void PenciloidTest::MasyuTest3()
+{
+	MasyuField field;
+
+	field.Init(5, 5);
+	field.SetHint(1, 1, MasyuField::HINT_BLACK);
+	field.SetHint(1, 3, MasyuField::HINT_WHITE);
+	field.SetHint(2, 4, MasyuField::HINT_BLACK);
+	field.SetHint(4, 0, MasyuField::HINT_BLACK);
+
+	assert(field.GetStatus() == SolverStatus::SUCCESS);
+}
+
 }

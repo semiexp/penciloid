@@ -19,6 +19,7 @@ void PenciloidTest::RunTestAll()
 
 	MasyuTest1();
 	MasyuTest2();
+	MasyuTest3();
 }
 
 }
