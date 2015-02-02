@@ -252,16 +252,16 @@ int GridLoop<AuxiliarySolver>::DetermineLine(int y, int x)
 	if (queue_top == -1) {
 		queue_top = queue_end = 0;
 
+		CheckNeighborhoodOfSegmentGroup(segment_id);
 		JoinLines(SegmentY(adjacent_id[0]), SegmentX(adjacent_id[0]));
 		JoinLines(SegmentY(adjacent_id[1]), SegmentX(adjacent_id[1]));
-		CheckNeighborhoodOfSegmentGroup(segment_id);
 
 		DequeueAndCheckAll();
 		queue_top = -1;
 	} else {
+		CheckNeighborhoodOfSegmentGroup(segment_id);
 		JoinLines(SegmentY(adjacent_id[0]), SegmentX(adjacent_id[0]));
 		JoinLines(SegmentY(adjacent_id[1]), SegmentX(adjacent_id[1]));
-		CheckNeighborhoodOfSegmentGroup(segment_id);
 	}
 
 	return UpdateStatus(0);
@@ -607,8 +607,10 @@ void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 	// Update style of segments
 	if (segb1.segment_style == LOOP_UNDECIDED && segb2.segment_style != LOOP_UNDECIDED) {
 		UpdateSegmentGroupStyle(seg1, segb2.segment_style);
+		CheckNeighborhoodOfSegmentGroup(seg1);
 	} else if (segb1.segment_style == LOOP_UNDECIDED && segb2.segment_style != LOOP_UNDECIDED) {
 		UpdateSegmentGroupStyle(seg2, segb1.segment_style);
+		CheckNeighborhoodOfSegmentGroup(seg2);
 	}
 
 	if (segb1.adj_vertex[1] == segb2.adj_vertex[1]) {
@@ -618,6 +620,8 @@ void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 				// DetermineBlank(SegmentY(seg1), SegmentX(seg1));
 				UpdateSegmentGroupStyle(seg1, LOOP_BLANK);
 				UpdateSegmentGroupStyle(seg2, LOOP_BLANK);
+				CheckNeighborhoodOfSegmentGroup(seg1);
+				CheckNeighborhoodOfSegmentGroup(seg2);
 			}
 		} else {
 			if (segb1.segment_style == LOOP_LINE) UpdateStatus(SolverStatus::SUCCESS);
@@ -635,6 +639,9 @@ void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 		segb2.group_root = seg1;
 		segb1.adj_vertex[0] = segb2.adj_vertex[1];
 
+		Enqueue(segb1.adj_vertex[0]);
+		Enqueue(segb1.adj_vertex[1]);
+
 		if (segb1.segment_style == LOOP_LINE) {
 			segments[segb2.adj_vertex[0]].line_destination = -1;
 			segments[segb1.adj_vertex[0]].line_destination = segb1.adj_vertex[1];
@@ -646,6 +653,9 @@ void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 		segb1.group_root = seg2;
 		segb2.adj_vertex[0] = segb1.adj_vertex[1];
 
+		Enqueue(segb2.adj_vertex[0]);
+		Enqueue(segb2.adj_vertex[1]);
+
 		if (segb2.segment_style == LOOP_LINE) {
 			segments[segb1.adj_vertex[0]].line_destination = -1;
 			segments[segb2.adj_vertex[0]].line_destination = segb2.adj_vertex[1];
@@ -653,9 +663,6 @@ void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 			segments[segb2.adj_vertex[0]].line_weight = segments[segb2.adj_vertex[1]].line_weight = -segb2.group_root;
 		}
 	}
-
-	// TODO: potentially too slow
-	CheckNeighborhoodOfSegmentGroup(seg1);
 }
 
 class LoopNullAuxiliarySolver;
