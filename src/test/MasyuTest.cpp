@@ -1,6 +1,7 @@
 #include <cassert>
 
 #include "../masyu/MasyuField.h"
+#include "../masyu/MasyuProblem.h"
 #include "Test.h"
 
 namespace Penciloid
@@ -50,6 +51,23 @@ void PenciloidTest::MasyuTest3()
 	field.SetHint(4, 0, MasyuField::HINT_BLACK);
 
 	assert(field.GetStatus() == SolverStatus::SUCCESS);
+}
+
+void PenciloidTest::MasyuTest4()
+{
+	for (int i = 1; i <= NUMBER_OF_MASYU_PROBLEM; ++i) {
+		MasyuProblem prob;
+
+		MasyuLoadProblem(prob, i);
+
+		MasyuField field;
+		field.Init(prob);
+
+		field.CheckAll();
+
+		field.Debug();
+		fprintf(stderr, "%d\n", field.GetStatus());
+	}
 }
 
 }

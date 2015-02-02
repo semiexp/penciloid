@@ -2,6 +2,8 @@ namespace Penciloid
 {
 class SlitherlinkField;
 class SlitherlinkProblem;
+class MasyuField;
+class MasyuProblem;
 
 class PenciloidTest
 {
@@ -26,9 +28,13 @@ public:
 	static void MasyuTest1();
 	static void MasyuTest2();
 	static void MasyuTest3();
+	static void MasyuTest4();
+
+	static void MasyuLoadProblem(MasyuProblem &storage, int problem_id);
 
 	static void RunTestAll();
 
 	static const int NUMBER_OF_SLITHERLINK_PROBLEM;
+	static const int NUMBER_OF_MASYU_PROBLEM;
 };
 }
