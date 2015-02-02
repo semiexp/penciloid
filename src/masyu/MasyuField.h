@@ -4,6 +4,8 @@
 
 namespace Penciloid
 {
+class MasyuProblem;
+
 class MasyuField
 {
 public:
@@ -23,7 +25,7 @@ public:
 	~MasyuField();
 
 	void Init(int height_t, int width_t);
-	void Init(MasyuField &prob);
+	void Init(MasyuProblem &prob);
 
 	inline int GetHeight() { return height; }
 	inline int GetWidth() { return width; }

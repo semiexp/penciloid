@@ -1,4 +1,5 @@
 #include "MasyuField.h"
+#include "MasyuProblem.h"
 
 namespace Penciloid
 {
@@ -28,6 +29,19 @@ void MasyuField::Init(int height_t, int width_t)
 	auxiliary.Init(this);
 	grid.SetAuxiliarySolver(&auxiliary);
 	grid.Init(height - 1, width - 1);
+}
+
+void MasyuField::Init(MasyuProblem &prob)
+{
+	Init(prob.GetHeight(), prob.GetWidth());
+
+	for (int i = 0; i < height; ++i) {
+		for (int j = 0; j < width; ++j) {
+			int hint = prob.GetHint(i, j);
+
+			if (hint != HINT_NONE) SetHint(i, j, hint);
+		}
+	}
 }
 
 int MasyuField::SetHint(int y, int x, int hint)
