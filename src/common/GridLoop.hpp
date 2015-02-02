@@ -98,7 +98,9 @@ private:
 				int line_weight;
 			};
 		};
-		LoopSegment() {} 
+		bool queue_stored;
+
+		LoopSegment() {}
 	};
 
 	inline int SegmentId(int y, int x) const { return y * (2 * width + 1) + x; }
@@ -119,12 +121,30 @@ private:
 	void CheckNeighborhoodOfSegment(int segment);
 	void CheckNeighborhoodOfSegmentGroup(int segment);
 
+	void Enqueue(int y, int x) { if (CheckSegmentRange(y, x)) Enqueue(SegmentId(y, x)); }
+	void Enqueue(int p) {
+		if (segments[p].queue_stored) return;
+		if (queue_end == queue_size) queue_end = 0;
+		process_queue[queue_end++] = p;
+		segments[p].queue_stored = true;
+	}
+	bool IsQueueEmpty() { return queue_top == queue_end; }
+	int Dequeue() {
+		if (queue_top == queue_size) queue_top = 0;
+		segments[process_queue[queue_top]].queue_stored = false;
+		return process_queue[queue_top++];
+	}
+	void DequeueAndCheckAll();
+
 	LoopSegment *segments;
 	AuxiliarySolver *auxiliary;
+	int *process_queue;
 
 	int height, width;
 	int total_lines;
 	int field_status;
+
+	int queue_top, queue_end, queue_size;
 };
 
 template <class AuxiliarySolver>
@@ -132,10 +152,12 @@ GridLoop<AuxiliarySolver>::GridLoop()
 {
 	segments = nullptr;
 	auxiliary = nullptr;
+	process_queue = nullptr;
 
 	height = -1;
 	width = -1;
 	total_lines = 0;
+	queue_top = queue_end = queue_size = -1;
 
 	field_status = SolverStatus::NORMAL;
 }
@@ -144,6 +166,7 @@ template <class AuxiliarySolver>
 GridLoop<AuxiliarySolver>::~GridLoop()
 {
 	if (segments) delete[] segments;
+	if (process_queue) delete[] process_queue;
 }
 
 template <class AuxiliarySolver>
@@ -155,6 +178,8 @@ void GridLoop<AuxiliarySolver>::Init(int height_t, int width_t)
 	if (segments) delete[] segments;
 
 	segments = new LoopSegment[(height * 2 + 1) * (width * 2 + 1)];
+	queue_size = height * width + (height + 1) * (width + 1) + 1;
+	process_queue = new int[queue_size];
 
 	for (int i = 0; i < height * 2 + 1; ++i) {
 		for (int j = 0; j < width * 2 + 1; ++j) {
@@ -163,6 +188,7 @@ void GridLoop<AuxiliarySolver>::Init(int height_t, int width_t)
 				LoopSegment &seg = segments[SegmentId(i, j)];
 				seg.line_destination = -1;
 				seg.line_weight = -1;
+				seg.queue_stored = false;
 			} else if (i % 2 == 0 && j % 2 == 1) {
 				LoopSegment &seg = segments[SegmentId(i, j)];
 				seg.adj_vertex[0] = VertexId(i, j - 1);
@@ -170,6 +196,7 @@ void GridLoop<AuxiliarySolver>::Init(int height_t, int width_t)
 				seg.group_root = -1;
 				seg.group_next = SegmentId(i, j);
 				seg.segment_style = LOOP_UNDECIDED;
+				seg.queue_stored = false;
 			} else if (i % 2 == 1 && j % 2 == 0) {
 				LoopSegment &seg = segments[SegmentId(i, j)];
 				seg.adj_vertex[0] = VertexId(i - 1, j);
@@ -177,16 +204,23 @@ void GridLoop<AuxiliarySolver>::Init(int height_t, int width_t)
 				seg.group_root = -1;
 				seg.group_next = SegmentId(i, j);
 				seg.segment_style = LOOP_UNDECIDED;
+				seg.queue_stored = false;
 			} else if (i % 2 == 1 && j % 2 == 1) {
 				// cell (i / 2, j / 2)
+				LoopSegment &seg = segments[SegmentId(i, j)];
+				seg.queue_stored = false;
 			}
 		}
 	}
 
+	queue_top = queue_end = 0;
 	Join(SegmentId(0, 1), SegmentId(1, 0));
 	Join(SegmentId(0, width * 2 - 1), SegmentId(1, width * 2));
 	Join(SegmentId(height * 2, 1), SegmentId(height * 2 - 1, 0));
 	Join(SegmentId(height * 2 - 1, width * 2), SegmentId(height * 2, width * 2 - 1));
+
+	DequeueAndCheckAll();
+	queue_top = -1;
 }
 
 template <class AuxiliarySolver>
@@ -212,11 +246,23 @@ int GridLoop<AuxiliarySolver>::DetermineLine(int y, int x)
 	segments[segment.adj_vertex[1]].line_destination = segment.adj_vertex[0];
 	segments[segment.adj_vertex[0]].line_weight = segments[segment.adj_vertex[1]].line_weight = -segment.group_root;
 
-	JoinLines(SegmentY(segment.adj_vertex[0]), SegmentX(segment.adj_vertex[0]));
-	JoinLines(SegmentY(segment.adj_vertex[1]), SegmentX(segment.adj_vertex[1]));
-
+	int adjacent_id[2] = { segment.adj_vertex[0], segment.adj_vertex[1] };
 	UpdateSegmentGroupStyle(segment_id, LOOP_LINE);
-	CheckNeighborhoodOfSegmentGroup(segment_id);
+
+	if (queue_top == -1) {
+		queue_top = queue_end = 0;
+
+		JoinLines(SegmentY(adjacent_id[0]), SegmentX(adjacent_id[0]));
+		JoinLines(SegmentY(adjacent_id[1]), SegmentX(adjacent_id[1]));
+		CheckNeighborhoodOfSegmentGroup(segment_id);
+
+		DequeueAndCheckAll();
+		queue_top = -1;
+	} else {
+		JoinLines(SegmentY(adjacent_id[0]), SegmentX(adjacent_id[0]));
+		JoinLines(SegmentY(adjacent_id[1]), SegmentX(adjacent_id[1]));
+		CheckNeighborhoodOfSegmentGroup(segment_id);
+	}
 
 	return UpdateStatus(0);
 }
@@ -236,19 +282,52 @@ int GridLoop<AuxiliarySolver>::DetermineBlank(int y, int x)
 	}
 
 	UpdateSegmentGroupStyle(segment_id, LOOP_BLANK);
-	CheckNeighborhoodOfSegmentGroup(segment_id);
+
+	if (queue_top == -1) {
+		queue_top = queue_end = 0;
+		CheckNeighborhoodOfSegmentGroup(segment_id);
+
+		DequeueAndCheckAll();
+		queue_top = -1;
+	} else {
+		CheckNeighborhoodOfSegmentGroup(segment_id);
+
+	}
 
 	return UpdateStatus(0);
 }
 
 template <class AuxiliarySolver>
+void GridLoop<AuxiliarySolver>::DequeueAndCheckAll()
+{
+	while (!IsQueueEmpty()) {
+		int top = Dequeue();
+		int y = SegmentY(top), x = SegmentX(top);
+
+		if (y % 2 == 0 && x % 2 == 0) CheckVertex(y, x);
+		if (y % 2 == 1 && x % 2 == 1) CheckCell(y, x);
+	}
+}
+
+template <class AuxiliarySolver>
 int GridLoop<AuxiliarySolver>::CheckAll()
 {
+	bool already_processing = (queue_top != -1);
+
+	if (!already_processing) {
+		queue_top = queue_end = 0;
+	}
+	
 	for (int i = 0; i <= height * 2; ++i) {
 		for (int j = 0; j <= width * 2; ++j) {
-			if (i % 2 == 0 && j % 2 == 0) CheckVertex(i, j);
-			if (i % 2 == 1 && j % 2 == 1) CheckCell(i, j);
+			if (i % 2 == 0 && j % 2 == 0) Enqueue(i, j);
+			if (i % 2 == 1 && j % 2 == 1) Enqueue(i, j);
 		}
+	}
+
+	if (!already_processing) {
+		DequeueAndCheckAll();
+		queue_top = -1;
 	}
 
 	return UpdateStatus(0);
@@ -262,25 +341,25 @@ void GridLoop<AuxiliarySolver>::CheckNeighborhoodOfSegment(int segment)
 	// TODO : solve cells
 
 	if (y % 2 == 1) {
-		CheckVertex(y - 1, x);
-		CheckVertex(y + 1, x);
+		Enqueue(y - 1, x);
+		Enqueue(y + 1, x);
 
-		CheckCell(y, x - 1);
-		CheckCell(y, x + 1);
-		CheckCell(y - 2, x - 1);
-		CheckCell(y - 2, x + 1);
-		CheckCell(y + 2, x - 1);
-		CheckCell(y + 2, x + 1);
+		Enqueue(y, x - 1);
+		Enqueue(y, x + 1);
+		Enqueue(y - 2, x - 1);
+		Enqueue(y - 2, x + 1);
+		Enqueue(y + 2, x - 1);
+		Enqueue(y + 2, x + 1);
 	} else {
-		CheckVertex(y, x - 1);
-		CheckVertex(y, x + 1);
+		Enqueue(y, x - 1);
+		Enqueue(y, x + 1);
 
-		CheckCell(y - 1, x);
-		CheckCell(y + 1, x);
-		CheckCell(y - 1, x - 2);
-		CheckCell(y + 1, x - 2);
-		CheckCell(y - 1, x + 2);
-		CheckCell(y + 1, x + 2);
+		Enqueue(y - 1, x);
+		Enqueue(y + 1, x);
+		Enqueue(y - 1, x - 2);
+		Enqueue(y + 1, x - 2);
+		Enqueue(y - 1, x + 2);
+		Enqueue(y + 1, x + 2);
 	}
 }
 
@@ -336,7 +415,9 @@ void GridLoop<AuxiliarySolver>::JoinLines(int y, int x)
 		}
 	}
 
-	if (line_segment[1] != -1) Join(line_segment[0], line_segment[1]);
+	if (line_segment[1] != -1) {
+		Join(line_segment[0], line_segment[1]);
+	}
 }
 
 template <class AuxiliarySolver>
