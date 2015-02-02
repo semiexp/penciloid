@@ -65,11 +65,32 @@ int MasyuField::SetHint(int y, int x, int hint)
 void MasyuField::CheckTheorem(int y, int x)
 {
 	// TODO: implement appropriately
+
+	int hint = hints[VertexId(y / 2, x / 2)];
+
+	if (hint == HINT_WHITE) {
+		for (int i = 0; i < 2; ++i) {
+			int dy = GridConstant::GRID_DY[i], dx = GridConstant::GRID_DX[i];
+
+			for (int j = 0; j <= 2; ++j) {
+				if    (GetHintSafe(y / 2 + (j - 2) * dy, x / 2 + (j - 2) * dx) == HINT_WHITE
+					&& GetHintSafe(y / 2 + (j - 1) * dy, x / 2 + (j - 1) * dx) == HINT_WHITE
+					&& GetHintSafe(y / 2 + (j - 0) * dy, x / 2 + (j - 0) * dx) == HINT_WHITE) {
+					grid.DetermineLine(y + 2 * (j - 2) * dy + dx, x + 2 * (j - 2) * dx + dy);
+					grid.DetermineLine(y + 2 * (j - 2) * dy - dx, x + 2 * (j - 2) * dx - dy);
+					grid.DetermineLine(y + 2 * (j - 1) * dy + dx, x + 2 * (j - 1) * dx + dy);
+					grid.DetermineLine(y + 2 * (j - 1) * dy - dx, x + 2 * (j - 1) * dx - dy);
+					grid.DetermineLine(y + 2 * (j - 0) * dy + dx, x + 2 * (j - 0) * dx + dy);
+					grid.DetermineLine(y + 2 * (j - 0) * dy - dx, x + 2 * (j - 0) * dx - dy);
+				}
+			}
+		}
+	}
 }
 
 void MasyuField::CheckVertex(int y, int x)
 {
-	int hint = hints[VertexId(y/ 2, x / 2)];
+	int hint = hints[VertexId(y / 2, x / 2)];
 
 	if (hint == HINT_WHITE) {
 		// TODO: faster checker
