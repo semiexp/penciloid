@@ -182,6 +182,7 @@ void MasyuField::CheckVertex(int y, int x)
 			int dy = GridConstant::GRID_DY[i], dx = GridConstant::GRID_DX[i];
 			grid.DetermineLine(y + dy, x + dx);
 			grid.DetermineLine(y + dy * 3, x + dx * 3);
+			grid.DetermineBlank(y - dy, x - dx);
 		}
 	}
 }
