@@ -111,6 +111,7 @@ private:
 		return segments[seg].group_root < 0 ? seg : (segments[seg].group_root = SegmentRoot(segments[seg].group_root));
 	}
 	void Join(int seg1, int seg2);
+	void JoinLines(int y, int x);
 
 	void CheckVertex(int y, int x);
 	inline void CheckCell(int y, int x) { if (0 <= y && y <= 2 * height && 0 <= x && x <= 2 * width) auxiliary->CheckCell(*this, y, x); }
@@ -210,6 +211,9 @@ int GridLoop<AuxiliarySolver>::DetermineLine(int y, int x)
 	segments[segment.adj_vertex[0]].line_destination = segment.adj_vertex[1];
 	segments[segment.adj_vertex[1]].line_destination = segment.adj_vertex[0];
 	segments[segment.adj_vertex[0]].line_weight = segments[segment.adj_vertex[1]].line_weight = -segment.group_root;
+
+	JoinLines(SegmentY(segment.adj_vertex[0]), SegmentX(segment.adj_vertex[0]));
+	JoinLines(SegmentY(segment.adj_vertex[1]), SegmentX(segment.adj_vertex[1]));
 
 	UpdateSegmentGroupStyle(segment_id, LOOP_LINE);
 	CheckNeighborhoodOfSegmentGroup(segment_id);
@@ -313,6 +317,26 @@ void GridLoop<AuxiliarySolver>::UpdateSegmentGroupStyle(int segment, int style)
 
 		segment_i = segments[segment_i].group_next;
 	} while (segment_i != segment);
+}
+
+template <class AuxiliarySolver>
+void GridLoop<AuxiliarySolver>::JoinLines(int y, int x)
+{
+	int line_segment[2] = { -1, -1 };
+	for (int i = 0; i < 4; ++i) {
+		int y2 = y + GridConstant::GRID_DY[i], x2 = x + GridConstant::GRID_DX[i];
+
+		if (GetSegmentStyleSafe(y2, x2) == LOOP_LINE) {
+			if (line_segment[1] != -1) {
+				UpdateStatus(SolverStatus::INCONSISTENT);
+				return;
+			}
+			if (line_segment[0] == -1) line_segment[0] = SegmentId(y2, x2);
+			else line_segment[1] = SegmentId(y2, x2);
+		}
+	}
+
+	if (line_segment[1] != -1) Join(line_segment[0], line_segment[1]);
 }
 
 template <class AuxiliarySolver>
