@@ -21,6 +21,7 @@ public:
 	~GridLoop();
 
 	void Init(int height_t, int width_t);
+	void Init(const GridLoop<AuxiliarySolver> &src);
 
 	inline void SetAuxiliarySolver(AuxiliarySolver *auxiliary_t) { auxiliary = auxiliary_t; }
 	inline AuxiliarySolver* GetAuxiliarySolver() { return auxiliary; }
@@ -176,6 +177,7 @@ void GridLoop<AuxiliarySolver>::Init(int height_t, int width_t)
 	width = width_t;
 
 	if (segments) delete[] segments;
+	if (process_queue) delete[] process_queue;
 
 	segments = new LoopSegment[(height * 2 + 1) * (width * 2 + 1)];
 	queue_size = height * width + (height + 1) * (width + 1) + 1;
@@ -220,6 +222,25 @@ void GridLoop<AuxiliarySolver>::Init(int height_t, int width_t)
 	Join(SegmentId(height * 2 - 1, width * 2), SegmentId(height * 2, width * 2 - 1));
 
 	DequeueAndCheckAll();
+	queue_top = -1;
+}
+
+template <class AuxiliarySolver>
+void GridLoop<AuxiliarySolver>::Init(const GridLoop<AuxiliarySolver> &src)
+{
+	if (segments == nullptr || height != src.height || width != src.width) {
+		height = src.height;
+		width = src.width;
+
+		if (segments) delete[] segments;
+		if (process_queue) delete[] process_queue;
+
+		segments = new LoopSegment[(height * 2 + 1) * (width * 2 + 1)];
+		queue_size = height * width + (height + 1) * (width + 1) + 1;
+		process_queue = new int[queue_size];
+	}
+
+	memcpy(segments, src.segments, sizeof(LoopSegment) * (height * 2 + 1) * (width * 2 + 1));
 	queue_top = -1;
 }
 
