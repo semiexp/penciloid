@@ -699,4 +699,41 @@ public:
 	void CheckCell(GridLoop<LoopNullAuxiliarySolver> &grid, int y, int x) {}
 };
 
+template <class AuxiliarySolver>
+int GridLoopAssume(GridLoop<AuxiliarySolver> &grid)
+{
+	GridLoop<AuxiliarySolver> tmp_line, tmp_blank;
+	int height = grid.GetHeight(), width = grid.GetWidth();
+	bool is_updated;
+
+	do {
+		is_updated = false;
+		for (int i = 0; i <= height * 2; ++i) {
+			for (int j = 0; j <= width * 2; ++j) {
+				if ((i & 1) == (j & 1)) continue;
+
+				if (grid.GetSegmentStyle(i, j) == GridLoop<AuxiliarySolver>::LOOP_UNDECIDED) {
+					tmp_line.Init(grid);
+					tmp_blank.Init(grid);
+
+					tmp_line.DetermineLine(i, j);
+					tmp_blank.DetermineBlank(i, j);
+
+					if ((tmp_line.GetStatus() & SolverStatus::INCONSISTENT) && (tmp_blank.GetStatus() & SolverStatus::INCONSISTENT)) {
+						return grid.UpdateStatus(SolverStatus::INCONSISTENT);
+					} else if (tmp_line.GetStatus() & SolverStatus::INCONSISTENT) {
+						grid.DetermineBlank(i, j);
+						is_updated = true;
+					} else if (tmp_blank.GetStatus() & SolverStatus::INCONSISTENT) {
+						grid.DetermineLine(i, j);
+						is_updated = true;
+					}
+				}
+			}
+		}
+	} while (is_updated);
+
+	return grid.GetStatus();
+}
+
 }
