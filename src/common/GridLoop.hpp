@@ -241,6 +241,10 @@ void GridLoop<AuxiliarySolver>::Init(const GridLoop<AuxiliarySolver> &src)
 	}
 
 	memcpy(segments, src.segments, sizeof(LoopSegment) * (height * 2 + 1) * (width * 2 + 1));
+	total_lines = src.total_lines;
+	field_status = src.field_status;
+	auxiliary = src.auxiliary;
+
 	queue_top = -1;
 }
 
