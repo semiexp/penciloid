@@ -86,6 +86,16 @@ void MasyuField::CheckTheorem(int y, int x)
 			}
 		}
 	}
+
+	if (hint == HINT_BLACK) {
+		for (int i = 0; i < 4; ++i) {
+			int dy = GridConstant::GRID_DY[i], dx = GridConstant::GRID_DX[i];
+
+			if (GetHintSafe(y / 2 + dy, x / 2 + dx) == HINT_BLACK) {
+				grid.DetermineBlank(y + dy, x + dx);
+			}
+		}
+	}
 }
 
 void MasyuField::CheckVertex(int y, int x)
