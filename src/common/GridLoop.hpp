@@ -708,6 +708,8 @@ int GridLoopAssume(GridLoop<AuxiliarySolver> &grid)
 
 	do {
 		is_updated = false;
+		grid.CheckAll();
+
 		for (int i = 0; i <= height * 2; ++i) {
 			for (int j = 0; j <= width * 2; ++j) {
 				if ((i & 1) == (j & 1)) continue;
