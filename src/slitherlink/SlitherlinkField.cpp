@@ -58,7 +58,7 @@ int SlitherlinkField::SetHint(int y, int x, int hint)
 
 	hints[id] = hint;
 	CheckTheorem(y * 2 + 1, x * 2 + 1);
-	CheckCell(y * 2 + 1, x * 2 + 1);
+	CheckCell(grid, y * 2 + 1, x * 2 + 1);
 
 	return grid.GetStatus();
 }
@@ -89,7 +89,7 @@ void SlitherlinkField::CheckTheorem(int y, int x)
 	}
 }
 
-void SlitherlinkField::CheckCell(int y, int x)
+void SlitherlinkField::CheckCell(GridLoop<SlitherlinkAuxiliarySolver> &grid, int y, int x)
 {
 	int id = CellId(y / 2, x / 2);
 

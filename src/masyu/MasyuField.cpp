@@ -57,7 +57,7 @@ int MasyuField::SetHint(int y, int x, int hint)
 
 	hints[id] = hint;
 	CheckTheorem(y * 2, x * 2);
-	CheckVertex(y * 2, x * 2);
+	CheckVertex(grid, y * 2, x * 2);
 
 	return grid.GetStatus();
 }
@@ -98,7 +98,7 @@ void MasyuField::CheckTheorem(int y, int x)
 	}
 }
 
-void MasyuField::CheckVertex(int y, int x)
+void MasyuField::CheckVertex(GridLoop<MasyuAuxiliarySolver> &grid, int y, int x)
 {
 	int hint = hints[VertexId(y / 2, x / 2)];
 

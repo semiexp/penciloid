@@ -55,14 +55,14 @@ private:
 		inline void CheckCell(GridLoop<MasyuAuxiliarySolver> &grid, int y, int x) {
 		}
 		inline void CheckVertex(GridLoop<MasyuAuxiliarySolver> &grid, int y, int x) {
-			masyu->CheckVertex(y, x);
+			masyu->CheckVertex(grid, y, x);
 		}
 
 	private:
 		MasyuField *masyu;
 	};
 
-	void CheckVertex(int y, int x);
+	void CheckVertex(GridLoop<MasyuAuxiliarySolver> &grid, int y, int x);
 	void CheckTheorem(int y, int x);
 	inline int VertexId(int y, int x) { return y * width + x; }
 
