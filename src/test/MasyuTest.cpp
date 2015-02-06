@@ -64,6 +64,7 @@ void PenciloidTest::MasyuTest4()
 		field.Init(prob);
 
 		field.CheckAll();
+		field.Assume();
 
 		field.Debug();
 		fprintf(stderr, "%d\n", field.GetStatus());
