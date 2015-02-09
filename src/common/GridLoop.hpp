@@ -27,15 +27,16 @@ public:
 	inline AuxiliarySolver* GetAuxiliarySolver() { return auxiliary; }
 	inline int GetHeight() const { return height; }
 	inline int GetWidth() const { return width; }
-	inline int GetSegmentStyle(int y, int x) { return segments[SegmentId(y, x)].segment_style; }
-	inline int GetSegmentStyleSafe(int y, int x) { return (CheckSegmentRange(y, x) ? segments[SegmentId(y, x)].segment_style : LOOP_BLANK); }
+	inline int GetSegmentStyle(int y, int x) const { return segments[SegmentId(y, x)].segment_style; }
+	inline int GetSegmentStyleSafe(int y, int x) const { return (CheckSegmentRange(y, x) ? segments[SegmentId(y, x)].segment_style : LOOP_BLANK); }
 
 	inline bool CheckSegmentRange(int y, int x) const { return 0 <= y && y <= 2 * height && 0 <= x && x <= 2 * width; }
 	inline bool CheckCellRange(int y, int x) const { return 0 <= y && y < height && 0 <= x && x < width; }
 	inline bool CheckVertexRange(int y, int x) const { return 0 <= y && y <= height && 0 <= x && x <= width; }
+	inline bool IsRepresentative(int y, int x) { return IsRepresentative(SegmentId(y, x)); }
 
 	inline int UpdateStatus(int status) { return field_status |= status; }
-	inline int GetStatus() { return field_status; }
+	inline int GetStatus() const { return field_status; }
 
 	int DetermineLine(int y, int x);
 	int DetermineBlank(int y, int x);
@@ -109,6 +110,7 @@ private:
 	inline int SegmentX(int segment) const { return segment % (2 * width + 1); }
 	inline int VertexId(int y, int x) const { return SegmentId(y, x); }
 	inline int CellId(int y, int x) const { return SegmentId(y, x); }
+	inline bool IsRepresentative(int id) { return SegmentRoot(id) == id; }
 
 	int SegmentRoot(int seg) { 
 		return segments[seg].group_root < 0 ? seg : (segments[seg].group_root = SegmentRoot(segments[seg].group_root));
@@ -714,7 +716,7 @@ int GridLoopAssume(GridLoop<AuxiliarySolver> &grid)
 			for (int j = 0; j <= width * 2; ++j) {
 				if ((i & 1) == (j & 1)) continue;
 
-				if (grid.GetSegmentStyle(i, j) == GridLoop<AuxiliarySolver>::LOOP_UNDECIDED) {
+				if (grid.GetSegmentStyle(i, j) == GridLoop<AuxiliarySolver>::LOOP_UNDECIDED && grid.IsRepresentative(i, j)) {
 					tmp_line.Init(grid);
 					tmp_blank.Init(grid);
 
