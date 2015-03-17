@@ -66,8 +66,12 @@ void PenciloidTest::MasyuTest4()
 		field.CheckAll();
 		field.Assume();
 
-		field.Debug();
-		fprintf(stderr, "%d\n", field.GetStatus());
+		if (field.GetStatus() == SolverStatus::SUCCESS) {
+			printf("Masyu problem test #%d: OK\n", i);
+		} else {
+			printf("Masyu problem test #%d: FAIL (status: %d)\n", i, field.GetStatus());
+			field.Debug();
+		}
 	}
 }
 

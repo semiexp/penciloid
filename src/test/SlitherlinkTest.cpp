@@ -85,8 +85,12 @@ void PenciloidTest::SlitherlinkTest3()
 		field.CheckAll();
 		field.Assume();
 
-		field.Debug();
-		fprintf(stderr, "%d\n", field.GetStatus());
+		if (field.GetStatus() == SolverStatus::SUCCESS) {
+			printf("Slitherlink problem test #%d: OK\n", i);
+		} else {
+			printf("Slitherlink problem test #%d: FAIL (status: %d)\n", i, field.GetStatus());
+			field.Debug();
+		}
 	}
 }
 
