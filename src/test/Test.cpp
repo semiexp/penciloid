@@ -16,11 +16,14 @@ void PenciloidTest::RunTestAll()
 	SlitherlinkTest1();
 	SlitherlinkTest2();
 	SlitherlinkTest3();
-
+	
 	MasyuTest1();
 	MasyuTest2();
 	MasyuTest3();
 	MasyuTest4();
+
+	SlitherlinkPerformanceTest();
+	MasyuPerformanceTest();
 }
 
 }

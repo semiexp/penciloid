@@ -1,4 +1,5 @@
 #include <cassert>
+#include <ctime>
 
 #include "../slitherlink/SlitherlinkDatabase.h"
 #include "../slitherlink/SlitherlinkField.h"
@@ -92,6 +93,38 @@ void PenciloidTest::SlitherlinkTest3()
 			field.Debug();
 		}
 	}
+}
+
+void PenciloidTest::SlitherlinkPerformanceTest()
+{
+	SlitherlinkDatabase::CreateDatabase();
+
+	clock_t start, end;
+	const int num_trial = 100;
+
+	start = clock();
+	int successful_trial = 0;
+
+	for (int i = 0; i < num_trial; ++i) {
+		SlitherlinkProblem prob;
+
+		SlitherlinkLoadProblem(prob, NUMBER_OF_SLITHERLINK_PROBLEM);
+
+		SlitherlinkField field;
+		field.Init(prob);
+
+		field.CheckAll();
+		field.Assume();
+		
+		if (field.GetStatus() == SolverStatus::SUCCESS) ++successful_trial;
+	}
+
+	end = clock();
+
+	if (successful_trial != num_trial) {
+		printf("Something is wrong; only %d out of %d succeeded", successful_trial, num_trial);
+	}
+	printf("Slitherlink performance test: %f[s] (%d times)\n", (double)(end - start) / CLOCKS_PER_SEC, num_trial);
 }
 
 }

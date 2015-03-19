@@ -1,4 +1,5 @@
 #include <cassert>
+#include <ctime>
 
 #include "../masyu/MasyuField.h"
 #include "../masyu/MasyuProblem.h"
@@ -73,6 +74,36 @@ void PenciloidTest::MasyuTest4()
 			field.Debug();
 		}
 	}
+}
+
+void PenciloidTest::MasyuPerformanceTest()
+{
+	clock_t start, end;
+	const int num_trial = 100;
+
+	start = clock();
+	int successful_trial = 0;
+
+	for (int i = 0; i < num_trial; ++i) {
+		MasyuProblem prob;
+
+		MasyuLoadProblem(prob, NUMBER_OF_MASYU_PROBLEM);
+
+		MasyuField field;
+		field.Init(prob);
+
+		field.CheckAll();
+		field.Assume();
+
+		if (field.GetStatus() == SolverStatus::SUCCESS) ++successful_trial;
+	}
+
+	end = clock();
+
+	if (successful_trial != num_trial) {
+		printf("Something is wrong; only %d out of %d succeeded", successful_trial, num_trial);
+	}
+	printf("Masyu performance test: %f[s] (%d times)\n", (double)(end - start) / CLOCKS_PER_SEC, num_trial);
 }
 
 }
