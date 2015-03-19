@@ -31,7 +31,7 @@ public:
 	inline int GetHintSafe(int y, int x) { return grid.CheckCellRange(y, x) ? GetHint(y, x) : HINT_NONE; }
 	int SetHint(int y, int x, int hint);
 	inline int CheckAll() { return grid.CheckAll(); }
-	inline int Assume() { return GridLoopAssume(grid); }
+	int Assume();
 
 	void Debug();
 	void Debug2() { grid.Debug2(); }
