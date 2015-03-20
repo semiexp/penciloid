@@ -17,6 +17,8 @@ public:
 	static void GridLoopTest5a();
 	static void GridLoopTest5b();
 
+	static void BlackCellForestTest1();
+
 	static bool SlitherlinkCheckGrid(SlitherlinkField &field, const int *expected);
 	static void SlitherlinkTest1();
 	static void SlitherlinkTest2();

@@ -13,6 +13,8 @@ void PenciloidTest::RunTestAll()
 	GridLoopTest5a();
 	GridLoopTest5b();
 
+	BlackCellForestTest1();
+
 	SlitherlinkTest1();
 	SlitherlinkTest2();
 	SlitherlinkTest3();
