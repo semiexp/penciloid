@@ -36,6 +36,8 @@ public:
 
 	static void MasyuLoadProblem(MasyuProblem &storage, int problem_id);
 
+	static void KakuroTest1();
+
 	static void RunTestAll();
 
 	static const int NUMBER_OF_SLITHERLINK_PROBLEM;
