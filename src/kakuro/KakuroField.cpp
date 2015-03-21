@@ -156,7 +156,7 @@ int KakuroField::UpdateCandidate(int id, int new_candidate)
 		}
 
 		cells[id].cell_value = cells[id | 1].cell_value = cand_value;
-		if (--num_undecided_cells) UpdateStatus(SolverStatus::SUCCESS);
+		if (--num_undecided_cells == 0) UpdateStatus(SolverStatus::SUCCESS);
 
 		// TODO: purge determined cells?
 	}
