@@ -37,6 +37,7 @@ public:
 	static void MasyuLoadProblem(MasyuProblem &storage, int problem_id);
 
 	static void KakuroTest1();
+	static void KakuroTest2();
 
 	static void RunTestAll();
 

@@ -25,6 +25,7 @@ void PenciloidTest::RunTestAll()
 	MasyuTest4();
 
 	KakuroTest1();
+	KakuroTest2();
 
 	SlitherlinkPerformanceTest();
 	MasyuPerformanceTest();
