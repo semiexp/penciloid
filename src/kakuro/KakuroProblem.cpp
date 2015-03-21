@@ -14,5 +14,10 @@ void KakuroProblem::Init(int height_t, int width_t)
 		hint[i] = HINT_NONE;
 	}
 }
+void KakuroProblem::Init(int height_t, int width_t, int *hint_t)
+{
+	Init(height_t, width_t);
+	for (int i = 0; i < height * width * 2; ++i) hint[i] = hint_t[i];
+}
 
 }

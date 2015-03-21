@@ -9,6 +9,7 @@ public:
 	~KakuroProblem() { if (hint) delete[] hint; }
 
 	void Init(int height_t, int width_t);
+	void Init(int height_t, int width_t, int *hint_t);
 
 	inline int GetHeight() const { return height; }
 	inline int GetWidth() const { return width; }
