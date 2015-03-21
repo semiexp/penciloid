@@ -4,6 +4,7 @@ class SlitherlinkField;
 class SlitherlinkProblem;
 class MasyuField;
 class MasyuProblem;
+class KakuroProblem;
 
 class PenciloidTest
 {
@@ -39,9 +40,12 @@ public:
 	static void KakuroTest1();
 	static void KakuroTest2();
 
+	static void KakuroLoadProblem(KakuroProblem &storage, int problem_id);
+
 	static void RunTestAll();
 
 	static const int NUMBER_OF_SLITHERLINK_PROBLEM;
 	static const int NUMBER_OF_MASYU_PROBLEM;
+	static const int NUMBER_OF_KAKURO_PROBLEM;
 };
 }

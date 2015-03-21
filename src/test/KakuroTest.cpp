@@ -30,30 +30,23 @@ void PenciloidTest::KakuroTest1()
 
 void PenciloidTest::KakuroTest2()
 {
-	KakuroProblem prob;
+	for (int i = 1; i <= NUMBER_OF_KAKURO_PROBLEM; ++i) {
+		KakuroProblem prob;
 
-	// Source: http://www.nikoli.com/ja/puzzles/kakuro/ Sample problem 1
-	int problem_array[] = {
-		-1, -1, -1, -1, 16, -1, 4, -1, -1, -1, 6, -1, 4, -1, 15, -1, -1, -1, -1, -1, 6, -1, 7, -1,
-		-1, -1, 7, 7, -2, -2, -2, -2, -1, 9, -2, -2, -2, -2, -2, -2, -1, -1, 16, 4, -2, -2, -2, -2,
-		-1, 7, -2, -2, -2, -2, -2, -2, 5, 7, -2, -2, -2, -2, -2, -2, 3, 6, -2, -2, -2, -2, -2, -2,
-		-1, 3, -2, -2, -2, -2, 16, 4, -2, -2, -2, -2, 8, 16, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2,
-		-1, 10, -2, -2, -2, -2, -2, -2, -2, -2, 15, 10, -2, -2, -2, -2, -2, -2, -2, -2, 15, -1, -1, -1,
-		-1, -1, -1, 10, -2, -2, -2, -2, 3, 6, -2, -2, -2, -2, -2, -2, 4, 5, -2, -2, -2, -2, 7, -1,
-		-1, -1, 6, -1, 7, 10, -2, -2, -2, -2, -2, -2, -2, -2, 7, 12, -2, -2, -2, -2, -2, -2, -2, -2,
-		-1, 16, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, 3, 4, -2, -2, -2, -2, 4, 4, -2, -2, -2, -2,
-		-1, 7, -2, -2, -2, -2, -2, -2, -1, 8, -2, -2, -2, -2, -2, -2, -1, 6, -2, -2, -2, -2, -2, -2,
-		-1, 3, -2, -2, -2, -2, -1, -1, -1, 7, -2, -2, -2, -2, -2, -2, -1, 3, -2, -2, -2, -2, -1, -1 
-	};
+		KakuroLoadProblem(prob, i);
 
-	prob.Init(10, 12, (int*) problem_array);
+		KakuroField field;
+		field.Init(prob);
 
-	KakuroField field;
-	field.Init(prob);
-	field.CheckAll();
+		field.CheckAll();
 
-	field.Debug();
-	fprintf(stderr, "status: %d\n", field.GetStatus());
+		field.Debug();
+		if (field.GetStatus() == SolverStatus::SUCCESS) {
+			printf("Kakuro problem test #%d: OK\n", i);
+		} else {
+			printf("Kakuro problem test #%d: FAIL (status: %d)\n", i, field.GetStatus());
+		}
+	}
 }
 
 }
