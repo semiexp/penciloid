@@ -105,8 +105,16 @@ int KakuroField::CheckGroup(int id)
 
 		if ((bits & already_used_values) != already_used_values || sum != cells[id].group_sum || num != cells[id].group_num_cells) continue;
 
+		for (int current = id;;) {
+			if ((cells[current].cell_candidate & bits) == 0) goto nex;
+			if ((current = Next(current)) == id) break;
+		}
+
 		possible_candidate |= bits ^ already_used_values;
 		imperative_candidate &= bits ^ already_used_values;
+
+	nex:
+		continue;
 	}
 
 	for (int current = id;;) {
