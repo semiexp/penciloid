@@ -105,12 +105,12 @@ int KakuroField::CheckGroup(int id)
 
 		if ((bits & already_used_values) != already_used_values || sum != cells[id].group_sum || num != cells[id].group_num_cells) continue;
 
-		possible_candidate |= bits;
-		imperative_candidate &= bits;
+		possible_candidate |= bits ^ already_used_values;
+		imperative_candidate &= bits ^ already_used_values;
 	}
 
 	for (int current = id;;) {
-		UpdateCandidate(current, possible_candidate);
+		if (cells[current].cell_value == CELL_UNDECIDED) UpdateCandidate(current, possible_candidate);
 		if ((current = Next(current)) == id) break;
 	}
 
@@ -140,8 +140,9 @@ int KakuroField::UpdateCandidate(int id, int new_candidate)
 	id &= ~1;
 	new_candidate &= cells[id].cell_candidate;
 
-	if (new_candidate == 0) return UpdateStatus(SolverStatus::INCONSISTENT);
-	if (new_candidate == cells[id].cell_candidate) return UpdateStatus(0);
+	if (new_candidate == 0) {
+		return UpdateStatus(SolverStatus::INCONSISTENT);
+	} if (new_candidate == cells[id].cell_candidate) return UpdateStatus(0);
 
 	cells[id].cell_candidate = cells[id | 1].cell_candidate = new_candidate;
 
