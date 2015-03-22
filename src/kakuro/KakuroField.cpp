@@ -92,7 +92,29 @@ int KakuroField::CheckGroup(int id)
 		if ((current = Next(current)) == id) break;
 	}
 
+	int reserved_candidate = 0;
+	for (int p = id;;) {
+		int cand = cells[p].cell_candidate;
+		if (!IsUniqueCandidate(cand) && IsUniqueCandidate(cand ^ (cand & -cand))) {
+			for (int q = id;;) {
+				if (p != q && cand == cells[q].cell_candidate) {
+					reserved_candidate |= cand;
+					for (int r = id;;) {
+						if (p != r && q != r) {
+							UpdateCandidate(r, ~cand);
+						}
+
+						if ((r = Next(r)) == id) break;
+					}
+				}
+				if ((q = Next(q)) == id) break;
+			}
+		}
+		if ((p = Next(p)) == id) break;
+	}
+
 	int possible_candidate = 0, imperative_candidate = (2 << CELL_MAX_VALUE) - 2;
+	
 	for (int bits = 2; bits < (2 << CELL_MAX_VALUE); bits += 2) {
 		int sum = 0, num = 0;
 
@@ -103,7 +125,7 @@ int KakuroField::CheckGroup(int id)
 			}
 		}
 
-		if ((bits & already_used_values) != already_used_values || sum != cells[id].group_sum || num != cells[id].group_num_cells) continue;
+		if ((bits & reserved_candidate) != reserved_candidate || (bits & already_used_values) != already_used_values || sum != cells[id].group_sum || num != cells[id].group_num_cells) continue;
 
 		for (int current = id;;) {
 			if ((cells[current].cell_candidate & bits) == 0) goto nex;
