@@ -1,5 +1,6 @@
 #include "KakuroField.h"
 #include "KakuroProblem.h"
+#include "../common/MiniVector.hpp"
 #include <cstdio>
 
 namespace Penciloid
@@ -84,33 +85,35 @@ int KakuroField::CheckGroup(int id)
 {
 	if (Next(id) == -1) return GetStatus();
 
-	// TODO: desperately naive algorithm
-	int already_used_values = 0;
-	
+	MiniVector<int, CELL_MAX_VALUE> group_cells;
+
 	for (int current = id;;) {
-		if (cells[current].cell_value >= 1) already_used_values |= 1 << cells[current].cell_value;
+		group_cells.push_back(current);
 		if ((current = Next(current)) == id) break;
 	}
 
+	// TODO: desperately naive algorithm
+	int already_used_values = 0;
+	
+	for (int current : group_cells) {
+		if (cells[current].cell_value >= 1) already_used_values |= 1 << cells[current].cell_value;
+	}
+
 	int reserved_candidate = 0;
-	for (int p = id;;) {
+	for (int p : group_cells) {
 		int cand = cells[p].cell_candidate;
 		if (!IsUniqueCandidate(cand) && IsUniqueCandidate(cand ^ (cand & -cand))) {
-			for (int q = id;;) {
+			for (int q : group_cells) {
 				if (p != q && cand == cells[q].cell_candidate) {
 					reserved_candidate |= cand;
-					for (int r = id;;) {
+					for (int r : group_cells) {
 						if (p != r && q != r) {
 							UpdateCandidate(r, ~cand);
 						}
-
-						if ((r = Next(r)) == id) break;
 					}
 				}
-				if ((q = Next(q)) == id) break;
 			}
 		}
-		if ((p = Next(p)) == id) break;
 	}
 
 	int possible_candidate = 0, imperative_candidate = (2 << CELL_MAX_VALUE) - 2;
@@ -127,9 +130,8 @@ int KakuroField::CheckGroup(int id)
 
 		if ((bits & reserved_candidate) != reserved_candidate || (bits & already_used_values) != already_used_values || sum != cells[id].group_sum || num != cells[id].group_num_cells) continue;
 
-		for (int current = id;;) {
+		for (int current : group_cells) {
 			if ((cells[current].cell_candidate & bits) == 0) goto nex;
-			if ((current = Next(current)) == id) break;
 		}
 
 		possible_candidate |= bits ^ already_used_values;
@@ -139,15 +141,14 @@ int KakuroField::CheckGroup(int id)
 		continue;
 	}
 
-	for (int current = id;;) {
+	for (int current : group_cells) {
 		if (cells[current].cell_value == CELL_UNDECIDED) UpdateCandidate(current, possible_candidate);
-		if ((current = Next(current)) == id) break;
 	}
 
 	for (int i = 1; i <= CELL_MAX_VALUE; ++i) if (imperative_candidate & (1 << i)) {
 		int candidate_loc = -1;
 
-		for (int current = id;;) {
+		for (int current : group_cells) {
 			if (cells[current].cell_candidate & (1 << i)) {
 				if (candidate_loc == -1) candidate_loc = current;
 				else {
@@ -155,7 +156,6 @@ int KakuroField::CheckGroup(int id)
 					break;
 				}
 			}
-			if ((current = Next(current)) == id) break;
 		}
 
 		if (candidate_loc == -1) return UpdateStatus(SolverStatus::INCONSISTENT);
