@@ -2,11 +2,11 @@
 
 namespace Penciloid
 {
-template <typename T, int size>
+template <typename T, const int SIZE>
 class MiniVector
 {
 public:
-	MiniVector<T, size>() : loc(0) { }
+	MiniVector<T, SIZE>() : loc(0) { }
 
 	void push_back(T &data) { storage[loc++] = data; }
 	void clear() { loc = 0; }
@@ -16,7 +16,7 @@ public:
 	T* end() { return &(storage[loc]); }
 
 private:
-	T storage[size];
+	T storage[SIZE];
 	int loc;
 };
 
