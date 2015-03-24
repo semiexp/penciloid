@@ -23,9 +23,10 @@ void PenciloidTest::RunTestAll()
 	MasyuTest2();
 	MasyuTest3();
 	MasyuTest4();
-
+	
 	KakuroTest1();
-	KakuroTest2();
+
+	KakuroConsecutiveSolve("kakuro.txt");
 
 	SlitherlinkPerformanceTest();
 	MasyuPerformanceTest();

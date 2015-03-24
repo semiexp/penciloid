@@ -38,9 +38,7 @@ public:
 	static void MasyuLoadProblem(MasyuProblem &storage, int problem_id);
 
 	static void KakuroTest1();
-	static void KakuroTest2();
-
-	static void KakuroLoadProblem(KakuroProblem &storage, int problem_id);
+	static void KakuroConsecutiveSolve(const char* filename);
 
 	static void RunTestAll();
 

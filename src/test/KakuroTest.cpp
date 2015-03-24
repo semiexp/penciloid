@@ -28,25 +28,4 @@ void PenciloidTest::KakuroTest1()
 	field.Debug();
 }
 
-void PenciloidTest::KakuroTest2()
-{
-	for (int i = 1; i <= NUMBER_OF_KAKURO_PROBLEM; ++i) {
-		KakuroProblem prob;
-
-		KakuroLoadProblem(prob, i);
-
-		KakuroField field;
-		field.Init(prob);
-
-		field.CheckAll();
-
-		field.Debug();
-		if (field.GetStatus() == SolverStatus::SUCCESS) {
-			printf("Kakuro problem test #%d: OK\n", i);
-		} else {
-			printf("Kakuro problem test #%d: FAIL (status: %d)\n", i, field.GetStatus());
-		}
-	}
-}
-
 }
