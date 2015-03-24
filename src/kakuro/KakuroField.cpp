@@ -117,7 +117,9 @@ int KakuroField::CheckGroup(int id)
 	}
 
 	int possible_candidate = 0, imperative_candidate = (2 << CELL_MAX_VALUE) - 2;
-	
+	MiniVector<int, CELL_MAX_VALUE> new_candidates;
+	for (int i : group_cells) new_candidates.push_back(0);
+
 	for (int bits = 2; bits < (2 << CELL_MAX_VALUE); bits += 2) {
 		int sum = 0, num = 0;
 
@@ -137,8 +139,32 @@ int KakuroField::CheckGroup(int id)
 		possible_candidate |= bits ^ already_used_values;
 		imperative_candidate &= bits ^ already_used_values;
 
+		int exclusive = 0, exclusive_remaining = (1 << group_cells.size()) - 1;
+		int current_candidate = bits;
+		bool updated;
+		do {
+			updated = false;
+
+			for (int i = 0; i < group_cells.size(); ++i) if (exclusive_remaining & (1 << i)) {
+				if (IsUniqueCandidate(current_candidate & cells[group_cells[i]].cell_candidate)) {
+					exclusive_remaining ^= 1 << i;
+					new_candidates[i] |= current_candidate & cells[group_cells[i]].cell_candidate;
+					current_candidate &= ~cells[group_cells[i]].cell_candidate;
+					updated = true;
+				}
+			}
+
+		} while (updated);
+
+		for (int i = 0; i < group_cells.size(); ++i) if (exclusive_remaining & (1 << i)) {
+			new_candidates[i] |= current_candidate;
+		}
 	nex:
 		continue;
+	}
+
+	for (int i = 0; i < group_cells.size(); ++i) {
+		UpdateCandidate(group_cells[i], new_candidates[i]);
 	}
 
 	for (int current : group_cells) {
