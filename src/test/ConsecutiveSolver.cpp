@@ -9,6 +9,7 @@
 #include "../masyu/MasyuProblem.h"
 #include "../slitherlink/SlitherlinkField.h"
 #include "../slitherlink/SlitherlinkProblem.h"
+#include "../slitherlink/SlitherlinkDatabase.h"
 #include "../kakuro/KakuroField.h"
 #include "../kakuro/KakuroProblem.h"
 
@@ -16,6 +17,8 @@ namespace Penciloid
 {
 void PenciloidTest::ConsecutiveSolve(const char* filename)
 {
+	SlitherlinkDatabase::CreateDatabase();
+
 	std::ifstream ifs(filename);
 
 	while (!ifs.eof()) {
@@ -88,6 +91,8 @@ void PenciloidTest::ConsecutiveSolve(const char* filename)
 }
 void PenciloidTest::ConsecutivePerformanceTest(const char* filename)
 {
+	SlitherlinkDatabase::CreateDatabase();
+
 	std::ifstream ifs(filename);
 	time_t start, end;
 
