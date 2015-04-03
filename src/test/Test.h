@@ -39,6 +39,7 @@ public:
 	static void InputKakuro(std::ifstream &ifs, KakuroProblem &problem);
 
 	static void ConsecutiveSolve(const char* filename);
+	static void ConsecutivePerformanceTest(const char* filename);
 
 	static void RunTestAll();
 };

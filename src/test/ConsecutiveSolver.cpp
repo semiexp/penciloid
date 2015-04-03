@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <ctime>
 
 #include "Test.h"
 #include "../masyu/MasyuField.h"
@@ -84,6 +85,65 @@ void PenciloidTest::ConsecutiveSolve(const char* filename)
 			break;
 		}
 	}
+}
+void PenciloidTest::ConsecutivePerformanceTest(const char* filename)
+{
+	std::ifstream ifs(filename);
+	time_t start, end;
+
+	start = clock();
+	while (!ifs.eof()) {
+		std::string puzzle_type, probid;
+		int repeat, status = 0;
+		ifs >> puzzle_type >> probid >> repeat;
+
+		if (puzzle_type == std::string("slitherlink")) {
+			SlitherlinkProblem problem;
+			InputSlitherlink(ifs, problem);
+
+			for (int i = 0; i < repeat; ++i) {
+				SlitherlinkField field;
+				field.Init(problem);
+
+				field.Assume();
+
+				status += field.GetStatus();
+			}
+		} else if (puzzle_type == std::string("masyu")) {
+			MasyuProblem problem;
+			InputMasyu(ifs, problem);
+
+			for (int i = 0; i < repeat; ++i) {
+				MasyuField field;
+				field.Init(problem);
+
+				field.Assume();
+
+				status += field.GetStatus();
+			}
+		} else if (puzzle_type == std::string("kakuro")) {
+			KakuroProblem problem;
+			InputKakuro(ifs, problem);
+
+			for (int i = 0; i < repeat; ++i) {
+				KakuroField field;
+				field.Init(problem);
+				field.CheckAll();
+
+				status += field.GetStatus();
+			}
+		} else {
+			break;
+		}
+
+		status /= repeat;
+		if (status != SolverStatus::SUCCESS) {
+			std::cerr << "Problem [" << probid << "]: Fail (" << status << ")" << std::endl;
+		}
+	}
+	end = clock();
+
+	std::cerr << "Done. (Cost: " << (double)(end - start) / CLOCKS_PER_SEC << ")" << std::endl;
 }
 
 }
