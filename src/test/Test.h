@@ -1,3 +1,5 @@
+#include <iostream>
+
 namespace Penciloid
 {
 class SlitherlinkField;
@@ -31,6 +33,10 @@ public:
 	static void MasyuTest3();
 
 	static void KakuroTest1();
+
+	static void InputSlitherlink(std::ifstream &ifs, SlitherlinkProblem &problem);
+	static void InputMasyu(std::ifstream &ifs, MasyuProblem &problem);
+	static void InputKakuro(std::ifstream &ifs, KakuroProblem &problem);
 
 	static void ConsecutiveSolve(const char* filename);
 
