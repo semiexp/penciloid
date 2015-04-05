@@ -37,6 +37,7 @@ public:
 
 	inline int UpdateStatus(int status) { return field_status |= status; }
 	inline int GetStatus() const { return field_status; }
+	inline int GetProgress() const { return progress; }
 
 	int DetermineLine(int y, int x);
 	int DetermineBlank(int y, int x);
@@ -145,7 +146,7 @@ private:
 
 	int height, width;
 	int total_lines;
-	int field_status;
+	int field_status, progress;
 
 	int queue_top, queue_end, queue_size;
 };
@@ -161,6 +162,7 @@ GridLoop<AuxiliarySolver>::GridLoop()
 	width = -1;
 	total_lines = 0;
 	queue_top = queue_end = queue_size = -1;
+	progress = 0;
 
 	field_status = SolverStatus::NORMAL;
 }
@@ -184,6 +186,7 @@ void GridLoop<AuxiliarySolver>::Init(int height_t, int width_t)
 	segments = new LoopSegment[(height * 2 + 1) * (width * 2 + 1)];
 	queue_size = height * width + (height + 1) * (width + 1) + 1;
 	process_queue = new int[queue_size];
+	progress = 0;
 
 	for (int i = 0; i < height * 2 + 1; ++i) {
 		for (int j = 0; j < width * 2 + 1; ++j) {
@@ -246,6 +249,7 @@ void GridLoop<AuxiliarySolver>::Init(const GridLoop<AuxiliarySolver> &src)
 	total_lines = src.total_lines;
 	field_status = src.field_status;
 	auxiliary = src.auxiliary;
+	progress = src.progress;
 
 	queue_top = -1;
 }
@@ -269,6 +273,7 @@ int GridLoop<AuxiliarySolver>::DetermineLine(int y, int x)
 		return UpdateStatus(SolverStatus::INCONSISTENT);
 	}
 
+	++progress;
 	segments[segment.adj_vertex[0]].line_destination = segment.adj_vertex[1];
 	segments[segment.adj_vertex[1]].line_destination = segment.adj_vertex[0];
 	segments[segment.adj_vertex[0]].line_weight = segments[segment.adj_vertex[1]].line_weight = -segment.group_root;
@@ -308,6 +313,7 @@ int GridLoop<AuxiliarySolver>::DetermineBlank(int y, int x)
 		return UpdateStatus(0);
 	}
 
+	++progress;
 	UpdateSegmentGroupStyle(segment_id, LOOP_BLANK);
 
 	if (queue_top == -1) {
@@ -710,7 +716,9 @@ int GridLoopAssume(GridLoop<AuxiliarySolver> &grid)
 
 	do {
 		is_updated = false;
+		int current_progress = grid.GetProgress();
 		grid.CheckAll();
+		if (current_progress < grid.GetProgress()) is_updated = true;
 
 		for (int i = 0; i <= height * 2; ++i) {
 			for (int j = 0; j <= width * 2; ++j) {
