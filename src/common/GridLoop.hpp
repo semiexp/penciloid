@@ -466,8 +466,6 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 	};
 
 	int vertex_id = VertexId(y, x);
-	int dest[4], style[4], weight[4];
-	int line_count = 0, undecided_count = 0;
 	MiniVector<NeighborhoodData, 4> line, undecided;
 
 	auxiliary->CheckVertex(*this, y, x);
@@ -475,21 +473,12 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 	for (int i = 0; i < 4; ++i) {
 		int y2 = y + GridConstant::GRID_DY[i], x2 = x + GridConstant::GRID_DX[i];
 
-		if (!CheckSegmentRange(y2, x2)) {
-			dest[i] = -1;
-			style[i] = LOOP_BLANK;
-			weight[i] = 0;
-		} else {
+		if (CheckSegmentRange(y2, x2)) {
 			LoopSegment &segment = segments[SegmentRoot(SegmentId(y2, x2))];
-			dest[i] = segment.GetAnotherEnd(vertex_id);
-			style[i] = segment.segment_style;
-			weight[i] = -segment.group_root;
 
-			if (style[i] == LOOP_LINE) {
-				++line_count;
+			if (segment.segment_style == LOOP_LINE) {
 				line.push_back(NeighborhoodData(y2, x2, segment.GetAnotherEnd(vertex_id), segment.segment_style, -segment.group_root));
-			} else if (style[i] == LOOP_UNDECIDED) {
-				++undecided_count;
+			} else if (segment.segment_style == LOOP_UNDECIDED) {
 				undecided.push_back(NeighborhoodData(y2, x2, segment.GetAnotherEnd(vertex_id), segment.segment_style, -segment.group_root));
 			}
 		}
@@ -513,7 +502,7 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 		return;
 	}
 
-	if (line_count == 1) {
+	if (line.size() == 1) {
 		int valid_y = -1, valid_x = -1;
 		int line_dest = line[0].dest, line_weight = line[0].weight;
 
