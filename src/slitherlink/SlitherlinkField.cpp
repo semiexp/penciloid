@@ -32,6 +32,20 @@ void SlitherlinkField::Init(int height_t, int width_t)
 	grid.Init(height, width);
 }
 
+void SlitherlinkField::Init(SlitherlinkField &field)
+{
+	height = field.height;
+	width = field.width;
+
+	if (hints) delete[] hints;
+	hints = new int[height * width];
+	memcpy(hints, field.hints, sizeof(int) * height * width);
+
+	auxiliary.Init(this);
+	grid.SetAuxiliarySolver(&auxiliary);
+	grid.Init(field.grid);
+}
+
 void SlitherlinkField::Init(SlitherlinkProblem &prob)
 {
 	Init(prob.GetHeight(), prob.GetWidth());

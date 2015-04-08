@@ -14,13 +14,14 @@ public:
 		LOOP_LINE = 1,
 		LOOP_BLANK = 2
 	};
-	const int HINT_NONE = -1;
+	static const int HINT_NONE = -1;
 
 	SlitherlinkField();
 	~SlitherlinkField();
 
 	void Init(int height_t, int width_t);
 	void Init(SlitherlinkProblem &prob);
+	void Init(SlitherlinkField &field);
 
 	inline int GetHeight() { return height; }
 	inline int GetWidth() { return width; }
