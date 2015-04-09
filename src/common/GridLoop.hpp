@@ -188,6 +188,8 @@ void GridLoop<AuxiliarySolver>::Init(int height_t, int width_t)
 	queue_size = height * width + (height + 1) * (width + 1) + 1;
 	process_queue = new int[queue_size];
 	progress = 0;
+	total_lines = 0;
+	field_status = SolverStatus::NORMAL;
 
 	for (int i = 0; i < height * 2 + 1; ++i) {
 		for (int j = 0; j < width * 2 + 1; ++j) {
