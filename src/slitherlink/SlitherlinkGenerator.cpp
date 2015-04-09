@@ -11,7 +11,6 @@ namespace Penciloid
 bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProblem &ret)
 {
 	SlitherlinkDatabase::CreateDatabase();
-	srand((int)time(NULL));
 
 	SlitherlinkField field;
 	field.Init(height, width);
