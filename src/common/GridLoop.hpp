@@ -414,6 +414,13 @@ void GridLoop<AuxiliarySolver>::UpdateSegmentGroupStyle(int segment, int style)
 {
 	int segment_i = segment;
 
+	do {
+		if (segments[segment_i].segment_style == LOOP_UNDECIDED && style == LOOP_LINE) ++total_lines;
+		segments[segment_i].segment_style = style;
+
+		segment_i = segments[segment_i].group_next;
+	} while (segment_i != segment);
+
 	if (style == LOOP_LINE && segments[segment_i].adj_vertex[0] == segments[segment_i].adj_vertex[1]) {
 		if (-segments[SegmentRoot(segment_i)].group_root < total_lines) {
 			UpdateStatus(SolverStatus::INCONSISTENT);
@@ -423,13 +430,6 @@ void GridLoop<AuxiliarySolver>::UpdateSegmentGroupStyle(int segment, int style)
 			return;
 		}
 	}
-
-	do {
-		if (segments[segment_i].segment_style == LOOP_UNDECIDED && style == LOOP_LINE) ++total_lines;
-		segments[segment_i].segment_style = style;
-
-		segment_i = segments[segment_i].group_next;
-	} while (segment_i != segment);
 }
 
 template <class AuxiliarySolver>
