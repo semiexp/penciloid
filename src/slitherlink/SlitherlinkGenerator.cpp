@@ -15,15 +15,18 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 	SlitherlinkField field;
 	field.Init(height, width);
 
-	for (int s = 0;; ++s) {
+	std::vector<std::pair<std::pair<int, int>, int> > current_hints;
+	
+	for (;;) {
 		// put a hint randomly
+		printf("%d\n", current_hints.size());
 		std::vector<std::pair<std::pair<int, int>, int> > cand;
 		
 		for (int i = 0; i < height; ++i) {
 			for (int j = 0; j < width; ++j) {
 				if (field.GetHint(i, j) != SlitherlinkField::HINT_NONE) continue;
 
-				bool zero_validity = s >= 3;
+				bool zero_validity = current_hints.size() >= 3;
 				if (field.GetHintSafe(i - 1, j - 1) == 0
 					|| field.GetHintSafe(i - 1, j) == 0
 					|| field.GetHintSafe(i - 1, j + 1) == 0
@@ -49,22 +52,60 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 		}
 
 		if (cand.size() == 0) {
+			goto rollback;
+		}
+
+		for (int t = 0;; ++t) {
+			if (t == 5 || cand.size() == 0) goto rollback;
+
+			auto next_step = cand[rand() % cand.size()];
+
+			SlitherlinkField field2;
+			field2.Init(field);
+			field2.SetHint(next_step.first.first, next_step.first.second, next_step.second);
+			field2.Assume();
+			field2.CheckInOutRule();
+			field2.CheckConnectability();
+
+			if (field2.GetStatus() & SolverStatus::INCONSISTENT) continue;
+
+			current_hints.push_back(next_step);
+			field.SetHint(next_step.first.first, next_step.first.second, next_step.second);
+			field.Assume();
+			field.CheckInOutRule();
+			field.CheckConnectability();
+
+			if (field.GetStatus() == SolverStatus::SUCCESS) {
+				ret.Init(height, width);
+				for (int y = 0; y < height; ++y) {
+					for (int x = 0; x < width; ++x) if (field.GetHint(y, x) != SlitherlinkField::HINT_NONE) {
+						ret.SetHint(y, x, field.GetHint(y, x));
+					}
+				}
+				return true;
+			}
+
 			break;
 		}
 
-		auto next_step = cand[rand() % cand.size()];
-		field.SetHint(next_step.first.first, next_step.first.second, next_step.second);
-		field.Assume();
+		continue;
 
-		if (field.GetStatus() == SolverStatus::SUCCESS) {
-			ret.Init(height, width);
-			for (int y = 0; y < height; ++y) {
-				for (int x = 0; x < width; ++x) if (field.GetHint(y, x) != SlitherlinkField::HINT_NONE) {
-					ret.SetHint(y, x, field.GetHint(y, x));
-				}
-			}
-			return true;
+	rollback:
+		for (int t = 0; t < 15 && !current_hints.empty(); ++t) {
+			current_hints.pop_back();
 		}
+
+		field.Init(height, width);
+		for (auto step : current_hints) {
+			field.SetHint(step.first.first, step.first.second, step.second);
+		}
+		field.Assume();
+		field.CheckInOutRule();
+		field.CheckConnectability();
+
+		field.Debug();
+		continue;
+
 	}
 
 	return false;
