@@ -25,6 +25,10 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 		for (int i = 0; i < height; ++i) {
 			for (int j = 0; j < width; ++j) {
 				if (field.GetHint(i, j) != SlitherlinkField::HINT_NONE) continue;
+				if (field.GetSegmentStyle(i * 2, j * 2 + 1) != SlitherlinkField::LOOP_UNDECIDED
+					&& field.GetSegmentStyle(i * 2 + 1, j * 2) != SlitherlinkField::LOOP_UNDECIDED
+					&& field.GetSegmentStyle(i * 2 + 2, j * 2 + 1) != SlitherlinkField::LOOP_UNDECIDED
+					&& field.GetSegmentStyle(i * 2 + 1, j * 2 + 2) != SlitherlinkField::LOOP_UNDECIDED) continue;
 
 				bool zero_validity = current_hints.size() >= 3;
 				if (field.GetHintSafe(i - 1, j - 1) == 0
