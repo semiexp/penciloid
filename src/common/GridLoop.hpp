@@ -4,6 +4,7 @@
 #include <cstdio>
 #include "SolverConstant.h"
 #include "MiniVector.hpp"
+#include "UnionFind.h"
 
 namespace Penciloid
 {
@@ -44,6 +45,8 @@ public:
 	int DetermineBlank(int y, int x);
 	int CheckAll();
 
+	int CheckInOutRule();
+	
 	void Debug() {
 		for (int i = 0; i <= height * 2; ++i) {
 			for (int j = 0; j <= width * 2; ++j) {
@@ -673,6 +676,70 @@ void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 			segments[segb2.adj_vertex[0]].line_weight = segments[segb2.adj_vertex[1]].line_weight = -segb2.group_root;
 		}
 	}
+}
+
+template <class AuxiliarySolver>
+int GridLoop<AuxiliarySolver>::CheckInOutRule()
+{
+	UnionFind uf(height * width * 2 + 2);
+	int out_of_grid = height * width;
+	
+	for (int i = 0; i <= height * 2; ++i) {
+		for (int j = 0; j <= width * 2; ++j) {
+			if (i % 2 == 1 && j % 2 == 0) {
+				int cell1 = CheckCellRange(i / 2, j / 2 - 1) ? ((i / 2) * width + (j / 2 - 1)) : out_of_grid;
+				int cell2 = CheckCellRange(i / 2, j / 2) ? ((i / 2) * width + (j / 2)) : out_of_grid;
+
+				if (GetSegmentStyle(i, j) == LOOP_LINE) {
+					uf.Join(cell1 * 2, cell2 * 2 + 1);
+					uf.Join(cell1 * 2 + 1, cell2 * 2);
+				} else if (GetSegmentStyle(i, j) == LOOP_BLANK) {
+					uf.Join(cell1 * 2, cell2 * 2);
+					uf.Join(cell1 * 2 + 1, cell2 * 2 + 1);
+				}
+			} else if (i % 2 == 0 && j % 2 == 1) {
+				int cell1 = CheckCellRange(i / 2 - 1, j / 2) ? ((i / 2 - 1) * width + (j / 2)) : out_of_grid;
+				int cell2 = CheckCellRange(i / 2, j / 2) ? ((i / 2) * width + (j / 2)) : out_of_grid;
+
+				if (GetSegmentStyle(i, j) == LOOP_LINE) {
+					uf.Join(cell1 * 2, cell2 * 2 + 1);
+					uf.Join(cell1 * 2 + 1, cell2 * 2);
+				} else if (GetSegmentStyle(i, j) == LOOP_BLANK) {
+					uf.Join(cell1 * 2, cell2 * 2);
+					uf.Join(cell1 * 2 + 1, cell2 * 2 + 1);
+				}
+			}
+		}
+	}
+
+	for (int i = 0; i <= height * width; ++i) {
+		if (uf.Root(i * 2) == uf.Root(i * 2 + 1)) {
+			return UpdateStatus(SolverStatus::INCONSISTENT);
+		}
+	}
+
+	for (int i = 0; i <= height * 2; ++i) {
+		for (int j = 0; j <= width * 2; ++j) {
+			int cell1, cell2;
+
+			if (i % 2 == 1 && j % 2 == 0) {
+				cell1 = CheckCellRange(i / 2, j / 2 - 1) ? ((i / 2) * width + (j / 2 - 1)) : out_of_grid;
+				cell2 = CheckCellRange(i / 2, j / 2) ? ((i / 2) * width + (j / 2)) : out_of_grid;
+			} else if (i % 2 == 0 && j % 2 == 1) {
+				cell1 = CheckCellRange(i / 2 - 1, j / 2) ? ((i / 2 - 1) * width + (j / 2)) : out_of_grid;
+				cell2 = CheckCellRange(i / 2, j / 2) ? ((i / 2) * width + (j / 2)) : out_of_grid;
+			} else continue;
+
+			if (uf.Root(cell1 * 2) == uf.Root(cell2 * 2)) {
+				DetermineBlank(i, j);
+			}
+			if (uf.Root(cell1 * 2) == uf.Root(cell2 * 2 + 1)) {
+				DetermineLine(i, j);
+			}
+		}
+	}
+
+	return GetStatus();
 }
 
 class LoopNullAuxiliarySolver;

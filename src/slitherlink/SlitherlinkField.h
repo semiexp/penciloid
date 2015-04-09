@@ -33,6 +33,7 @@ public:
 	int SetHint(int y, int x, int hint);
 	inline int CheckAll() { return grid.CheckAll(); }
 	int Assume();
+	inline int CheckInOutRule() { return grid.CheckInOutRule(); }
 
 	void Debug();
 	void Debug2() { grid.Debug2(); }
