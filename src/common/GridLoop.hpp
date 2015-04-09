@@ -753,7 +753,7 @@ int GridLoop<AuxiliarySolver>::CheckConnectability()
 			for (int k = 0; k < 4; ++k) {
 				int y = i + GridConstant::GRID_DY[k], x = j + GridConstant::GRID_DX[k];
 				if (CheckSegmentRange(y, x) && GetSegmentStyle(y, x) != LOOP_BLANK) {
-					Join(SegmentId(i, j), SegmentId(y, x));
+					uf.Join(SegmentId(i, j), SegmentId(y, x));
 				}
 			}
 		}
@@ -762,7 +762,7 @@ int GridLoop<AuxiliarySolver>::CheckConnectability()
 	int line_root = -1;
 	for (int i = 0; i <= 2 * height; ++i) {
 		for (int j = 0; j <= 2 * width; ++j) {
-			if (GetSegmentStyle(y, x) == LOOP_LINE) {
+			if (i % 2 != j % 2 && GetSegmentStyle(i, j) == LOOP_LINE) {
 				if (line_root == -1) line_root = uf.Root(SegmentId(i, j));
 				else if (line_root != uf.Root(SegmentId(i, j))) {
 					return UpdateStatus(SolverStatus::INCONSISTENT);
