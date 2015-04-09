@@ -34,6 +34,7 @@ public:
 	inline int CheckAll() { return grid.CheckAll(); }
 	int Assume();
 	inline int CheckInOutRule() { return grid.CheckInOutRule(); }
+	inline int CheckConnectability() { return grid.CheckConnectability(); }
 
 	void Debug();
 	void Debug2() { grid.Debug2(); }
