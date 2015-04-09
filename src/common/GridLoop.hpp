@@ -46,7 +46,8 @@ public:
 	int CheckAll();
 
 	int CheckInOutRule();
-	
+	int CheckConnectability();
+
 	void Debug() {
 		for (int i = 0; i <= height * 2; ++i) {
 			for (int j = 0; j <= width * 2; ++j) {
@@ -735,6 +736,37 @@ int GridLoop<AuxiliarySolver>::CheckInOutRule()
 			}
 			if (uf.Root(cell1 * 2) == uf.Root(cell2 * 2 + 1)) {
 				DetermineLine(i, j);
+			}
+		}
+	}
+
+	return GetStatus();
+}
+
+template <class AuxiliarySolver>
+int GridLoop<AuxiliarySolver>::CheckConnectability()
+{
+	UnionFind uf((2 * height + 1) * (2 * width + 1));
+
+	for (int i = 0; i <= 2 * height; i += 2) {
+		for (int j = 0; j <= 2 * width; j += 2) {
+			for (int k = 0; k < 4; ++k) {
+				int y = i + GridConstant::GRID_DY[k], x = j + GridConstant::GRID_DX[k];
+				if (CheckSegmentRange(y, x) && GetSegmentStyle(y, x) != LOOP_BLANK) {
+					Join(SegmentId(i, j), SegmentId(y, x));
+				}
+			}
+		}
+	}
+
+	int line_root = -1;
+	for (int i = 0; i <= 2 * height; ++i) {
+		for (int j = 0; j <= 2 * width; ++j) {
+			if (GetSegmentStyle(y, x) == LOOP_LINE) {
+				if (line_root == -1) line_root = uf.Root(SegmentId(i, j));
+				else if (line_root != uf.Root(SegmentId(i, j))) {
+					return UpdateStatus(SolverStatus::INCONSISTENT);
+				}
 			}
 		}
 	}
