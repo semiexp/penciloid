@@ -38,6 +38,8 @@ public:
 	static void InputMasyu(std::ifstream &ifs, MasyuProblem &problem);
 	static void InputKakuro(std::ifstream &ifs, KakuroProblem &problem);
 
+	static void SlitherlinkGeneratorTest(int height, int width);
+
 	static void ConsecutiveSolve(const char* filename);
 	static void ConsecutivePerformanceTest(const char* filename);
 
