@@ -125,4 +125,43 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 	return false;
 }
 
+void SlitherlinkGenerator::SimplifyProblem(SlitherlinkProblem &problem, bool symmetry)
+{
+	int height = problem.GetHeight(), width = problem.GetWidth();
+
+	for (int i = 0; i < height; ++i) {
+		for (int j = 0; j < width; ++j) {
+			if (problem.GetHint(i, j) == SlitherlinkField::HINT_NONE) continue;
+
+			if (!symmetry) {
+				int hint_tmp = problem.GetHint(i, j);
+				problem.SetHint(i, j, SlitherlinkField::HINT_NONE);
+
+				SlitherlinkField field;
+				field.Init(problem);
+				field.Assume();
+
+				if (field.GetStatus() != SolverStatus::SUCCESS) {
+					problem.SetHint(i, j, hint_tmp);
+				}
+			} else {
+				int i2 = height - 1 - i, j2 = width - 1 - j;
+				int hint_tmp = problem.GetHint(i, j);
+				int hint_tmp2 = problem.GetHint(i2, j2);
+				problem.SetHint(i, j, SlitherlinkField::HINT_NONE);
+				problem.SetHint(i2, j2, SlitherlinkField::HINT_NONE);
+
+				SlitherlinkField field;
+				field.Init(problem);
+				field.Assume();
+
+				if (field.GetStatus() != SolverStatus::SUCCESS) {
+					problem.SetHint(i, j, hint_tmp);
+					problem.SetHint(i2, j2, hint_tmp2);
+				}
+			}
+		}
+	}
+}
+
 }
