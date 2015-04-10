@@ -27,6 +27,7 @@ public:
 	inline int GetWidth() { return width; }
 	inline int GetStatus() { return grid.GetStatus(); }
 	inline int GetSegmentStyle(int y, int x) { return grid.GetSegmentStyle(y, x); }
+	inline int GetProgress() const { return grid.GetProgress(); }
 
 	inline int GetHint(int y, int x) { return hints[CellId(y, x)]; }
 	inline int GetHintSafe(int y, int x) { return grid.CheckCellRange(y, x) ? GetHint(y, x) : HINT_NONE; }
