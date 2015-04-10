@@ -8,7 +8,7 @@
 
 namespace Penciloid
 {
-bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProblem &ret)
+bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProblem &ret, bool symmetry)
 {
 	SlitherlinkDatabase::CreateDatabase();
 
@@ -24,8 +24,14 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 		
 		for (int i = 0; i < height; ++i) {
 			for (int j = 0; j < width; ++j) {
+				if (symmetry && current_hints.size() % 2 == 1) {
+					// TODO: odd * odd case
+					if (i + current_hints[current_hints.size() - 1].first.first != height - 1) continue;
+					if (j + current_hints[current_hints.size() - 1].first.second != width - 1) continue;
+				}
+
 				if (field.GetHint(i, j) != SlitherlinkField::HINT_NONE) continue;
-				if (field.GetSegmentStyle(i * 2, j * 2 + 1) != SlitherlinkField::LOOP_UNDECIDED
+				if (!symmetry && field.GetSegmentStyle(i * 2, j * 2 + 1) != SlitherlinkField::LOOP_UNDECIDED
 					&& field.GetSegmentStyle(i * 2 + 1, j * 2) != SlitherlinkField::LOOP_UNDECIDED
 					&& field.GetSegmentStyle(i * 2 + 2, j * 2 + 1) != SlitherlinkField::LOOP_UNDECIDED
 					&& field.GetSegmentStyle(i * 2 + 1, j * 2 + 2) != SlitherlinkField::LOOP_UNDECIDED) continue;
@@ -80,6 +86,10 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 			field.CheckConnectability();
 
 			if (field.GetStatus() == SolverStatus::SUCCESS) {
+				if (symmetry && current_hints.size() % 2 == 1) {
+					break;
+				}
+
 				ret.Init(height, width);
 				for (int y = 0; y < height; ++y) {
 					for (int x = 0; x < width; ++x) if (field.GetHint(y, x) != SlitherlinkField::HINT_NONE) {

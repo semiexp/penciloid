@@ -7,7 +7,7 @@ class SlitherlinkProblem;
 class SlitherlinkGenerator
 {
 public:
-	static bool GenerateNaive(int height, int width, SlitherlinkProblem &ret);
+	static bool GenerateNaive(int height, int width, SlitherlinkProblem &ret, bool symmetry = false);
 };
 
 }
