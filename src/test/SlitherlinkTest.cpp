@@ -71,4 +71,44 @@ void PenciloidTest::SlitherlinkTest2()
 	assert(SlitherlinkCheckGrid(field, expected));
 }
 
+void PenciloidTest::SlitherlinkTest3()
+{
+	{
+		SlitherlinkProblem prob;
+		prob.Init(5, 3);
+
+		prob.SetHint(0, 0, 3);
+		prob.SetHint(0, 1, 3);
+		prob.SetHint(0, 2, 3);
+		prob.SetHint(1, 0, 2);
+		prob.SetHint(1, 1, 2);
+		prob.SetHint(1, 2, 2);
+		prob.SetHint(2, 2, 1);
+
+		SlitherlinkField field;
+		field.Init(prob);
+
+		assert(field.GetStatus() == SolverStatus::SUCCESS);
+	}
+
+	{
+		SlitherlinkProblem prob;
+		prob.Init(5, 3);
+
+		prob.SetHint(0, 0, 3);
+		prob.SetHint(0, 1, 3);
+		prob.SetHint(0, 2, 3);
+		prob.SetHint(1, 0, 2);
+		prob.SetHint(1, 1, 2);
+		prob.SetHint(1, 2, 2);
+		prob.SetHint(3, 2, 2);
+
+		SlitherlinkField field;
+		field.Init(prob);
+
+		assert(field.GetStatus() & SolverStatus::INCONSISTENT);
+	}
+
+}
+
 }

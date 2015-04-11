@@ -25,6 +25,7 @@ public:
 	static bool SlitherlinkCheckGrid(SlitherlinkField &field, const int *expected);
 	static void SlitherlinkTest1();
 	static void SlitherlinkTest2();
+	static void SlitherlinkTest3();
 
 	static void SlitherlinkProblemTest(SlitherlinkProblem &problem);
 

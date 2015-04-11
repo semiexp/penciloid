@@ -70,6 +70,17 @@ int SlitherlinkField::SetHint(int y, int x, int hint)
 		return grid.UpdateStatus(0);
 	}
 
+	if (GetStatus() & SolverStatus::SUCCESS) {
+		int adjacent_lines = 0;
+		for (int i = 0; i < 4; ++i) {
+			if (GetSegmentStyle(y * 2 + 1 + GridConstant::GRID_DY[i], x * 2 + 1 + GridConstant::GRID_DX[i]) == GridLoop<SlitherlinkAuxiliarySolver>::LOOP_LINE) ++adjacent_lines;
+		}
+
+		if (adjacent_lines != hint) {
+			return grid.UpdateStatus(SolverStatus::INCONSISTENT);
+		}
+	}
+
 	hints[id] = hint;
 	CheckTheorem(y * 2 + 1, x * 2 + 1);
 	CheckCell(grid, y * 2 + 1, x * 2 + 1);
