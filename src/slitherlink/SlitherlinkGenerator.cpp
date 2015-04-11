@@ -1,5 +1,6 @@
 #include <ctime>
 #include <vector>
+#include <cmath>
 
 #include "SlitherlinkGenerator.h"
 #include "SlitherlinkField.h"
@@ -123,19 +124,19 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 	return false;
 }
 
-bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, SlitherlinkProblem &ret)
+bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, SlitherlinkProblem &ret, bool use_assumption)
 {
 	SlitherlinkField field;
 	field.Init(height, width);
 
 	std::vector<std::pair<std::pair<int, int>, int> > current_hints;
 
-	for (;;) {
+	for (int step = 0;; ++step) {
+		if (step > 4 * height * width) return false;
 		// put a hint randomly
-		printf("%d\n", current_hints.size());
 		std::vector<std::pair<std::pair<int, int>, int> > cand;
 		bool exist_valid_cell = false;
-
+		printf("%d / %d\n", step, current_hints.size());
 		for (int i = 0; i < height; ++i) {
 			for (int j = 0; j < width; ++j) {
 				if (field.GetHint(i, j) != SlitherlinkField::HINT_NONE) continue;
@@ -173,7 +174,7 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 		}
 
 		for (int t = 0;; ++t) {
-			if (t == 5 || cand.size() == 0) goto rollback;
+			if (t == 10 || cand.size() == 0) goto rollback;
 
 			auto next_step = cand[rand() % cand.size()];
 
@@ -214,15 +215,7 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 
 	}
 
-	if (field.GetStatus() == SolverStatus::SUCCESS) {
-		ret.Init(height, width);
-		for (int y = 0; y < height; ++y) {
-			for (int x = 0; x < width; ++x) if (field.GetHint(y, x) != SlitherlinkField::HINT_NONE) {
-				ret.SetHint(y, x, field.GetHint(y, x));
-			}
-		}
-		return true;
-	}
+	field.Debug();
 
 	SlitherlinkProblem current_problem;
 	current_problem.Init(height, width);
@@ -232,15 +225,21 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 		}
 	}
 
-	double valid_gap = -1.0;
 	int best_score = 0;
+	int max_step = 5000;
 
-	for (;;) {
+	for (int step = 0; step < max_step; ++step) {
 		int current_progress = 0;
 		bool is_progress = false;
+
 		SlitherlinkField field;
 		field.Init(current_problem);
-		field.Assume();
+		if (use_assumption) field.Assume();
+		if (field.GetStatus() == SolverStatus::SUCCESS) break;
+
+		// double temperature = 2.0 * (max_step - step) / (double)max_step;
+		double temperature = 5.0 * exp(-2.0 * (double)step / max_step);
+
 		current_progress = field.GetProgress();
 		if (best_score < current_progress) best_score = current_progress;
 
@@ -261,7 +260,7 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 			int i = t.first, j = t.second;
 			int current_hint = current_problem.GetHint(i, j);
 
-			bool zero_validity = current_hints.size() >= 3;
+			bool zero_validity = true;
 			if (field.GetHintSafe(i - 1, j - 1) == 0
 				|| field.GetHintSafe(i - 1, j) == 0
 				|| field.GetHintSafe(i - 1, j + 1) == 0
@@ -275,13 +274,19 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 				current_problem.SetHint(i, j, n);
 				SlitherlinkField field2;
 				field2.Init(current_problem);
-				field2.Assume();
+				if (use_assumption) field2.Assume();
 
-				if (!(field2.GetStatus() & SolverStatus::INCONSISTENT) && current_progress + 0 < field2.GetProgress()) {
+				bool transition = false;
+				if (!(field2.GetStatus() & SolverStatus::INCONSISTENT)) {
+					if (current_progress < field2.GetProgress()) transition = true;
+					else {
+						double trans_probability = exp((field2.GetProgress() - current_progress) / temperature);
+						if (rand() % 65536 < trans_probability * 65536) transition = true;
+					}
+				}
+				if (transition) {
 					current_progress = field2.GetProgress();
-					valid_gap += 0.1;
-					if (valid_gap > 0) valid_gap = 0;
-					printf("%d %f %d\n", current_progress, valid_gap, field2.GetProgress());
+					printf("%d %f %d\n", current_progress, temperature, field2.GetProgress());
 					is_progress = true;
 					break;
 				} else {
@@ -291,12 +296,10 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 
 			if (is_progress) break;
 		}
-
-		if (!is_progress) break;
 	}
 
 	field.Init(current_problem);
-	field.Assume();
+	if (use_assumption) field.Assume();
 
 	if (field.GetStatus() == SolverStatus::SUCCESS) {
 		ret.Init(height, width);

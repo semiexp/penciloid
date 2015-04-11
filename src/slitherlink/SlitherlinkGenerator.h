@@ -8,7 +8,7 @@ class SlitherlinkGenerator
 {
 public:
 	static bool GenerateNaive(int height, int width, SlitherlinkProblem &ret, bool symmetry = false);
-	static bool GenerateOfShape(int height, int width, int *shape, SlitherlinkProblem &ret);
+	static bool GenerateOfShape(int height, int width, int *shape, SlitherlinkProblem &ret, bool use_assumption = false);
 	static void SimplifyProblem(SlitherlinkProblem &problem, bool symmetry = false);
 };
 
