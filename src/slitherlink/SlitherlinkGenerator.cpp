@@ -144,7 +144,10 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 		if (use_assumption) field.Assume();
 		if (field.GetStatus() == SolverStatus::SUCCESS && number_of_unplaced_hints == 0) break;
 
-		if (step % 100 == 0) field.Debug();
+		if (step % 100 == 0) {
+			field.Debug();
+			fprintf(stderr, "\n\n\n\n");
+		}
 		// double temperature = 2.0 * (max_step - step) / (double)max_step;
 		double temperature = 5.0 * exp(-2.0 * (double)step / max_step);
 
@@ -155,7 +158,19 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 
 		for (int i = 0; i < height; ++i) {
 			for (int j = 0; j < width; ++j) if (shape[i * width + j]) { //current_problem.GetHint(i, j) != SlitherlinkField::HINT_NONE) {
-				locs.push_back(std::make_pair(i, j));
+				bool check_flg = false;
+				if (field.GetHint(i, j) == SlitherlinkField::HINT_NONE) check_flg = true;
+
+				for (int k = -7; k <= 7; ++k) {
+					for (int l = -7; l <= 7; ++l) {
+						int y = i * 2 + 1 + k, x = j * 2 + 1 + l;
+						if (0 <= y && y <= 2 * height && 0 <= x && x <= 2 * width && y % 2 != x % 2 && field.GetSegmentStyle(y, x) == SlitherlinkField::LOOP_UNDECIDED) {
+							check_flg = true;
+							break;
+						}
+					}
+				}
+				if (check_flg) locs.push_back(std::make_pair(i, j));
 			}
 		}
 
@@ -178,7 +193,15 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 				|| field.GetHintSafe(i + 1, j) == 0
 				|| field.GetHintSafe(i + 1, j + 1) == 0) zero_validity = false;
 
-			for (int n = zero_validity ? 0 : 1; n <= 3; ++n) if (n != current_hint) {
+			std::vector<int> nums;
+			for (int n = zero_validity ? 0 : 1; n <= 3; ++n) if (n != current_hint) nums.push_back(n);
+			for (int i = 0; i < nums.size(); ++i) {
+				int j = i + rand() % (nums.size() - i);
+				if (i != j) std::swap(nums[i], nums[j]);
+			}
+
+			// for (int n = zero_validity ? 0 : 1; n <= 3; ++n) if (n != current_hint) {
+			for (int n : nums) {
 				current_problem.SetHint(i, j, n);
 				SlitherlinkField field2;
 				field2.Init(current_problem);
