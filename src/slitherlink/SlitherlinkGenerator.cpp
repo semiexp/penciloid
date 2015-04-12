@@ -126,107 +126,14 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 
 bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, SlitherlinkProblem &ret, bool use_assumption)
 {
-	SlitherlinkField field;
-	field.Init(height, width);
-
-	std::vector<std::pair<std::pair<int, int>, int> > current_hints;
-
-	for (int step = 0;; ++step) {
-		if (step > 4 * height * width) return false;
-		// put a hint randomly
-		std::vector<std::pair<std::pair<int, int>, int> > cand;
-		bool exist_valid_cell = false;
-		printf("%d / %d\n", step, current_hints.size());
-		for (int i = 0; i < height; ++i) {
-			for (int j = 0; j < width; ++j) {
-				if (field.GetHint(i, j) != SlitherlinkField::HINT_NONE) continue;
-				if (!shape[i * width + j]) continue;
-
-				exist_valid_cell = true;
-				bool zero_validity = current_hints.size() >= 3;
-				if (field.GetHintSafe(i - 1, j - 1) == 0
-					|| field.GetHintSafe(i - 1, j) == 0
-					|| field.GetHintSafe(i - 1, j + 1) == 0
-					|| field.GetHintSafe(i, j - 1) == 0
-					|| field.GetHintSafe(i, j + 1) == 0
-					|| field.GetHintSafe(i + 1, j - 1) == 0
-					|| field.GetHintSafe(i + 1, j) == 0
-					|| field.GetHintSafe(i + 1, j + 1) == 0) zero_validity = false;
-
-				for (int k = zero_validity ? 0 : 1; k < 4; ++k) {
-					SlitherlinkField field2;
-					field2.Init(field);
-
-					field2.SetHint(i, j, k);
-					if (field2.GetStatus() & SolverStatus::INCONSISTENT) continue;
-
-					// field2.Assume();
-					// if (field2.GetStatus() & SolverStatus::INCONSISTENT) continue;
-
-					cand.push_back(std::make_pair(std::make_pair(i, j), k));
-				}
-			}
-		}
-
-		if (!exist_valid_cell) break;
-		if (cand.size() == 0) {
-			goto rollback;
-		}
-
-		for (int t = 0;; ++t) {
-			if (t == 10 || cand.size() == 0) goto rollback;
-
-			auto next_step = cand[rand() % cand.size()];
-
-			SlitherlinkField field2;
-			field2.Init(field);
-			field2.SetHint(next_step.first.first, next_step.first.second, next_step.second);
-			field2.Assume();
-			field2.CheckInOutRule();
-			field2.CheckConnectability();
-
-			if (field2.GetStatus() & SolverStatus::INCONSISTENT) continue;
-
-			current_hints.push_back(next_step);
-			field.SetHint(next_step.first.first, next_step.first.second, next_step.second);
-			field.Assume();
-			field.CheckInOutRule();
-			field.CheckConnectability();
-
-			break;
-		}
-
-		continue;
-
-	rollback:
-		for (int t = 0; t < 15 && !current_hints.empty(); ++t) {
-			current_hints.pop_back();
-		}
-
-		field.Init(height, width);
-		for (auto step : current_hints) {
-			field.SetHint(step.first.first, step.first.second, step.second);
-		}
-		field.Assume();
-		field.CheckInOutRule();
-		field.CheckConnectability();
-
-		continue;
-
-	}
-
-	field.Debug();
-
 	SlitherlinkProblem current_problem;
 	current_problem.Init(height, width);
-	for (int y = 0; y < height; ++y) {
-		for (int x = 0; x < width; ++x) if (field.GetHint(y, x) != SlitherlinkField::HINT_NONE) {
-			current_problem.SetHint(y, x, field.GetHint(y, x));
-		}
-	}
 
 	int best_score = 0;
 	int max_step = 5000;
+	int number_of_unplaced_hints = 0;
+
+	for (int i = 0; i < height * width; ++i) if (shape[i]) ++number_of_unplaced_hints;
 
 	for (int step = 0; step < max_step; ++step) {
 		int current_progress = 0;
@@ -235,8 +142,9 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 		SlitherlinkField field;
 		field.Init(current_problem);
 		if (use_assumption) field.Assume();
-		if (field.GetStatus() == SolverStatus::SUCCESS) break;
+		if (field.GetStatus() == SolverStatus::SUCCESS && number_of_unplaced_hints == 0) break;
 
+		if (step % 100 == 0) field.Debug();
 		// double temperature = 2.0 * (max_step - step) / (double)max_step;
 		double temperature = 5.0 * exp(-2.0 * (double)step / max_step);
 
@@ -246,7 +154,7 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 		std::vector<std::pair<int, int> > locs;
 
 		for (int i = 0; i < height; ++i) {
-			for (int j = 0; j < width; ++j) if (current_problem.GetHint(i, j) != SlitherlinkField::HINT_NONE) {
+			for (int j = 0; j < width; ++j) if (shape[i * width + j]) { //current_problem.GetHint(i, j) != SlitherlinkField::HINT_NONE) {
 				locs.push_back(std::make_pair(i, j));
 			}
 		}
@@ -284,7 +192,15 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 						if (rand() % 65536 < trans_probability * 65536) transition = true;
 					}
 				}
+
 				if (transition) {
+					field2.CheckInOutRule();
+					field2.CheckConnectability();
+					if (field2.GetStatus() & SolverStatus::INCONSISTENT) transition = false;
+				}
+
+				if (transition) {
+					if (current_hint == SlitherlinkField::HINT_NONE) --number_of_unplaced_hints;
 					current_progress = field2.GetProgress();
 					printf("%d %f %d\n", current_progress, temperature, field2.GetProgress());
 					is_progress = true;
@@ -298,6 +214,7 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 		}
 	}
 
+	SlitherlinkField field;
 	field.Init(current_problem);
 	if (use_assumption) field.Assume();
 
