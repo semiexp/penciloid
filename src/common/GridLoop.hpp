@@ -129,6 +129,7 @@ private:
 	void UpdateSegmentGroupStyle(int segment, int style);
 	void CheckNeighborhoodOfSegment(int segment);
 	void CheckNeighborhoodOfSegmentGroup(int segment);
+	int Succeeded();
 
 	void Enqueue(int y, int x) { if (CheckSegmentRange(y, x)) Enqueue(SegmentId(y, x)); }
 	void Enqueue(int p) {
@@ -338,6 +339,17 @@ int GridLoop<AuxiliarySolver>::DetermineBlank(int y, int x)
 }
 
 template <class AuxiliarySolver>
+int GridLoop<AuxiliarySolver>::Succeeded()
+{
+	for (int i = 0; i <= height * 2; ++i) {
+		for (int j = 0; j <= width * 2; ++j) if (i % 2 != j % 2 && GetSegmentStyle(i, j) == LOOP_UNDECIDED) {
+			DetermineBlank(i, j);
+		}
+	}
+	return UpdateStatus(0);
+}
+
+template <class AuxiliarySolver>
 void GridLoop<AuxiliarySolver>::DequeueAndCheckAll()
 {
 	while (!IsQueueEmpty()) {
@@ -432,6 +444,7 @@ void GridLoop<AuxiliarySolver>::UpdateSegmentGroupStyle(int segment, int style)
 			UpdateStatus(SolverStatus::INCONSISTENT);
 			return;
 		} else {
+			Succeeded();
 			UpdateStatus(SolverStatus::SUCCESS);
 			return;
 		}
@@ -638,7 +651,10 @@ void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 				CheckNeighborhoodOfSegmentGroup(seg2);
 			}
 		} else {
-			if (segb1.segment_style == LOOP_LINE) UpdateStatus(SolverStatus::SUCCESS);
+			if (segb1.segment_style == LOOP_LINE) {
+				Succeeded();
+				UpdateStatus(SolverStatus::SUCCESS);
+			}
 		}
 	}
 
