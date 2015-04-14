@@ -241,7 +241,7 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 	field.Init(current_problem);
 	if (use_assumption) field.Assume();
 
-	if (field.GetStatus() == SolverStatus::SUCCESS) {
+	if (field.GetStatus() == SolverStatus::SUCCESS && number_of_unplaced_hints == 0) {
 		ret.Init(height, width);
 		for (int y = 0; y < height; ++y) {
 			for (int x = 0; x < width; ++x) if (field.GetHint(y, x) != SlitherlinkField::HINT_NONE) {
