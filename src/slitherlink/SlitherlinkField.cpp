@@ -42,8 +42,8 @@ void SlitherlinkField::Init(SlitherlinkField &field)
 	memcpy(hints, field.hints, sizeof(int) * height * width);
 
 	auxiliary.Init(this);
-	grid.SetAuxiliarySolver(&auxiliary);
 	grid.Init(field.grid);
+	grid.SetAuxiliarySolver(&auxiliary);
 }
 
 void SlitherlinkField::Init(SlitherlinkProblem &prob)
