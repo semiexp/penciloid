@@ -144,10 +144,6 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 		if (use_assumption) field.Assume();
 		if (field.GetStatus() == SolverStatus::SUCCESS && number_of_unplaced_hints == 0) break;
 
-		if (step % 100 == 0) {
-			field.Debug();
-			fprintf(stderr, "\n\n\n\n");
-		}
 		// double temperature = 2.0 * (max_step - step) / (double)max_step;
 		double temperature = 5.0 * exp(-2.0 * (double)step / max_step);
 
@@ -200,7 +196,6 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 				if (i != j) std::swap(nums[i], nums[j]);
 			}
 
-			// for (int n = zero_validity ? 0 : 1; n <= 3; ++n) if (n != current_hint) {
 			for (int n : nums) {
 				current_problem.SetHint(i, j, n);
 				SlitherlinkField field2;
@@ -225,7 +220,6 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 				if (transition) {
 					if (current_hint == SlitherlinkField::HINT_NONE) --number_of_unplaced_hints;
 					current_progress = field2.GetProgress();
-					printf("%d %f %d\n", current_progress, temperature, field2.GetProgress());
 					is_progress = true;
 					break;
 				} else {
@@ -250,9 +244,7 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 		}
 		return true;
 	}
-
-	field.Debug();
-
+	
 	return false;
 }
 
