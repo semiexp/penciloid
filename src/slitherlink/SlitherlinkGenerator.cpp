@@ -130,8 +130,9 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 	current_problem.Init(height, width);
 
 	int best_score = 0;
-	int max_step = 5000;
+	int max_step = height * width * 10;
 	int number_of_unplaced_hints = 0;
+	int no_progress = 0;
 
 	for (int i = 0; i < height * width; ++i) if (shape[i]) ++number_of_unplaced_hints;
 
@@ -228,6 +229,9 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 			}
 
 			if (is_progress) break;
+		}
+		if (!is_progress) {
+			if (no_progress++ >= 20) return false;
 		}
 	}
 
