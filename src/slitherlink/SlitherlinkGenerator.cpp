@@ -197,19 +197,36 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 				if (i != j) std::swap(nums[i], nums[j]);
 			}
 
+			int previous_hint = current_problem.GetHint(i, j);
+			SlitherlinkField common;
+
+			if (previous_hint == SlitherlinkField::HINT_NONE) {
+				common.Init(field);
+			} else {
+				current_problem.SetHint(i, j, SlitherlinkField::HINT_NONE);
+				common.Init(current_problem);
+			}
+
 			for (int n : nums) {
 				current_problem.SetHint(i, j, n);
 				SlitherlinkField field2;
-				field2.Init(current_problem);
+				field2.Init(common);
+				field2.SetHint(i, j, n);
 				if (use_assumption) field2.Assume();
 
 				bool transition = false;
-				if (!(field2.GetStatus() & SolverStatus::INCONSISTENT)) {
-					if (current_progress < field2.GetProgress()) transition = true;
-					else {
-						double trans_probability = exp((field2.GetProgress() - current_progress) / temperature);
-						if (rand() % 65536 < trans_probability * 65536) transition = true;
-					}
+
+				if (field2.GetStatus() & SolverStatus::INCONSISTENT) continue;
+
+				int new_progress = field2.GetProgress();
+				field2.CheckInOutRule();
+				field2.CheckConnectability();
+				if (field2.GetStatus() & SolverStatus::INCONSISTENT) continue;
+
+				if (current_progress < new_progress) transition = true;
+				else {
+					double trans_probability = exp((new_progress - current_progress) / temperature);
+					if (rand() % 65536 < trans_probability * 65536) transition = true;
 				}
 
 				if (transition) {
@@ -223,12 +240,13 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 					current_progress = field2.GetProgress();
 					is_progress = true;
 					break;
-				} else {
-					current_problem.SetHint(i, j, current_hint);
 				}
 			}
 
 			if (is_progress) break;
+			else {
+				current_problem.SetHint(i, j, previous_hint);
+			}
 		}
 		if (!is_progress) {
 			if (no_progress++ >= 20) return false;
