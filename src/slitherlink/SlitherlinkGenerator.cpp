@@ -136,14 +136,12 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 
 	for (int i = 0; i < height * width; ++i) if (shape[i]) ++number_of_unplaced_hints;
 
+	SlitherlinkField field;
+	field.Init(height, width);
+
 	for (int step = 0; step < max_step; ++step) {
 		int current_progress = 0;
 		bool is_progress = false;
-
-		SlitherlinkField field;
-		field.Init(current_problem);
-		if (use_assumption) field.Assume();
-		if (field.GetStatus() == SolverStatus::SUCCESS && number_of_unplaced_hints == 0) break;
 
 		// double temperature = 2.0 * (max_step - step) / (double)max_step;
 		double temperature = 5.0 * exp(-2.0 * (double)step / max_step);
@@ -219,9 +217,12 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 				if (field2.GetStatus() & SolverStatus::INCONSISTENT) continue;
 
 				int new_progress = field2.GetProgress();
-				field2.CheckInOutRule();
-				field2.CheckConnectability();
-				if (field2.GetStatus() & SolverStatus::INCONSISTENT) continue;
+
+				SlitherlinkField field3;
+				field3.Init(field2);
+				field3.CheckInOutRule();
+				field3.CheckConnectability();
+				if (field3.GetStatus() & SolverStatus::INCONSISTENT) continue;
 
 				if (current_progress < new_progress) transition = true;
 				else {
@@ -233,6 +234,8 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 					if (current_hint == SlitherlinkField::HINT_NONE) --number_of_unplaced_hints;
 					current_progress = new_progress;
 					is_progress = true;
+
+					field.Init(field2);
 					break;
 				}
 			}
@@ -242,14 +245,13 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 				current_problem.SetHint(i, j, previous_hint);
 			}
 		}
+
+		if (field.GetStatus() == SolverStatus::SUCCESS && number_of_unplaced_hints == 0) break;
+
 		if (!is_progress) {
 			if (no_progress++ >= 20) return false;
 		}
 	}
-
-	SlitherlinkField field;
-	field.Init(current_problem);
-	if (use_assumption) field.Assume();
 
 	if (field.GetStatus() == SolverStatus::SUCCESS && number_of_unplaced_hints == 0) {
 		ret.Init(height, width);
