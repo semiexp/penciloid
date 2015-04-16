@@ -230,14 +230,8 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 				}
 
 				if (transition) {
-					field2.CheckInOutRule();
-					field2.CheckConnectability();
-					if (field2.GetStatus() & SolverStatus::INCONSISTENT) transition = false;
-				}
-
-				if (transition) {
 					if (current_hint == SlitherlinkField::HINT_NONE) --number_of_unplaced_hints;
-					current_progress = field2.GetProgress();
+					current_progress = new_progress;
 					is_progress = true;
 					break;
 				}
