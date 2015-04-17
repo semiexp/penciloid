@@ -144,7 +144,7 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 		bool is_progress = false;
 
 		// double temperature = 2.0 * (max_step - step) / (double)max_step;
-		double temperature = 5.0 * exp(-2.0 * (double)step / max_step);
+		double temperature = 7.0 * exp(-1.0 * (double)step / max_step);
 
 		current_progress = field.GetProgress();
 		if (best_score < current_progress) best_score = current_progress;
