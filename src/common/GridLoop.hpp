@@ -281,7 +281,7 @@ int GridLoop<AuxiliarySolver>::DetermineLine(int y, int x)
 		return UpdateStatus(SolverStatus::INCONSISTENT);
 	}
 
-	++progress;
+	progress += -segment.group_root;
 	segments[segment.adj_vertex[0]].line_destination = segment.adj_vertex[1];
 	segments[segment.adj_vertex[1]].line_destination = segment.adj_vertex[0];
 	segments[segment.adj_vertex[0]].line_weight = segments[segment.adj_vertex[1]].line_weight = -segment.group_root;
@@ -321,7 +321,7 @@ int GridLoop<AuxiliarySolver>::DetermineBlank(int y, int x)
 		return UpdateStatus(0);
 	}
 
-	++progress;
+	progress += -segment.group_root;
 	UpdateSegmentGroupStyle(segment_id, LOOP_BLANK);
 
 	if (queue_top == -1) {
