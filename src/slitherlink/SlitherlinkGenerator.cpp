@@ -129,7 +129,6 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 	SlitherlinkProblem current_problem;
 	current_problem.Init(height, width);
 
-	int best_score = 0;
 	int max_step = height * width * 10;
 	int number_of_unplaced_hints = 0;
 	int no_progress = 0;
@@ -140,19 +139,15 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 	field.Init(height, width);
 
 	for (int step = 0; step < max_step; ++step) {
-		int current_progress = 0;
+		int current_progress = field.GetProgress();
 		bool is_progress = false;
 
-		// double temperature = 2.0 * (max_step - step) / (double)max_step;
 		double temperature = 7.0 * exp(-1.0 * (double)step / max_step);
-
-		current_progress = field.GetProgress();
-		if (best_score < current_progress) best_score = current_progress;
 
 		std::vector<std::pair<int, int> > locs;
 
 		for (int i = 0; i < height; ++i) {
-			for (int j = 0; j < width; ++j) if (shape[i * width + j]) { //current_problem.GetHint(i, j) != SlitherlinkField::HINT_NONE) {
+			for (int j = 0; j < width; ++j) if (shape[i * width + j]) {
 				bool check_flg = false;
 				if (field.GetHint(i, j) == SlitherlinkField::HINT_NONE) check_flg = true;
 
