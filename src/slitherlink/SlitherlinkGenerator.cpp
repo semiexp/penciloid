@@ -7,6 +7,19 @@
 #include "SlitherlinkProblem.h"
 #include "SlitherlinkDatabase.h"
 
+int FieldHash(Penciloid::SlitherlinkField &field, int hash_size)
+{
+	long long ret = 0;
+
+	for (int i = 0; i < field.GetHeight(); ++i) {
+		for (int j = 0; j < field.GetWidth(); ++j) {
+			ret = (ret << 3) | (field.GetHint(i, j) + 1);
+			ret %= hash_size;
+		}
+	}
+	return (int)ret;
+}
+
 namespace Penciloid
 {
 bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProblem &ret, bool symmetry)
@@ -126,12 +139,15 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 
 bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, SlitherlinkProblem &ret, bool use_assumption)
 {
+	const int hash_size = 100007;
+	int hash[hash_size]; for (int i = 0; i < hash_size; ++i) hash[i] = 0;
 	SlitherlinkProblem current_problem;
 	current_problem.Init(height, width);
 
 	int max_step = height * width * 10;
 	int number_of_unplaced_hints = 0;
 	int no_progress = 0;
+	int moc = 0;
 
 	for (int i = 0; i < height * width; ++i) if (shape[i]) ++number_of_unplaced_hints;
 
@@ -225,8 +241,12 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 					if (rand() % 65536 < trans_probability * 65536) transition = true;
 				}
 
+				int hash_id = FieldHash(field2, hash_size);
+				if (hash[hash_id] >= 10) continue;
+
 				if (transition) {
 					if (current_hint == SlitherlinkField::HINT_NONE) --number_of_unplaced_hints;
+					moc = std::max(moc, ++hash[hash_id]);
 					current_progress = new_progress;
 					is_progress = true;
 
