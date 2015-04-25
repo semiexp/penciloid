@@ -58,6 +58,7 @@ function Init() {
 	canvas.onmousedown = MouseDown;
 	canvas.onmousemove = MouseMove;
 	canvas.onmouseup = MouseUp;
+	canvas.oncontextmenu = function () { return false; }
 
 	ctx = canvas.getContext("2d");
 
@@ -234,9 +235,12 @@ function MouseDown(e) {
 	var loc = LocateMouse(mouse_loc);
 
 	if (0 <= loc.x && loc.x <= width * 2 && 0 <= loc.y && loc.y <= height * 2) {
-		next_status = (lines[loc.y][loc.x] + 1) % 3;
+		if (e.button == 2) next_status = (lines[loc.y][loc.x] + 2) % 3;
+		else next_status = (lines[loc.y][loc.x] + 1) % 3;
 		UpdateLine(loc.x, loc.y, next_status);
 	}
+
+	return false;
 }
 
 function MouseMove(e) {
