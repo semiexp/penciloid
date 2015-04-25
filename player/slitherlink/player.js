@@ -35,7 +35,9 @@ function SetProblem() {
 	for (var y = 0; y < height; ++y) {
 		var line = [];
 		for (var x = 0; x < width; ++x) {
-			line.push(CharToInt(arg.charAt(y * width + x + 2)) - 1);
+			var idx = y * width + x;
+			if (idx % 2 == 0) line.push(CharToInt(arg.charAt(Math.floor(idx / 2) + 2)) % 5 - 1);
+			if (idx % 2 == 1) line.push(Math.floor(CharToInt(arg.charAt(Math.floor(idx / 2) + 2)) / 5) - 1);
 		}
 		problem.push(line);
 	}
