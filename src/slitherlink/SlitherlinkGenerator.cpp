@@ -153,12 +153,11 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 
 	SlitherlinkField field;
 	field.Init(height, width);
-
 	for (int step = 0; step < max_step; ++step) {
 		int current_progress = field.GetProgress();
 		bool is_progress = false;
 
-		double temperature = 7.0 * exp(-1.0 * (double)step / max_step);
+		double temperature = 7.0 * exp(-2.0 * (double)step / max_step);
 
 		std::vector<std::pair<int, int> > locs;
 
@@ -185,6 +184,7 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 			if (i != j) std::swap(locs[i], locs[j]);
 		}
 
+		int trial = 0;
 		for (auto &t : locs) {
 			int i = t.first, j = t.second;
 			int current_hint = current_problem.GetHint(i, j);
@@ -219,7 +219,7 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 			for (int n : nums) {
 				current_problem.SetHint(i, j, n);
 				SlitherlinkField field2;
-				field2.Init(common);
+				field2.Init(common); ++trial;
 				field2.SetHint(i, j, n);
 				if (use_assumption) field2.Assume();
 
@@ -260,8 +260,11 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 				current_problem.SetHint(i, j, previous_hint);
 			}
 		}
-
-		if (field.GetStatus() == SolverStatus::SUCCESS && number_of_unplaced_hints == 0) break;
+		if (field.GetStatus() == SolverStatus::SUCCESS && number_of_unplaced_hints == 0) {
+			fprintf(stdout, "success (%d/%d steps, temp %f, %d no progress)\n", step, max_step, temperature, no_progress);
+			fprintf(stderr, "success (%d/%d steps, temp %f, %d no progress)\n", step, max_step, temperature, no_progress);
+			break;
+		}
 
 		if (!is_progress) {
 			if (no_progress++ >= 20) return false;
