@@ -5,6 +5,7 @@
 #include "SolverConstant.h"
 #include "MiniVector.hpp"
 #include "UnionFind.h"
+#include "GridLoopMethod.hpp"
 
 namespace Penciloid
 {
@@ -27,6 +28,9 @@ public:
 
 	inline void SetAuxiliarySolver(AuxiliarySolver *auxiliary_t) { auxiliary = auxiliary_t; }
 	inline AuxiliarySolver* GetAuxiliarySolver() { return auxiliary; }
+	inline void SetMethod(GridLoopMethod &method_t) { method = method_t; }
+	inline GridLoopMethod GetMethod() { return method; }
+
 	inline int GetHeight() const { return height; }
 	inline int GetWidth() const { return width; }
 	inline int GetSegmentStyle(int y, int x) const { return segments[SegmentId(y, x)].segment_style; }
@@ -155,6 +159,7 @@ private:
 	int field_status, progress;
 
 	int queue_top, queue_end, queue_size;
+	GridLoopMethod method;
 };
 
 template <class AuxiliarySolver>
@@ -555,7 +560,7 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 						int current_destination = segments[SegmentRoot(current_segment_id)].GetAnotherEndSafe(segments[vertex_id].line_destination);
 
 						if (current_destination == undecided[0].dest || current_destination == undecided[1].dest) {
-							DetermineBlank(y2 + GridConstant::GRID_DY[i], x2 + GridConstant::GRID_DX[i]);
+							if (method.hourglass_level1) DetermineBlank(y2 + GridConstant::GRID_DY[i], x2 + GridConstant::GRID_DX[i]);
 						} else if (current_destination != -1) {
 							if (undecided_rev[1] != -1) return;
 							else if (undecided_rev[0] == -1) undecided_rev[0] = current_destination;
@@ -576,7 +581,7 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 								int current_destination = segments[SegmentRoot(current_segment_id)].GetAnotherEndSafe(undecided_rev[j]);
 
 								if (current_destination == undecided[0].dest || current_destination == undecided[1].dest) {
-									DetermineBlank(y3 + GridConstant::GRID_DY[i], x3 + GridConstant::GRID_DX[i]);
+									if (method.hourglass_level2) DetermineBlank(y3 + GridConstant::GRID_DY[i], x3 + GridConstant::GRID_DX[i]);
 								}
 							}
 						}

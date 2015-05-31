@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../common/GridLoop.hpp"
+#include "SlitherlinkMethod.hpp"
 
 namespace Penciloid
 {
@@ -22,6 +23,9 @@ public:
 	void Init(int height_t, int width_t);
 	void Init(SlitherlinkProblem &prob);
 	void Init(SlitherlinkField &field);
+
+	void SetMethod(SlitherlinkMethod &method_t) { method = method_t; grid.SetMethod(method.grid_loop_method);  }
+	SlitherlinkMethod GetMethod() { return method; }
 
 	inline int GetHeight() { return height; }
 	inline int GetWidth() { return width; }
@@ -72,6 +76,8 @@ private:
 	int height, width;
 	int field_status;
 	int *hints;
+
+	SlitherlinkMethod method;
 };
 
 }
