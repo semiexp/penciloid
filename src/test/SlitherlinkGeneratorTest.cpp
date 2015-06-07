@@ -5,6 +5,7 @@
 #include "../slitherlink/SlitherlinkProblem.h"
 #include "../slitherlink/SlitherlinkField.h"
 #include "../slitherlink/SlitherlinkGenerator.h"
+#include "../slitherlink/SlitherlinkProblemConstraint.h"
 
 namespace Penciloid
 {
@@ -43,21 +44,26 @@ void PenciloidTest::SlitherlinkGeneratorOfShapeTest()
 {
 	int height = 10, width = 10;
 	int shape[] = {
-		0, 1, 1, 0, 0, 0, 0, 0, 1, 0,
-		1, 0, 0, 1, 1, 0, 0, 1, 0, 1,
-		0, 1, 0, 0, 1, 0, 1, 0, 0, 1,
-		0, 0, 1, 1, 0, 0, 1, 0, 1, 0,
-		0, 0, 0, 0, 0, 0, 0, 1, 1, 0,
-		0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-		0, 1, 0, 1, 0, 0, 1, 1, 0, 0,
-		1, 0, 0, 1, 0, 1, 0, 0, 1, 0,
-		1, 0, 1, 0, 0, 1, 1, 0, 0, 1,
-		0, 1, 0, 0, 0, 0, 0, 1, 1, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+		1, 1, 1, 1, 1, 1, 0, 0, 1, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+		0, 0, 0, 1, 1, 0, 1, 0, 1, 0,
+		0, 1, 0, 0, 0, 0, 1, 0, 1, 0,
+		0, 1, 0, 1, 0, 0, 0, 0, 1, 0,
+		0, 1, 0, 1, 0, 1, 1, 0, 0, 0,
+		0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 1, 0, 0, 1, 1, 1, 1, 1, 1,
+		0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
 	};
 
-	srand((int)time(NULL));
 	SlitherlinkProblem prob;
-	while (!SlitherlinkGenerator::GenerateOfShape(10, 10, shape, prob));
+	SlitherlinkProblemConstraint constraint;
+	constraint.Init(height, width, shape);
+
+	srand((int)time(NULL));
+	SlitherlinkDatabase::CreateDatabase();
+
+	while (!SlitherlinkGenerator::GenerateOfShape(constraint, prob, false));
 
 	std::cout << height << " " << width << std::endl;
 	for (int i = 0; i < height; ++i) {

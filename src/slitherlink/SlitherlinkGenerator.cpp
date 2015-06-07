@@ -6,6 +6,7 @@
 #include "SlitherlinkField.h"
 #include "SlitherlinkProblem.h"
 #include "SlitherlinkDatabase.h"
+#include "SlitherlinkProblemConstraint.h"
 
 int FieldHash(Penciloid::SlitherlinkField &field, int hash_size)
 {
@@ -137,10 +138,12 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 	return false;
 }
 
-bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, SlitherlinkProblem &ret, bool use_assumption)
+bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constraint, SlitherlinkProblem &ret, bool use_assumption)
 {
+	int height = constraint.GetHeight(), width = constraint.GetWidth();
 	const int hash_size = 100007;
 	int hash[hash_size]; for (int i = 0; i < hash_size; ++i) hash[i] = 0;
+
 	SlitherlinkProblem current_problem;
 	current_problem.Init(height, width);
 
@@ -149,10 +152,17 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 	int no_progress = 0;
 	int moc = 0;
 
-	for (int i = 0; i < height * width; ++i) if (shape[i]) ++number_of_unplaced_hints;
+	for (int i = 0; i < height; ++i) {
+		for (int j = 0; j < width; ++j) {
+			int cont = constraint.GetCellConstraint(i, j);
+
+			if (cont >= 0 && cont <= 3) current_problem.SetHint(i, j, cont);
+			else if (cont == SlitherlinkProblemConstraint::HINT_SOME) ++number_of_unplaced_hints;
+		}
+	}
 
 	SlitherlinkField field;
-	field.Init(height, width);
+	field.Init(current_problem);
 	for (int step = 0; step < max_step; ++step) {
 		int current_progress = field.GetProgress();
 		bool is_progress = false;
@@ -162,7 +172,7 @@ bool SlitherlinkGenerator::GenerateOfShape(int height, int width, int *shape, Sl
 		std::vector<std::pair<int, int> > locs;
 
 		for (int i = 0; i < height; ++i) {
-			for (int j = 0; j < width; ++j) if (shape[i * width + j]) {
+			for (int j = 0; j < width; ++j) if (constraint.GetCellConstraint(i, j) == SlitherlinkProblemConstraint::HINT_SOME) {
 				bool check_flg = false;
 				if (field.GetHint(i, j) == SlitherlinkField::HINT_NONE) check_flg = true;
 
