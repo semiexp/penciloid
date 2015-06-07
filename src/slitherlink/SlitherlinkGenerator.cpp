@@ -270,11 +270,6 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 				current_problem.SetHint(i, j, previous_hint);
 			}
 		}
-		if (field.GetStatus() == SolverStatus::SUCCESS && number_of_unplaced_hints == 0) {
-			fprintf(stdout, "success (%d/%d steps, temp %f, %d no progress)\n", step, max_step, temperature, no_progress);
-			fprintf(stderr, "success (%d/%d steps, temp %f, %d no progress)\n", step, max_step, temperature, no_progress);
-			break;
-		}
 
 		if (!is_progress) {
 			if (no_progress++ >= 20) return false;
