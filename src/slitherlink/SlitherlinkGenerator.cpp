@@ -239,17 +239,18 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 
 				int new_progress = field2.GetProgress();
 
-				SlitherlinkField field3;
-				field3.Init(field2);
-				field3.CheckInOutRule();
-				field3.CheckConnectability();
-				if (field3.GetStatus() & SolverStatus::INCONSISTENT) continue;
-
 				if (current_progress < new_progress) transition = true;
 				else {
 					double trans_probability = exp((new_progress - current_progress) / temperature);
 					if (rand() % 65536 < trans_probability * 65536) transition = true;
 				}
+				if (!transition) continue;
+
+				SlitherlinkField field3;
+				field3.Init(field2);
+				field3.CheckInOutRule();
+				field3.CheckConnectability();
+				if (field3.GetStatus() & SolverStatus::INCONSISTENT) continue;
 
 				int hash_id = FieldHash(field2, hash_size);
 				if (hash[hash_id] >= 10) continue;
