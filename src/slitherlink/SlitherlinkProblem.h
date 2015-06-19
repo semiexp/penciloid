@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace Penciloid
 {
 class SlitherlinkProblem
@@ -16,6 +18,8 @@ public:
 	inline int GetWidth() { return width; }
 	inline int GetHint(int y, int x) { return hint[CellId(y, x)]; }
 	inline void SetHint(int y, int x, int h) { hint[CellId(y, x)] = h; }
+
+	std::string GetPlayerFormatString();
 
 private:
 	inline int CellId(int y, int x) { return y * width + x; }

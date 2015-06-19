@@ -1,4 +1,5 @@
 #include "SlitherlinkProblem.h"
+#include <string>
 
 namespace Penciloid
 {
@@ -38,6 +39,25 @@ void SlitherlinkProblem::Init(int height_t, int width_t, char *hint_t[])
 			}
 		}
 	}
+}
+std::string SlitherlinkProblem::GetPlayerFormatString()
+{
+	auto converter = [](int a){
+		if (a < 10) return (char)(a + '0');
+		if (a < 36) return (char)(a - 10 + 'a');
+		return (char)(a - 36 + 'A');
+	};
+
+	std::string ret;
+
+	ret.push_back(converter(GetHeight()));
+	ret.push_back(converter(GetWidth()));
+
+	for (int i = 0; i < height * width; i += 2) {
+		ret.push_back(converter((hint[i] + 1) + (i + 1 < height * width ? (hint[i + 1] + 1) : 0) * 5));
+	}
+
+	return ret;
 }
 
 }
