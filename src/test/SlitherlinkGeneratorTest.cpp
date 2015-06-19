@@ -1,6 +1,7 @@
 #include <ctime>
 #include <iostream>
 #include "Test.h"
+#include "../common/XorShift.h"
 #include "../slitherlink/SlitherlinkDatabase.h"
 #include "../slitherlink/SlitherlinkProblem.h"
 #include "../slitherlink/SlitherlinkField.h"
@@ -59,11 +60,12 @@ void PenciloidTest::SlitherlinkGeneratorOfShapeTest()
 	SlitherlinkProblem prob;
 	SlitherlinkProblemConstraint constraint;
 	constraint.Init(height, width, shape);
+	
+	XorShift rnd((int)time(NULL));
 
-	srand((int)time(NULL));
 	SlitherlinkDatabase::CreateDatabase();
 
-	while (!SlitherlinkGenerator::GenerateOfShape(constraint, prob, false));
+	while (!SlitherlinkGenerator::GenerateOfShape(constraint, prob, rnd, false));
 
 	std::cout << height << " " << width << std::endl;
 	for (int i = 0; i < height; ++i) {

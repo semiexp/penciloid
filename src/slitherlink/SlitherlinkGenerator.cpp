@@ -2,6 +2,7 @@
 #include <vector>
 #include <cmath>
 
+#include "../common/XorShift.h"
 #include "SlitherlinkGenerator.h"
 #include "SlitherlinkField.h"
 #include "SlitherlinkProblem.h"
@@ -138,7 +139,7 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 	return false;
 }
 
-bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constraint, SlitherlinkProblem &ret, bool use_assumption)
+bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constraint, SlitherlinkProblem &ret, XorShift &rnd, bool use_assumption)
 {
 	int height = constraint.GetHeight(), width = constraint.GetWidth();
 	const int hash_size = 100007;
@@ -167,10 +168,9 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 		int current_progress = field.GetProgress();
 		bool is_progress = false;
 
-		double temperature = 7.0 * exp(-2.0 * (double)step / max_step);
+		double temperature = 5; // 7.0 * exp(-2.0 * (double)step / max_step);
 
 		std::vector<std::pair<int, int> > locs;
-
 		for (int i = 0; i < height; ++i) {
 			for (int j = 0; j < width; ++j) if (constraint.GetCellConstraint(i, j) == SlitherlinkProblemConstraint::HINT_SOME) {
 				bool check_flg = false;
@@ -190,7 +190,7 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 		}
 
 		for (int i = 0; i < locs.size(); ++i) {
-			int j = i + rand() % (locs.size() - i);
+			int j = i + rnd.NextInt() % (locs.size() - i);
 			if (i != j) std::swap(locs[i], locs[j]);
 		}
 
@@ -212,7 +212,7 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 			std::vector<int> nums;
 			for (int n = zero_validity ? 0 : 1; n <= 3; ++n) if (n != current_hint) nums.push_back(n);
 			for (int i = 0; i < nums.size(); ++i) {
-				int j = i + rand() % (nums.size() - i);
+				int j = i + rnd.NextInt() % (nums.size() - i);
 				if (i != j) std::swap(nums[i], nums[j]);
 			}
 
@@ -242,7 +242,7 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 				if (current_progress < new_progress) transition = true;
 				else {
 					double trans_probability = exp((new_progress - current_progress) / temperature);
-					if (rand() % 65536 < trans_probability * 65536) transition = true;
+					if (rnd.NextInt() % 65536 < trans_probability * 65536) transition = true;
 				}
 				if (!transition) continue;
 
