@@ -168,7 +168,7 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 		int current_progress = field.GetProgress();
 		bool is_progress = false;
 
-		double temperature = 5; // 7.0 * exp(-2.0 * (double)step / max_step);
+		double temperature = 7.0 * exp(-2.0 * (double)step / max_step);
 
 		std::vector<std::pair<int, int> > locs;
 		for (int i = 0; i < height; ++i) {
