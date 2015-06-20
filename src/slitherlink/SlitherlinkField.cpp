@@ -120,6 +120,8 @@ void SlitherlinkField::CheckCell(GridLoop<SlitherlinkAuxiliarySolver> &grid, int
 
 	if (hints[id] == HINT_NONE) return;
 
+	if (method.diagonal_chain) CheckDiagonalChain(grid, y, x);
+
 	if (SlitherlinkDatabase::IsCreated()) {
 		int db_index = hints[id];
 
@@ -218,6 +220,68 @@ void SlitherlinkField::CheckCell(GridLoop<SlitherlinkAuxiliarySolver> &grid, int
 			}
 			if (grid.GetSegmentStyleSafe(y + dy2 + dy1 * 2, x + dx2 + dx1 * 2) == LOOP_LINE) {
 				grid.DetermineBlank(y + dy1 + dy2 * 2, x + dx1 + dx2 * 2);
+			}
+		}
+	}
+}
+
+void SlitherlinkField::CheckDiagonalChain(GridLoop<SlitherlinkAuxiliarySolver> &grid, int y, int x)
+{
+	for (int dir = 0; dir < 4; ++dir){
+		int dy1 = GridConstant::GRID_DY[dir], dx1 = GridConstant::GRID_DX[dir];
+		int dy2 = GridConstant::GRID_DY[(dir + 1) & 3], dx2 = GridConstant::GRID_DX[(dir + 1) & 3];
+
+		int line_in = -1;
+
+		int style1 = grid.GetSegmentStyle(y + dy1, x + dx1);
+		int style2 = grid.GetSegmentStyle(y + dy2, x + dx2);
+
+		if (style1 != LOOP_UNDECIDED && style2 != LOOP_UNDECIDED) {
+			line_in = (style1 == LOOP_LINE ? 1 : 0) + (style2 == LOOP_LINE ? 1 : 0);
+		}
+
+		int style3 = grid.GetSegmentStyle(y - dy1, x - dx1);
+		int style4 = grid.GetSegmentStyle(y - dy2, x - dx2);
+
+		if (GetHint(y / 2, x / 2) != HINT_NONE && style3 != LOOP_UNDECIDED && style4 != LOOP_UNDECIDED) {
+			line_in = GetHint(y / 2, x / 2) - ((style3 == LOOP_LINE ? 1 : 0) + (style4 == LOOP_LINE ? 1 : 0));
+		}
+
+		if (line_in != -1) {
+			line_in &= 1;
+
+			int current_y = y + 2 * (dy1 + dy2), current_x = x + 2 * (dx1 + dx2);
+			while (true) {
+				if (current_y < 0 || current_x < 0 || current_y > 2 * height || current_x > 2 * width) break;
+				
+				int hint2 = GetHint(current_y / 2, current_x / 2);
+
+				if (hint2 == HINT_NONE || hint2 == 0) break;
+				if (hint2 == 2) {
+					current_y += 2 * (dy1 + dy2);
+					current_x += 2 * (dx1 + dx2);
+					continue;
+				}
+				if (hint2 == 1) {
+					if (line_in == 0) {
+						grid.DetermineBlank(current_y - dy1, current_x - dx1);
+						grid.DetermineBlank(current_y - dy2, current_x - dx2);
+					} else if (line_in == 1) {
+						grid.DetermineBlank(current_y + dy1, current_x + dx1);
+						grid.DetermineBlank(current_y + dy2, current_x + dx2);
+					}
+					break;
+				}
+				if (hint2 == 3) {
+					if (line_in == 0) {
+						grid.DetermineLine(current_y - dy1, current_x - dx1);
+						grid.DetermineLine(current_y - dy2, current_x - dx2);
+					} else if (line_in == 1) {
+						grid.DetermineLine(current_y + dy1, current_x + dx1);
+						grid.DetermineLine(current_y + dy2, current_x + dx2);
+					}
+					break;
+				}
 			}
 		}
 	}

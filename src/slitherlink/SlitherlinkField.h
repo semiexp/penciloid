@@ -67,6 +67,7 @@ private:
 	};
 
 	void CheckCell(GridLoop<SlitherlinkAuxiliarySolver> &grid, int y, int x);
+	void CheckDiagonalChain(GridLoop<SlitherlinkAuxiliarySolver> &grid, int y, int x);
 	void CheckTheorem(int y, int x);
 	inline int CellId(int y, int x) { return y * width + x; }
 

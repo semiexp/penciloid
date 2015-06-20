@@ -111,4 +111,72 @@ void PenciloidTest::SlitherlinkTest3()
 
 }
 
+void PenciloidTest::SlitherlinkTest4()
+{
+	{
+		SlitherlinkProblem prob;
+		prob.Init(4, 4);
+
+		prob.SetHint(0, 0, 0);
+		prob.SetHint(1, 1, 2);
+		prob.SetHint(2, 2, 1);
+
+		SlitherlinkField field;
+		field.Init(prob);
+		field.CheckAll();
+
+		assert(field.GetStatus() == SolverStatus::NORMAL);
+		assert(field.GetSegmentStyle(4, 5) == SlitherlinkField::LOOP_BLANK);
+		assert(field.GetSegmentStyle(5, 4) == SlitherlinkField::LOOP_BLANK);
+	}
+	{
+		SlitherlinkProblem prob;
+		prob.Init(4, 4);
+
+		prob.SetHint(0, 0, 1);
+		prob.SetHint(1, 1, 2);
+		prob.SetHint(2, 2, 1);
+
+		SlitherlinkField field;
+		field.Init(prob);
+		field.CheckAll();
+
+		assert(field.GetStatus() == SolverStatus::NORMAL);
+		assert(field.GetSegmentStyle(6, 5) == SlitherlinkField::LOOP_BLANK);
+		assert(field.GetSegmentStyle(5, 6) == SlitherlinkField::LOOP_BLANK);
+	}
+	{
+		SlitherlinkProblem prob;
+		prob.Init(4, 4);
+
+		prob.SetHint(0, 0, 0);
+		prob.SetHint(1, 1, 2);
+		prob.SetHint(2, 2, 3);
+
+		SlitherlinkField field;
+		field.Init(prob);
+		field.CheckAll();
+
+		assert(field.GetStatus() == SolverStatus::NORMAL);
+		assert(field.GetSegmentStyle(4, 5) == SlitherlinkField::LOOP_LINE);
+		assert(field.GetSegmentStyle(5, 4) == SlitherlinkField::LOOP_LINE);
+	}
+	{
+		SlitherlinkProblem prob;
+		prob.Init(4, 4);
+
+		prob.SetHint(0, 0, 1);
+		prob.SetHint(1, 1, 2);
+		prob.SetHint(2, 2, 3);
+
+		SlitherlinkField field;
+		field.Init(prob);
+		field.CheckAll();
+
+		assert(field.GetStatus() == SolverStatus::NORMAL);
+		assert(field.GetSegmentStyle(6, 5) == SlitherlinkField::LOOP_LINE);
+		assert(field.GetSegmentStyle(5, 6) == SlitherlinkField::LOOP_LINE);
+	}
+}
+
 }

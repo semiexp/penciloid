@@ -26,6 +26,7 @@ public:
 	static void SlitherlinkTest1();
 	static void SlitherlinkTest2();
 	static void SlitherlinkTest3();
+	static void SlitherlinkTest4();
 
 	static void SlitherlinkProblemTest(SlitherlinkProblem &problem);
 
