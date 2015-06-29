@@ -15,6 +15,7 @@ void MasyuProblem::Init(int height_t, int width_t)
 	height = height_t;
 	width = width_t;
 
+	if (hint) delete[] hint;
 	hint = new int[height * width];
 
 	for (int i = 0; i < height * width; ++i) hint[i] = HINT_NONE;
