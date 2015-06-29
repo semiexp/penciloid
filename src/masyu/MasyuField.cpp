@@ -5,9 +5,6 @@ namespace Penciloid
 {
 MasyuField::MasyuField()
 {
-	height = 0;
-	width = 0;
-
 	hints = nullptr;
 }
 
@@ -18,25 +15,29 @@ MasyuField::~MasyuField()
 
 void MasyuField::Init(int height_t, int width_t)
 {
-	height = height_t;
-	width = width_t;
+	GridLoop<MasyuField>::Init(height_t - 1, width_t - 1);
 
 	if (hints) delete[] hints;
-	hints = new int[height * width];
+	hints = new int[(GetHeight() + 1) * (GetWidth() + 1)];
 
-	for (int i = 0; i < height * width; ++i) hints[i] = HINT_NONE;
+	for (int i = 0; i < (GetHeight() + 1) * (GetWidth() + 1); ++i) hints[i] = HINT_NONE;
+}
 
-	auxiliary.Init(this);
-	grid.SetAuxiliarySolver(&auxiliary);
-	grid.Init(height - 1, width - 1);
+void MasyuField::Init(MasyuField &field)
+{
+	GridLoop<MasyuField>::Init(field);
+
+	if (hints) delete[] hints;
+	hints = new int[(GetHeight() + 1) * (GetWidth() + 1)];
+	memcpy(hints, field.hints, sizeof(int) * (GetHeight() + 1) * (GetWidth() + 1));
 }
 
 void MasyuField::Init(MasyuProblem &prob)
 {
 	Init(prob.GetHeight(), prob.GetWidth());
 
-	for (int i = 0; i < height; ++i) {
-		for (int j = 0; j < width; ++j) {
+	for (int i = 0; i <= GetHeight(); ++i) {
+		for (int j = 0; j <= GetWidth(); ++j) {
 			int hint = prob.GetHint(i, j);
 
 			if (hint != HINT_NONE) SetHint(i, j, hint);
@@ -46,27 +47,27 @@ void MasyuField::Init(MasyuProblem &prob)
 
 int MasyuField::SetHint(int y, int x, int hint)
 {
-	int id = VertexId(y, x);
+	int id = HintId(y, x);
 
 	if (hints[id] != HINT_NONE) {
 		if (hints[id] != hint) {
-			return grid.UpdateStatus(SolverStatus::INCONSISTENT);
+			return UpdateStatus(SolverStatus::INCONSISTENT);
 		}
-		return grid.UpdateStatus(0);
+		return UpdateStatus(0);
 	}
 
 	hints[id] = hint;
 	CheckTheorem(y * 2, x * 2);
-	CheckVertex(grid, y * 2, x * 2);
+	CheckVertex(y * 2, x * 2);
 
-	return grid.GetStatus();
+	return GetStatus();
 }
 
 void MasyuField::CheckTheorem(int y, int x)
 {
 	// TODO: implement appropriately
 
-	int hint = hints[VertexId(y / 2, x / 2)];
+	int hint = GetHint(y / 2, x / 2); 
 
 	if (hint == HINT_WHITE) {
 		for (int i = 0; i < 2; ++i) {
@@ -76,12 +77,12 @@ void MasyuField::CheckTheorem(int y, int x)
 				if    (GetHintSafe(y / 2 + (j - 2) * dy, x / 2 + (j - 2) * dx) == HINT_WHITE
 					&& GetHintSafe(y / 2 + (j - 1) * dy, x / 2 + (j - 1) * dx) == HINT_WHITE
 					&& GetHintSafe(y / 2 + (j - 0) * dy, x / 2 + (j - 0) * dx) == HINT_WHITE) {
-					grid.DetermineLine(y + 2 * (j - 2) * dy + dx, x + 2 * (j - 2) * dx + dy);
-					grid.DetermineLine(y + 2 * (j - 2) * dy - dx, x + 2 * (j - 2) * dx - dy);
-					grid.DetermineLine(y + 2 * (j - 1) * dy + dx, x + 2 * (j - 1) * dx + dy);
-					grid.DetermineLine(y + 2 * (j - 1) * dy - dx, x + 2 * (j - 1) * dx - dy);
-					grid.DetermineLine(y + 2 * (j - 0) * dy + dx, x + 2 * (j - 0) * dx + dy);
-					grid.DetermineLine(y + 2 * (j - 0) * dy - dx, x + 2 * (j - 0) * dx - dy);
+					DetermineLine(y + 2 * (j - 2) * dy + dx, x + 2 * (j - 2) * dx + dy);
+					DetermineLine(y + 2 * (j - 2) * dy - dx, x + 2 * (j - 2) * dx - dy);
+					DetermineLine(y + 2 * (j - 1) * dy + dx, x + 2 * (j - 1) * dx + dy);
+					DetermineLine(y + 2 * (j - 1) * dy - dx, x + 2 * (j - 1) * dx - dy);
+					DetermineLine(y + 2 * (j - 0) * dy + dx, x + 2 * (j - 0) * dx + dy);
+					DetermineLine(y + 2 * (j - 0) * dy - dx, x + 2 * (j - 0) * dx - dy);
 				}
 			}
 		}
@@ -92,22 +93,24 @@ void MasyuField::CheckTheorem(int y, int x)
 			int dy = GridConstant::GRID_DY[i], dx = GridConstant::GRID_DX[i];
 
 			if (GetHintSafe(y / 2 + dy, x / 2 + dx) == HINT_BLACK) {
-				grid.DetermineBlank(y + dy, x + dx);
+				DetermineBlank(y + dy, x + dx);
 			}
 		}
 	}
 }
 
-void MasyuField::CheckVertex(GridLoop<MasyuAuxiliarySolver> &grid, int y, int x)
+void MasyuField::CheckVertexSpecific(int y, int x)
 {
-	int hint = hints[VertexId(y / 2, x / 2)];
+	if (hints == nullptr) return;
+
+	int hint = hints[HintId(y / 2, x / 2)];
 
 	if (hint == HINT_WHITE) {
 		// TODO: faster checker
 		int neighborhood_segment_style[16];
 
 		for (int i = 0; i < 16; ++i) {
-			neighborhood_segment_style[i] = grid.GetSegmentStyleSafe(
+			neighborhood_segment_style[i] = GetSegmentStyleSafe(
 				y + GridConstant::GRID_DY[i / 4] * 2 + GridConstant::GRID_DY[i % 4],
 				x + GridConstant::GRID_DX[i / 4] * 2 + GridConstant::GRID_DX[i % 4]
 				);
@@ -176,14 +179,14 @@ void MasyuField::CheckVertex(GridLoop<MasyuAuxiliarySolver> &grid, int y, int x)
 
 		for (int i = 0; i < 16; ++i) {
 			if (segment_line_candidate & (1 << i)) {
-				grid.DetermineLine(
+				DetermineLine(
 					y + GridConstant::GRID_DY[i / 4] * 2 + GridConstant::GRID_DY[i % 4],
 					x + GridConstant::GRID_DX[i / 4] * 2 + GridConstant::GRID_DX[i % 4]
 					);
 			}
 
 			if (segment_blank_candidate & (1 << i)) {
-				grid.DetermineBlank(
+				DetermineBlank(
 					y + GridConstant::GRID_DY[i / 4] * 2 + GridConstant::GRID_DY[i % 4],
 					x + GridConstant::GRID_DX[i / 4] * 2 + GridConstant::GRID_DX[i % 4]
 					);
@@ -197,33 +200,33 @@ void MasyuField::CheckVertex(GridLoop<MasyuAuxiliarySolver> &grid, int y, int x)
 			int dy1 = GridConstant::GRID_DY[i], dx1 = GridConstant::GRID_DX[i];
 			int dy2 = GridConstant::GRID_DY[(i + 1) & 3], dx2 = GridConstant::GRID_DX[(i + 1) & 3];
 
-			if (grid.GetSegmentStyleSafe(y + dy1, x + dx1) == LOOP_BLANK) continue;
-			if (grid.GetSegmentStyleSafe(y + dy1 * 3, x + dx1 * 3) == LOOP_BLANK) continue;
-			if (grid.GetSegmentStyleSafe(y + dy2, x + dx2) == LOOP_BLANK) continue;
-			if (grid.GetSegmentStyleSafe(y + dy2 * 3, x + dx2 * 3) == LOOP_BLANK) continue;
-			if (grid.GetSegmentStyleSafe(y + dy1 * 2 + dy2, x + dx1 * 2 + dx2) == LOOP_LINE) continue;
-			if (grid.GetSegmentStyleSafe(y + dy1 * 2 - dy2, x + dx1 * 2 - dx2) == LOOP_LINE) continue;
-			if (grid.GetSegmentStyleSafe(y + dy2 * 2 + dy1, x + dx2 * 2 + dx1) == LOOP_LINE) continue;
-			if (grid.GetSegmentStyleSafe(y + dy2 * 2 - dy1, x + dx2 * 2 - dx1) == LOOP_LINE) continue;
+			if (GetSegmentStyleSafe(y + dy1, x + dx1) == LOOP_BLANK) continue;
+			if (GetSegmentStyleSafe(y + dy1 * 3, x + dx1 * 3) == LOOP_BLANK) continue;
+			if (GetSegmentStyleSafe(y + dy2, x + dx2) == LOOP_BLANK) continue;
+			if (GetSegmentStyleSafe(y + dy2 * 3, x + dx2 * 3) == LOOP_BLANK) continue;
+			if (GetSegmentStyleSafe(y + dy1 * 2 + dy2, x + dx1 * 2 + dx2) == LOOP_LINE) continue;
+			if (GetSegmentStyleSafe(y + dy1 * 2 - dy2, x + dx1 * 2 - dx2) == LOOP_LINE) continue;
+			if (GetSegmentStyleSafe(y + dy2 * 2 + dy1, x + dx2 * 2 + dx1) == LOOP_LINE) continue;
+			if (GetSegmentStyleSafe(y + dy2 * 2 - dy1, x + dx2 * 2 - dx1) == LOOP_LINE) continue;
 
 			line_direction_candidate &= ((1 << i) | (1 << ((i + 1) & 3)));
 		}
 
 		for (int i = 0; i < 4; ++i) if (line_direction_candidate & (1 << i)) {
 			int dy = GridConstant::GRID_DY[i], dx = GridConstant::GRID_DX[i];
-			grid.DetermineLine(y + dy, x + dx);
-			grid.DetermineLine(y + dy * 3, x + dx * 3);
-			grid.DetermineBlank(y - dy, x - dx);
+			DetermineLine(y + dy, x + dx);
+			DetermineLine(y + dy * 3, x + dx * 3);
+			DetermineBlank(y - dy, x - dx);
 		}
 	}
 }
 
 void MasyuField::Debug()
 {
-	for (int i = 0; i <= (height - 1) * 2; ++i) {
-		for (int j = 0; j <= (width - 1) * 2; ++j) {
+	for (int i = 0; i <= GetHeight() * 2; ++i) {
+		for (int j = 0; j <= GetWidth() * 2; ++j) {
 			if (i % 2 == 0 && j % 2 == 0) {
-				int hint = hints[VertexId(i / 2, j / 2)];
+				int hint = hints[HintId(i / 2, j / 2)];
 
 				if (hint == HINT_NONE) fprintf(stderr, "+");
 				else if (hint == HINT_WHITE) fprintf(stderr, "O");

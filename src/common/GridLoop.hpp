@@ -10,7 +10,7 @@
 namespace Penciloid
 {
 
-template <class AuxiliarySolver>
+template <class T>
 class GridLoop
 {
 public:
@@ -24,10 +24,8 @@ public:
 	~GridLoop();
 
 	void Init(int height_t, int width_t);
-	void Init(const GridLoop<AuxiliarySolver> &src);
+	void Init(const GridLoop<T> &src);
 
-	inline void SetAuxiliarySolver(AuxiliarySolver *auxiliary_t) { auxiliary = auxiliary_t; }
-	inline AuxiliarySolver* GetAuxiliarySolver() { return auxiliary; }
 	inline void SetMethod(GridLoopMethod &method_t) { method = method_t; }
 	inline GridLoopMethod GetMethod() { return method; }
 
@@ -51,6 +49,11 @@ public:
 
 	int CheckInOutRule();
 	int CheckConnectability();
+
+	void CheckVertex(int y, int x);
+	inline void CheckCell(int y, int x) { if (0 <= y && y <= 2 * height && 0 <= x && x <= 2 * width) static_cast<T*>(this)->CheckCellSpecific(y, x); }
+	inline void CheckCellSpecific(int y, int x) {}
+	inline void CheckVertexSpecific(int y, int x) {}
 
 	void Debug() {
 		for (int i = 0; i <= height * 2; ++i) {
@@ -128,8 +131,6 @@ private:
 	void Join(int seg1, int seg2);
 	void JoinLines(int y, int x);
 
-	void CheckVertex(int y, int x);
-	inline void CheckCell(int y, int x) { if (0 <= y && y <= 2 * height && 0 <= x && x <= 2 * width) auxiliary->CheckCell(*this, y, x); }
 	void UpdateSegmentGroupStyle(int segment, int style);
 	void CheckNeighborhoodOfSegment(int segment);
 	void CheckNeighborhoodOfSegmentGroup(int segment);
@@ -151,7 +152,6 @@ private:
 	void DequeueAndCheckAll();
 
 	LoopSegment *segments;
-	AuxiliarySolver *auxiliary;
 	int *process_queue;
 
 	int height, width;
@@ -162,11 +162,10 @@ private:
 	GridLoopMethod method;
 };
 
-template <class AuxiliarySolver>
-GridLoop<AuxiliarySolver>::GridLoop()
+template <class T>
+GridLoop<T>::GridLoop()
 {
 	segments = nullptr;
-	auxiliary = nullptr;
 	process_queue = nullptr;
 
 	height = -1;
@@ -178,15 +177,15 @@ GridLoop<AuxiliarySolver>::GridLoop()
 	field_status = SolverStatus::NORMAL;
 }
 
-template <class AuxiliarySolver>
-GridLoop<AuxiliarySolver>::~GridLoop()
+template <class T>
+GridLoop<T>::~GridLoop()
 {
 	if (segments) delete[] segments;
 	if (process_queue) delete[] process_queue;
 }
 
-template <class AuxiliarySolver>
-void GridLoop<AuxiliarySolver>::Init(int height_t, int width_t)
+template <class T>
+void GridLoop<T>::Init(int height_t, int width_t)
 {
 	height = height_t;
 	width = width_t;
@@ -243,8 +242,8 @@ void GridLoop<AuxiliarySolver>::Init(int height_t, int width_t)
 	queue_top = -1;
 }
 
-template <class AuxiliarySolver>
-void GridLoop<AuxiliarySolver>::Init(const GridLoop<AuxiliarySolver> &src)
+template <class T>
+void GridLoop<T>::Init(const GridLoop<T> &src)
 {
 	if (segments == nullptr || height != src.height || width != src.width) {
 		height = src.height;
@@ -261,14 +260,13 @@ void GridLoop<AuxiliarySolver>::Init(const GridLoop<AuxiliarySolver> &src)
 	memcpy(segments, src.segments, sizeof(LoopSegment) * (height * 2 + 1) * (width * 2 + 1));
 	total_lines = src.total_lines;
 	field_status = src.field_status;
-	auxiliary = src.auxiliary;
 	progress = src.progress;
 
 	queue_top = -1;
 }
 
-template <class AuxiliarySolver>
-int GridLoop<AuxiliarySolver>::DetermineLine(int y, int x)
+template <class T>
+int GridLoop<T>::DetermineLine(int y, int x)
 {
 	if (!CheckSegmentRange(y, x)) return UpdateStatus(SolverStatus::UNEXPECTED);
 
@@ -312,8 +310,8 @@ int GridLoop<AuxiliarySolver>::DetermineLine(int y, int x)
 	return UpdateStatus(0);
 }
 
-template <class AuxiliarySolver>
-int GridLoop<AuxiliarySolver>::DetermineBlank(int y, int x)
+template <class T>
+int GridLoop<T>::DetermineBlank(int y, int x)
 {
 	if (!CheckSegmentRange(y, x)) return UpdateStatus(0);
 
@@ -343,8 +341,8 @@ int GridLoop<AuxiliarySolver>::DetermineBlank(int y, int x)
 	return UpdateStatus(0);
 }
 
-template <class AuxiliarySolver>
-int GridLoop<AuxiliarySolver>::Succeeded()
+template <class T>
+int GridLoop<T>::Succeeded()
 {
 	for (int i = 0; i <= height * 2; ++i) {
 		for (int j = 0; j <= width * 2; ++j) if (i % 2 != j % 2 && GetSegmentStyle(i, j) == LOOP_UNDECIDED) {
@@ -354,8 +352,8 @@ int GridLoop<AuxiliarySolver>::Succeeded()
 	return UpdateStatus(0);
 }
 
-template <class AuxiliarySolver>
-void GridLoop<AuxiliarySolver>::DequeueAndCheckAll()
+template <class T>
+void GridLoop<T>::DequeueAndCheckAll()
 {
 	while (!IsQueueEmpty()) {
 		int top = Dequeue();
@@ -366,8 +364,8 @@ void GridLoop<AuxiliarySolver>::DequeueAndCheckAll()
 	}
 }
 
-template <class AuxiliarySolver>
-int GridLoop<AuxiliarySolver>::CheckAll()
+template <class T>
+int GridLoop<T>::CheckAll()
 {
 	bool already_processing = (queue_top != -1);
 
@@ -390,8 +388,8 @@ int GridLoop<AuxiliarySolver>::CheckAll()
 	return UpdateStatus(0);
 }
 
-template <class AuxiliarySolver>
-void GridLoop<AuxiliarySolver>::CheckNeighborhoodOfSegment(int segment)
+template <class T>
+void GridLoop<T>::CheckNeighborhoodOfSegment(int segment)
 {
 	int y = SegmentY(segment), x = SegmentX(segment);
 
@@ -420,8 +418,8 @@ void GridLoop<AuxiliarySolver>::CheckNeighborhoodOfSegment(int segment)
 	}
 }
 
-template <class AuxiliarySolver>
-void GridLoop<AuxiliarySolver>::CheckNeighborhoodOfSegmentGroup(int segment)
+template <class T>
+void GridLoop<T>::CheckNeighborhoodOfSegmentGroup(int segment)
 {
 	int segment_i = segment;
 
@@ -432,8 +430,8 @@ void GridLoop<AuxiliarySolver>::CheckNeighborhoodOfSegmentGroup(int segment)
 	} while (segment_i != segment);
 }
 
-template <class AuxiliarySolver>
-void GridLoop<AuxiliarySolver>::UpdateSegmentGroupStyle(int segment, int style)
+template <class T>
+void GridLoop<T>::UpdateSegmentGroupStyle(int segment, int style)
 {
 	int segment_i = segment;
 
@@ -456,8 +454,8 @@ void GridLoop<AuxiliarySolver>::UpdateSegmentGroupStyle(int segment, int style)
 	}
 }
 
-template <class AuxiliarySolver>
-void GridLoop<AuxiliarySolver>::JoinLines(int y, int x)
+template <class T>
+void GridLoop<T>::JoinLines(int y, int x)
 {
 	int line_segment[2] = { -1, -1 };
 	for (int i = 0; i < 4; ++i) {
@@ -478,8 +476,8 @@ void GridLoop<AuxiliarySolver>::JoinLines(int y, int x)
 	}
 }
 
-template <class AuxiliarySolver>
-void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
+template <class T>
+void GridLoop<T>::CheckVertex(int y, int x)
 {
 	struct NeighborhoodData
 	{
@@ -492,7 +490,7 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 	int vertex_id = VertexId(y, x);
 	MiniVector<NeighborhoodData, 4> line, undecided;
 
-	auxiliary->CheckVertex(*this, y, x);
+	static_cast<T*>(this)->CheckVertexSpecific(y, x);
 	
 	for (int i = 0; i < 4; ++i) {
 		int y2 = y + GridConstant::GRID_DY[i], x2 = x + GridConstant::GRID_DX[i];
@@ -605,8 +603,8 @@ void GridLoop<AuxiliarySolver>::CheckVertex(int y, int x)
 	}
 }
 
-template <class AuxiliarySolver>
-void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
+template <class T>
+void GridLoop<T>::Join(int seg1, int seg2)
 {
 	seg1 = SegmentRoot(seg1);
 	seg2 = SegmentRoot(seg2);
@@ -700,8 +698,8 @@ void GridLoop<AuxiliarySolver>::Join(int seg1, int seg2)
 	}
 }
 
-template <class AuxiliarySolver>
-int GridLoop<AuxiliarySolver>::CheckInOutRule()
+template <class T>
+int GridLoop<T>::CheckInOutRule()
 {
 	UnionFind uf(height * width * 2 + 2);
 	int out_of_grid = height * width;
@@ -764,8 +762,8 @@ int GridLoop<AuxiliarySolver>::CheckInOutRule()
 	return GetStatus();
 }
 
-template <class AuxiliarySolver>
-int GridLoop<AuxiliarySolver>::CheckConnectability()
+template <class T>
+int GridLoop<T>::CheckConnectability()
 {
 	UnionFind uf((2 * height + 1) * (2 * width + 1));
 
@@ -795,19 +793,14 @@ int GridLoop<AuxiliarySolver>::CheckConnectability()
 	return GetStatus();
 }
 
-class LoopNullAuxiliarySolver;
-
-class LoopNullAuxiliarySolver
+class GridLoopSimple : public GridLoop <GridLoopSimple>
 {
-public:
-	void CheckVertex(GridLoop<LoopNullAuxiliarySolver> &grid, int y, int x) {}
-	void CheckCell(GridLoop<LoopNullAuxiliarySolver> &grid, int y, int x) {}
 };
 
-template <class AuxiliarySolver>
-int GridLoopAssume(GridLoop<AuxiliarySolver> &grid)
+template <class T>
+int GridLoopAssume(T &grid)
 {
-	GridLoop<AuxiliarySolver> tmp_line, tmp_blank;
+	T tmp_line, tmp_blank;
 	int height = grid.GetHeight(), width = grid.GetWidth();
 	bool is_updated;
 
@@ -821,7 +814,7 @@ int GridLoopAssume(GridLoop<AuxiliarySolver> &grid)
 			for (int j = 0; j <= width * 2; ++j) {
 				if ((i & 1) == (j & 1)) continue;
 
-				if (grid.GetSegmentStyle(i, j) == GridLoop<AuxiliarySolver>::LOOP_UNDECIDED && grid.IsRepresentative(i, j)) {
+				if (grid.GetSegmentStyle(i, j) == T::LOOP_UNDECIDED && grid.IsRepresentative(i, j)) {
 					tmp_line.Init(grid);
 					tmp_blank.Init(grid);
 
