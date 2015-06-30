@@ -4,6 +4,7 @@ namespace Penciloid
 {
 class SlitherlinkProblem;
 class SlitherlinkProblemConstraint;
+class XorShift;
 
 class SlitherlinkGenerator
 {
