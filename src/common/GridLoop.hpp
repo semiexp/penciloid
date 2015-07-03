@@ -361,6 +361,8 @@ void GridLoop<T>::DequeueAndCheckAll()
 
 		if (y % 2 == 0 && x % 2 == 0) CheckVertex(y, x);
 		if (y % 2 == 1 && x % 2 == 1) CheckCell(y, x);
+
+		if (GetStatus() & SolverStatus::INCONSISTENT) break;
 	}
 }
 
