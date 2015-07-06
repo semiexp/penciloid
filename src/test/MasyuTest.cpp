@@ -54,4 +54,17 @@ void PenciloidTest::MasyuTest3()
 	assert(field.GetStatus() == SolverStatus::SUCCESS);
 }
 
+void PenciloidTest::MasyuTest4()
+{
+	MasyuField field;
+
+	field.Init(5, 5);
+	field.SetHint(0, 1, MasyuField::HINT_BLACK);
+
+	field.Init(5, 5);
+	assert(field.GetSegmentStyle(1, 2) == MasyuField::LOOP_UNDECIDED);
+
+	field.Debug();
+}
+
 }
