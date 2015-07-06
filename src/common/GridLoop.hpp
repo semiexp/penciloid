@@ -238,7 +238,7 @@ void GridLoop<T>::Init(int height_t, int width_t)
 	Join(SegmentId(height * 2, 1), SegmentId(height * 2 - 1, 0));
 	Join(SegmentId(height * 2 - 1, width * 2), SegmentId(height * 2, width * 2 - 1));
 
-	DequeueAndCheckAll();
+	while (!IsQueueEmpty()) Dequeue();
 	queue_top = -1;
 }
 
