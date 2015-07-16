@@ -25,7 +25,7 @@ public:
 	void CheckCellSpecific(int y, int x);
 
 	inline int GetHint(int y, int x) { return hints[CellId(y, x)]; }
-	inline int GetHintSafe(int y, int x) { return CheckCellRange(y, x) ? GetHint(y, x) : HINT_NONE; }
+	inline int GetHintSafe(int y, int x) { return (0 <= y && y < GetHeight() && 0 <= x && x < GetWidth()) ? GetHint(y, x) : HINT_NONE; }
 	int SetHint(int y, int x, int hint);
 	int Assume();
 

@@ -32,11 +32,9 @@ public:
 	inline int GetHeight() const { return height; }
 	inline int GetWidth() const { return width; }
 	inline int GetSegmentStyle(int y, int x) const { return segments[SegmentId(y, x)].segment_style; }
-	inline int GetSegmentStyleSafe(int y, int x) const { return (CheckSegmentRange(y, x) ? segments[SegmentId(y, x)].segment_style : LOOP_BLANK); }
+	inline int GetSegmentStyleSafe(int y, int x) const { return (IsProperCoordinate(y, x) ? segments[SegmentId(y, x)].segment_style : LOOP_BLANK); }
 
-	inline bool CheckSegmentRange(int y, int x) const { return 0 <= y && y <= 2 * height && 0 <= x && x <= 2 * width; }
-	inline bool CheckCellRange(int y, int x) const { return 0 <= y && y < height && 0 <= x && x < width; }
-	inline bool CheckVertexRange(int y, int x) const { return 0 <= y && y <= height && 0 <= x && x <= width; }
+	inline bool IsProperCoordinate(int y, int x) const { return 0 <= y && y <= 2 * height && 0 <= x && x <= 2 * width; }
 	inline bool IsRepresentative(int y, int x) { return IsRepresentative(SegmentId(y, x)); }
 
 	inline int UpdateStatus(int status) { return field_status |= status; }
@@ -136,7 +134,7 @@ private:
 	void CheckNeighborhoodOfSegmentGroup(int segment);
 	int Succeeded();
 
-	void Enqueue(int y, int x) { if (CheckSegmentRange(y, x)) Enqueue(SegmentId(y, x)); }
+	void Enqueue(int y, int x) { if (IsProperCoordinate(y, x)) Enqueue(SegmentId(y, x)); }
 	void Enqueue(int p) {
 		if (segments[p].queue_stored) return;
 		if (queue_end == queue_size) queue_end = 0;
@@ -268,7 +266,7 @@ void GridLoop<T>::Init(const GridLoop<T> &src)
 template <class T>
 int GridLoop<T>::DetermineLine(int y, int x)
 {
-	if (!CheckSegmentRange(y, x)) return UpdateStatus(SolverStatus::UNEXPECTED);
+	if (!IsProperCoordinate(y, x)) return UpdateStatus(SolverStatus::UNEXPECTED);
 
 	int segment_id = SegmentRoot(SegmentId(y, x));
 	LoopSegment &segment = segments[segment_id];
@@ -313,7 +311,7 @@ int GridLoop<T>::DetermineLine(int y, int x)
 template <class T>
 int GridLoop<T>::DetermineBlank(int y, int x)
 {
-	if (!CheckSegmentRange(y, x)) return UpdateStatus(0);
+	if (!IsProperCoordinate(y, x)) return UpdateStatus(0);
 
 	int segment_id = SegmentRoot(SegmentId(y, x));
 	LoopSegment &segment = segments[segment_id];
@@ -497,7 +495,7 @@ void GridLoop<T>::CheckVertex(int y, int x)
 	for (int i = 0; i < 4; ++i) {
 		int y2 = y + GridConstant::GRID_DY[i], x2 = x + GridConstant::GRID_DX[i];
 
-		if (CheckSegmentRange(y2, x2)) {
+		if (IsProperCoordinate(y2, x2)) {
 			LoopSegment &segment = segments[SegmentRoot(SegmentId(y2, x2))];
 
 			if (segment.segment_style == LOOP_LINE) {
@@ -553,7 +551,7 @@ void GridLoop<T>::CheckVertex(int y, int x)
 				int y2 = SegmentY(segments[vertex_id].line_destination), x2 = SegmentX(segments[vertex_id].line_destination);
 				int undecided_rev[2] = { -1, -1 };
 
-				for (int i = 0; i < 4; ++i) if (CheckSegmentRange(y2 + GridConstant::GRID_DY[i], x2 + GridConstant::GRID_DX[i])) {
+				for (int i = 0; i < 4; ++i) if (IsProperCoordinate(y2 + GridConstant::GRID_DY[i], x2 + GridConstant::GRID_DX[i])) {
 					int current_segment_id = SegmentId(y2 + GridConstant::GRID_DY[i], x2 + GridConstant::GRID_DX[i]);
 
 					if (segments[current_segment_id].segment_style == LOOP_UNDECIDED) {
@@ -574,7 +572,7 @@ void GridLoop<T>::CheckVertex(int y, int x)
 
 					for (int j = 0; j < 2; ++j) {
 						int y3 = SegmentY(undecided_rev[j]), x3 = SegmentX(undecided_rev[j]);
-						for (int i = 0; i < 4; ++i) if (CheckSegmentRange(y3 + GridConstant::GRID_DY[i], x3 + GridConstant::GRID_DX[i])) {
+						for (int i = 0; i < 4; ++i) if (IsProperCoordinate(y3 + GridConstant::GRID_DY[i], x3 + GridConstant::GRID_DX[i])) {
 							int current_segment_id = SegmentId(y3 + GridConstant::GRID_DY[i], x3 + GridConstant::GRID_DX[i]);
 
 							if (segments[current_segment_id].segment_style == LOOP_UNDECIDED) {
@@ -709,8 +707,8 @@ int GridLoop<T>::CheckInOutRule()
 	for (int i = 0; i <= height * 2; ++i) {
 		for (int j = 0; j <= width * 2; ++j) {
 			if (i % 2 == 1 && j % 2 == 0) {
-				int cell1 = CheckCellRange(i / 2, j / 2 - 1) ? ((i / 2) * width + (j / 2 - 1)) : out_of_grid;
-				int cell2 = CheckCellRange(i / 2, j / 2) ? ((i / 2) * width + (j / 2)) : out_of_grid;
+				int cell1 = IsProperCoordinate(i, j - 1) ? ((i / 2) * width + (j / 2 - 1)) : out_of_grid;
+				int cell2 = IsProperCoordinate(i, j + 1) ? ((i / 2) * width + (j / 2)) : out_of_grid;
 
 				if (GetSegmentStyle(i, j) == LOOP_LINE) {
 					uf.Join(cell1 * 2, cell2 * 2 + 1);
@@ -720,8 +718,8 @@ int GridLoop<T>::CheckInOutRule()
 					uf.Join(cell1 * 2 + 1, cell2 * 2 + 1);
 				}
 			} else if (i % 2 == 0 && j % 2 == 1) {
-				int cell1 = CheckCellRange(i / 2 - 1, j / 2) ? ((i / 2 - 1) * width + (j / 2)) : out_of_grid;
-				int cell2 = CheckCellRange(i / 2, j / 2) ? ((i / 2) * width + (j / 2)) : out_of_grid;
+				int cell1 = IsProperCoordinate(i - 1, j) ? ((i / 2 - 1) * width + (j / 2)) : out_of_grid;
+				int cell2 = IsProperCoordinate(i + 1, j) ? ((i / 2) * width + (j / 2)) : out_of_grid;
 
 				if (GetSegmentStyle(i, j) == LOOP_LINE) {
 					uf.Join(cell1 * 2, cell2 * 2 + 1);
@@ -745,11 +743,11 @@ int GridLoop<T>::CheckInOutRule()
 			int cell1, cell2;
 
 			if (i % 2 == 1 && j % 2 == 0) {
-				cell1 = CheckCellRange(i / 2, j / 2 - 1) ? ((i / 2) * width + (j / 2 - 1)) : out_of_grid;
-				cell2 = CheckCellRange(i / 2, j / 2) ? ((i / 2) * width + (j / 2)) : out_of_grid;
+				cell1 = IsProperCoordinate(i, j - 1) ? ((i / 2) * width + (j / 2 - 1)) : out_of_grid;
+				cell2 = IsProperCoordinate(i, j + 1) ? ((i / 2) * width + (j / 2)) : out_of_grid;
 			} else if (i % 2 == 0 && j % 2 == 1) {
-				cell1 = CheckCellRange(i / 2 - 1, j / 2) ? ((i / 2 - 1) * width + (j / 2)) : out_of_grid;
-				cell2 = CheckCellRange(i / 2, j / 2) ? ((i / 2) * width + (j / 2)) : out_of_grid;
+				cell1 = IsProperCoordinate(i - 1, j) ? ((i / 2 - 1) * width + (j / 2)) : out_of_grid;
+				cell2 = IsProperCoordinate(i + 1, j) ? ((i / 2) * width + (j / 2)) : out_of_grid;
 			} else continue;
 
 			if (uf.Root(cell1 * 2) == uf.Root(cell2 * 2)) {
@@ -773,7 +771,7 @@ int GridLoop<T>::CheckConnectability()
 		for (int j = 0; j <= 2 * width; j += 2) {
 			for (int k = 0; k < 4; ++k) {
 				int y = i + GridConstant::GRID_DY[k], x = j + GridConstant::GRID_DX[k];
-				if (CheckSegmentRange(y, x) && GetSegmentStyle(y, x) != LOOP_BLANK) {
+				if (IsProperCoordinate(y, x) && GetSegmentStyle(y, x) != LOOP_BLANK) {
 					uf.Join(SegmentId(i, j), SegmentId(y, x));
 				}
 			}

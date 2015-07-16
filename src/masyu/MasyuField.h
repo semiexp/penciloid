@@ -23,7 +23,7 @@ public:
 	void Init(MasyuProblem &prob);
 
 	inline int GetHint(int y, int x) { return hints[HintId(y, x)]; }
-	inline int GetHintSafe(int y, int x) { return CheckVertexRange(y, x) ? GetHint(y, x) : HINT_NONE; }
+	inline int GetHintSafe(int y, int x) { return (0 <= y && y <= GetHeight() && 0 <= x && x <= GetWidth()) ? GetHint(y, x) : HINT_NONE; }
 	int SetHint(int y, int x, int hint);
 	inline int Assume() { return GridLoopAssume(*this); }
 
