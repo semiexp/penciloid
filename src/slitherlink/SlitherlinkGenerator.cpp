@@ -163,12 +163,12 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 	}
 
 	SlitherlinkField field;
-	field.Init(current_problem);
+	field.Init(current_problem, use_assumption);
 	for (int step = 0; step < max_step; ++step) {
 		int current_progress = field.GetProgress();
 		bool is_progress = false;
 
-		double temperature = 7.0 * exp(-2.0 * (double)step / max_step);
+		double temperature = 5.0; // 7.0 * exp(-2.0 * (double)step / max_step);
 
 		std::vector<std::pair<int, int> > locs;
 		for (int i = 0; i < height; ++i) {
@@ -223,7 +223,7 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 				common.Init(field);
 			} else {
 				current_problem.SetHint(i, j, SlitherlinkField::HINT_NONE);
-				common.Init(current_problem);
+				common.Init(current_problem, use_assumption);
 			}
 
 			for (int n : nums) {
