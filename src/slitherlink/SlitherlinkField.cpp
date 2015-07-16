@@ -7,16 +7,26 @@ namespace Penciloid
 SlitherlinkField::SlitherlinkField()
 {
 	hints = nullptr;
+	assumption_table = nullptr;
 }
 
 SlitherlinkField::~SlitherlinkField()
 {
 	if (hints) delete[] hints;
+	if (assumption_table) delete[] assumption_table;
 }
 
-void SlitherlinkField::Init(int height_t, int width_t)
+void SlitherlinkField::Init(int height_t, int width_t, bool enable_assumption_table)
 {
+	if (assumption_table) delete[] assumption_table;
+	assumption_table = nullptr;
+
 	GridLoop<SlitherlinkField>::Init(height_t, width_t);
+
+	if (enable_assumption_table) {
+		assumption_table = new bool[(2 * GetHeight() + 1) * (2 * GetWidth() + 1)];
+		std::fill(assumption_table, assumption_table + (2 * GetHeight() + 1) + (2 * GetWidth() + 1), false);
+	} else assumption_table = nullptr;
 
 	if (hints) delete[] hints;
 	hints = new int[GetHeight() * GetWidth()];
@@ -26,16 +36,32 @@ void SlitherlinkField::Init(int height_t, int width_t)
 
 void SlitherlinkField::Init(SlitherlinkField &field)
 {
+	if (assumption_table) delete[] assumption_table;
+	assumption_table = nullptr;
+
 	GridLoop<SlitherlinkField>::Init(field);
 
 	if (hints) delete[] hints;
 	hints = new int[GetHeight() * GetWidth()];
 	memcpy(hints, field.hints, sizeof(int) * GetHeight() * GetWidth());
+
+	if (field.assumption_table != nullptr) {
+		assumption_table = new bool[(2 * GetHeight() + 1) * (2 * GetWidth() + 1)];
+		memcpy(assumption_table, field.assumption_table, sizeof(bool) * (2 * GetHeight() + 1) + (2 * GetWidth() + 1));
+	} else assumption_table = nullptr;
 }
 
-void SlitherlinkField::Init(SlitherlinkProblem &prob)
+void SlitherlinkField::Init(SlitherlinkProblem &prob, bool enable_assumption_table)
 {
+	if (assumption_table) delete[] assumption_table;
+	assumption_table = nullptr;
+
 	Init(prob.GetHeight(), prob.GetWidth());
+
+	if (enable_assumption_table) {
+		assumption_table = new bool[(2 * GetHeight() + 1) * (2 * GetWidth() + 1)];
+		std::fill(assumption_table, assumption_table + (2 * GetHeight() + 1) + (2 * GetWidth() + 1), false);
+	} else assumption_table = nullptr;
 
 	for (int i = 0; i < GetHeight(); ++i) {
 		for (int j = 0; j < GetWidth(); ++j) {
@@ -68,11 +94,40 @@ int SlitherlinkField::SetHint(int y, int x, int hint)
 		}
 	}
 
+	if (assumption_table != nullptr) {
+		int y2 = y * 2 + 1, x2 = x * 2 + 1;
+
+		for (int i = 0; i < 12; ++i) {
+			SetAssumptionCandidate(y2 + SlitherlinkDatabase::DATABASE_DY[i], x2 + SlitherlinkDatabase::DATABASE_DX[i]);
+		}
+	}
+
 	hints[id] = hint;
 	CheckTheorem(y * 2 + 1, x * 2 + 1);
 	CheckCellSpecific(y * 2 + 1, x * 2 + 1);
 
 	return GetStatus();
+}
+
+void SlitherlinkField::SegmentDetermined(int y, int x)
+{
+	if (assumption_table != nullptr) {
+		if (y % 2 == 1 && x % 2 == 0) {
+			SetAssumptionCandidate(y - 2, x);
+			SetAssumptionCandidate(y - 1, x - 1);
+			SetAssumptionCandidate(y - 1, x + 1);
+			SetAssumptionCandidate(y + 1, x - 1);
+			SetAssumptionCandidate(y + 1, x + 1);
+			SetAssumptionCandidate(y + 2, x);
+		} else {
+			SetAssumptionCandidate(y, x - 2);
+			SetAssumptionCandidate(y - 1, x - 1);
+			SetAssumptionCandidate(y + 1, x - 1);
+			SetAssumptionCandidate(y - 1, x + 1);
+			SetAssumptionCandidate(y + 1, x + 1);
+			SetAssumptionCandidate(y, x + 2);
+		}
+	}
 }
 
 void SlitherlinkField::CheckTheorem(int y, int x)
@@ -287,6 +342,10 @@ int SlitherlinkField::Assume()
 			for (int j = 0; j <= GetWidth() * 2; ++j) {
 				if ((i & 1) == (j & 1)) continue;
 
+				if (assumption_table) {
+					if (!assumption_table[i * (GetWidth() * 2 + 1) + j]) continue;
+				}
+
 				if (i & 1) {
 					if (GetSegmentStyleSafe(i - 1, j - 1) == LOOP_UNDECIDED
 						&& GetSegmentStyleSafe(i - 1, j + 1) == LOOP_UNDECIDED
@@ -304,7 +363,10 @@ int SlitherlinkField::Assume()
 						&& GetSegmentStyleSafe(i, j + 2) == LOOP_UNDECIDED)
 						continue;
 				}
+
 				if (GetSegmentStyle(i, j) == LOOP_UNDECIDED && IsRepresentative(i, j)) {
+					if (assumption_table) assumption_table[i * (GetWidth() * 2 + 1) + j] = false;
+
 					tmp_line.Init(*this);
 					tmp_blank.Init(*this);
 
@@ -324,7 +386,6 @@ int SlitherlinkField::Assume()
 			}
 		}
 	} while (is_updated);
-
 	return GetStatus();
 }
 
