@@ -50,8 +50,11 @@ public:
 
 	void CheckVertex(int y, int x);
 	inline void CheckCell(int y, int x) { if (0 <= y && y <= 2 * height && 0 <= x && x <= 2 * width) static_cast<T*>(this)->CheckCellSpecific(y, x); }
+
 	inline void CheckCellSpecific(int y, int x) {}
 	inline void CheckVertexSpecific(int y, int x) {}
+	void CheckNeighborhood(int y, int x);
+	inline void SegmentDetermined(int y, int x) {}
 
 	void Debug() {
 		for (int i = 0; i <= height * 2; ++i) {
@@ -87,6 +90,9 @@ public:
 			fprintf(stderr, "\n");
 		}
 	}
+
+protected:
+	void Enqueue(int y, int x) { if (IsProperCoordinate(y, x) && queue_top != -1) Enqueue(SegmentId(y, x)); }
 
 private:
 	struct LoopSegment
@@ -130,11 +136,9 @@ private:
 	void JoinLines(int y, int x);
 
 	void UpdateSegmentGroupStyle(int segment, int style);
-	void CheckNeighborhoodOfSegment(int segment);
 	void CheckNeighborhoodOfSegmentGroup(int segment);
 	int Succeeded();
 
-	void Enqueue(int y, int x) { if (IsProperCoordinate(y, x)) Enqueue(SegmentId(y, x)); }
 	void Enqueue(int p) {
 		if (segments[p].queue_stored) return;
 		if (queue_end == queue_size) queue_end = 0;
@@ -296,6 +300,7 @@ int GridLoop<T>::DetermineLine(int y, int x)
 		CheckNeighborhoodOfSegmentGroup(segment_id);
 		JoinLines(SegmentY(adjacent_id[0]), SegmentX(adjacent_id[0]));
 		JoinLines(SegmentY(adjacent_id[1]), SegmentX(adjacent_id[1]));
+		static_cast<T*>(this)->SegmentDetermined(y, x);
 
 		DequeueAndCheckAll();
 		queue_top = -1;
@@ -303,6 +308,7 @@ int GridLoop<T>::DetermineLine(int y, int x)
 		CheckNeighborhoodOfSegmentGroup(segment_id);
 		JoinLines(SegmentY(adjacent_id[0]), SegmentX(adjacent_id[0]));
 		JoinLines(SegmentY(adjacent_id[1]), SegmentX(adjacent_id[1]));
+		static_cast<T*>(this)->SegmentDetermined(y, x);
 	}
 
 	return UpdateStatus(0);
@@ -328,11 +334,13 @@ int GridLoop<T>::DetermineBlank(int y, int x)
 	if (queue_top == -1) {
 		queue_top = queue_end = 0;
 		CheckNeighborhoodOfSegmentGroup(segment_id);
+		static_cast<T*>(this)->SegmentDetermined(y, x);
 
 		DequeueAndCheckAll();
 		queue_top = -1;
 	} else {
 		CheckNeighborhoodOfSegmentGroup(segment_id);
+		static_cast<T*>(this)->SegmentDetermined(y, x);
 
 	}
 
@@ -389,12 +397,8 @@ int GridLoop<T>::CheckAll()
 }
 
 template <class T>
-void GridLoop<T>::CheckNeighborhoodOfSegment(int segment)
+void GridLoop<T>::CheckNeighborhood(int y, int x)
 {
-	int y = SegmentY(segment), x = SegmentX(segment);
-
-	// TODO : solve cells
-
 	if (y % 2 == 1) {
 		Enqueue(y - 1, x);
 		Enqueue(y + 1, x);
@@ -424,7 +428,7 @@ void GridLoop<T>::CheckNeighborhoodOfSegmentGroup(int segment)
 	int segment_i = segment;
 
 	do {
-		CheckNeighborhoodOfSegment(segment_i);
+		static_cast<T*>(this)->CheckNeighborhood(SegmentY(segment_i), SegmentX(segment_i));
 
 		segment_i = segments[segment_i].group_next;
 	} while (segment_i != segment);
