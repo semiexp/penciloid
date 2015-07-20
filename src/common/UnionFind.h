@@ -10,7 +10,8 @@ public:
 	~UnionFind();
 
 	int Root(int p) { return parent[p] < 0 ? p : (parent[p] = Root(parent[p])); }
-	bool Join(int p, int q);
+	inline bool Join(int p, int q);
+	inline int UnionSize(int p) { return -parent[Root(p)]; }
 
 private:
 	int size;
