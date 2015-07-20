@@ -7,6 +7,7 @@ void SlitherlinkProblemConstraint::Init(int height_t, int width_t)
 	height = height_t;
 	width = width_t;
 
+	if (field) delete[] field;
 	field = new int[height * width];
 	for (int i = 0; i < height * width; ++i) field[i] = HINT_NONE;
 }
@@ -15,6 +16,7 @@ void SlitherlinkProblemConstraint::Init(int height_t, int width_t, int* hint_t, 
 	height = height_t;
 	width = width_t;
 
+	if (field) delete[] field;
 	field = new int[height * width];
 	for (int i = 0; i < height * width; ++i) {
 		if (!enable_hint_restriction) field[i] = (hint_t[i] == 0 ? HINT_NONE : HINT_SOME);
@@ -26,6 +28,7 @@ void SlitherlinkProblemConstraint::Init(int height_t, int width_t, char* hint_t[
 	height = height_t;
 	width = width_t;
 
+	if (field) delete[] field;
 	field = new int[height * width];
 	for (int i = 0; i < height; ++i) {
 		for (int j = 0; j < width; ++j) {
