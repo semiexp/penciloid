@@ -3,6 +3,7 @@
 #include <cmath>
 
 #include "../common/XorShift.h"
+#include "../common/UnionFind.h"
 #include "SlitherlinkGenerator.h"
 #include "SlitherlinkField.h"
 #include "SlitherlinkProblem.h"
@@ -30,12 +31,12 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 	field.Init(height, width);
 
 	std::vector<std::pair<std::pair<int, int>, int> > current_hints;
-	
+
 	for (;;) {
 		// put a hint randomly
 		printf("%d\n", current_hints.size());
 		std::vector<std::pair<std::pair<int, int>, int> > cand;
-		
+
 		for (int i = 0; i < height; ++i) {
 			for (int j = 0; j < width; ++j) {
 				if (symmetry && current_hints.size() % 2 == 1) {
@@ -163,7 +164,7 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 	}
 
 	SlitherlinkField field;
-	field.Init(current_problem, use_assumption);
+	field.Init(current_problem);
 	for (int step = 0; step < max_step; ++step) {
 		int current_progress = field.GetProgress();
 		bool is_progress = false;
@@ -289,7 +290,7 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 		}
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -330,6 +331,102 @@ void SlitherlinkGenerator::SimplifyProblem(SlitherlinkProblem &problem, bool sym
 			}
 		}
 	}
+}
+void SlitherlinkGenerator::GenerateConstraint(int height, int width, int n_hints, int symmetricity, XorShift &rnd, SlitherlinkProblemConstraint &ret)
+{
+	UnionFind hint_group(height * width);
+	ret.Init(height, width);
+
+	if ((symmetricity & SHAPE_ROTATION_90) && height == width) {
+		for (int i = 0; i < height; ++i) {
+			for (int j = 0; j < height; ++j) {
+				int id = i * height + j;
+				int rot90 = j * height + (height - 1 - i);
+
+				hint_group.Join(id, rot90);
+			}
+		}
+	} else if (symmetricity & SHAPE_ROTATION_180) {
+		for (int i = 0; i < height; ++i) {
+			for (int j = 0; j < width; ++j) {
+				int id = i * width + j;
+				int rot180 = (height - 1 - i) * width + (width - 1 - j);
+
+				hint_group.Join(id, rot180);
+			}
+		}
+	}
+
+	if (symmetricity & SHAPE_MIRROR_HORIZONTAL) {
+		for (int i = 0; i < height; ++i) {
+			for (int j = 0; j < width / 2; ++j) {
+				int id = i * width + j;
+				int symm = i * width + (width - 1 - j);
+
+				hint_group.Join(id, symm);
+			}
+		}
+	}
+
+	if (symmetricity & SHAPE_MIRROR_VERTICAL) {
+		for (int i = 0; i < height / 2; ++i) {
+			for (int j = 0; j < width; ++j) {
+				int id = i * width + j;
+				int symm = (height - 1 - i) * width + j;
+
+				hint_group.Join(id, symm);
+			}
+		}
+	}
+
+	std::vector<std::pair<int, int> > possible_hints, candidates;
+
+	for (int i = 0; i < height * width; ++i) if (hint_group.Root(i) == i)
+		possible_hints.push_back(std::make_pair(i, hint_group.UnionSize(i)));
+
+	while (n_hints > 0) {
+		int score_sum = 0;
+		candidates.clear();
+
+		for (int i = 0; i < possible_hints.size(); ++i) if (possible_hints[i].second <= n_hints) {
+			int y = possible_hints[i].first / width, x = possible_hints[i].first % width;
+
+			if (ret.IsHint(y, x)) continue;
+
+			int score = 0;
+
+			for (int dy = -2; dy <= 2; ++dy) {
+				for (int dx = -2; dx <= 2; ++dx) {
+					int y2 = y + dy, x2 = x + dx;
+					if (0 <= y2 && y2 < height && 0 <= x2 && x2 < width) {
+						if (ret.IsHint(y2, x2)) score += 5 - abs(dy) - abs(dx);
+					}
+				}
+			}
+
+			score = std::max(0, 11 - score) + 1;
+			score_sum += score;
+			candidates.push_back(std::make_pair(i, score));
+		}
+
+		if (candidates.size() == 0) break;
+
+		int cand_pos = (int)(rnd.NextInt() % score_sum);
+		
+		for (int i = 0; i < candidates.size(); ++i) {
+			if (cand_pos < candidates[i].second) {
+				int representative = possible_hints[candidates[i].first].first;
+
+				// TODO: improve time complexity
+				for (int j = 0; j < height * width; ++j) if (hint_group.Root(j) == hint_group.Root(representative)) {
+					--n_hints;
+					ret.SetCellConstraint(j / width, j % width, SlitherlinkProblemConstraint::HINT_SOME);
+				}
+				break;
+			} else cand_pos -= candidates[i].second;
+		}
+	}
+	for (int i = 0; i < height; ++i) for (int j = 0; j < width; ++j) if (ret.IsHint(i, j)) ++n_hints;
 }
 
 }
