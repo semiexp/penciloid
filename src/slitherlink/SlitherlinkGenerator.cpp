@@ -404,7 +404,7 @@ void SlitherlinkGenerator::GenerateConstraint(int height, int width, int n_hints
 				}
 			}
 
-			score = std::max(0, 11 - score) + 1;
+			score = (int)(64 * pow(2, (16 - score) / 2.0) + 4);
 			score_sum += score;
 			candidates.push_back(std::make_pair(i, score));
 		}
