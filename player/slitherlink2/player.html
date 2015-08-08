@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<meta http-equiv="Content-Type" content="text/html; charset=Shift_JIS">
+<html lang="ja">
+<head>
+    <title>Slitherlink Player</title>
+    <script type="text/javascript" src="unionfind.js"></script>
+    <script type="text/javascript" src="applet.js"></script>
+    <script type="text/javascript" src="controller.js"></script>
+    <script type="text/javascript" src="sl_controller.js"></script>
+    <script type="text/javascript" src="board.js"></script>
+    <script type="text/javascript" src="field.js"></script>
+    <script type="text/javascript">
+    window.onload = function() {
+    	var cont = new SlitherlinkController;
+    	var board = new Board;
+    	var field = new Field;
+    	var applet = new Applet(document.getElementById("player"), cont, board);
+    	cont.setProblems(["aa20k0b2f400005000kf4448004a007fk54200040000k25g020a", "aa4a2250kk50k0000404095001f4f002m0k0k00001034404k535"]);
+    	cont.setBoard(board);
+    	board.setField(field);
+    	cont.setProblemID(0);
+    }
+    </script>
+</head>
+<body>
+    <canvas id="player" width="395" height="425"></canvas>
+    <param name="problem" value="43h00l000" />
+</body>
+</html>
