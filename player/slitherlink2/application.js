@@ -6,7 +6,7 @@ window.onload = function () {
 
 	var problems = document.getElementsByName("problem")[0].value;
 	problems = problems.split(",");
-	if (problems[problems.length - 1] == "") problem.pop();
+	if (problems[problems.length - 1] == "") problems.pop();
 
 	cont.setProblems(problems);
 	cont.setBoard(board);
