@@ -11,13 +11,31 @@ function Applet(canvas, controller, board) {
 			var rect = event.target.getBoundingClientRect();
 			self.mouseDown(x - rect.left, y - rect.top, button);
 		});
+		canvas.addEventListener("touchstart", function (event) {
+			event.preventDefault();
+			var x = event.changedTouches[0].clientX, y = event.changedTouches[0].clientY, button = false;
+			var rect = event.target.getBoundingClientRect();
+			self.mouseDown(x - rect.left, y - rect.top, button);
+		});
 		canvas.addEventListener("mousemove", function (event) {
 			var x = event.clientX, y = event.clientY, button = (event.button == 2);
 			var rect = event.target.getBoundingClientRect();
 			self.mouseMove(x - rect.left, y - rect.top, button);
 		});
+		canvas.addEventListener("touchmove", function (event) {
+			event.preventDefault();
+			var x = event.changedTouches[0].clientX, y = event.changedTouches[0].clientY, button = false;
+			var rect = event.target.getBoundingClientRect();
+			self.mouseMove(x - rect.left, y - rect.top, button);
+		});
 		canvas.addEventListener("mouseup", function (event) {
 			var x = event.clientX, y = event.clientY, button = (event.button == 2);
+			var rect = event.target.getBoundingClientRect();
+			self.mouseUp(x - rect.left, y - rect.top, button);
+		});
+		canvas.addEventListener("touchend", function (event) {
+			event.preventDefault();
+			var x = event.changedTouches[0].clientX, y = event.changedTouches[0].clientY, button = false;
 			var rect = event.target.getBoundingClientRect();
 			self.mouseUp(x - rect.left, y - rect.top, button);
 		});
