@@ -26,10 +26,29 @@ Board.prototype.setField = function (field) {
 	this.isComplete = false;
 	this.undoHistory = [];
 	this.redoHistory = [];
-	var totalWidth = 2 * this.marginX + field.width * this.unitSize + this.dotSize;
-	var totalHeight = 2 * this.marginX + field.height * this.unitSize + this.dotSize;
+	this.totalWidth = 2 * this.marginX + field.width * this.unitSize + this.dotSize;
+	if (this.totalWidth < 250) this.totalWidth = 250;
+	this.totalHeight = 2 * this.marginX + field.height * this.unitSize + this.dotSize;
 
-	this.applet.resize(totalWidth, totalHeight + this.controllerHeight);
+	this.applet.resize(this.totalWidth, this.totalHeight + this.controllerHeight);
+	if (this.ctx) this.drawPanel();
+}
+
+Board.prototype.setZoom = function (z) {
+	this.dotSize = z;
+	this.hintSize = z * 6;
+	this.unitSize = this.dotSize + this.hintSize;
+	this.lineLength = this.hintSize - 2;
+	this.lineWidth = z * 0.6;
+	this.blankXSize = z * 1.6;
+	this.allowedDistance = z;
+	this.motionlessDistance = z * 0.6;
+
+	this.totalWidth = 2 * this.marginX + this.field.width * this.unitSize + this.dotSize;
+	if (this.totalWidth < 250) this.totalWidth = 250;
+	this.totalHeight = 2 * this.marginX + this.field.height * this.unitSize + this.dotSize;
+
+	this.applet.resize(this.totalWidth, this.totalHeight + this.controllerHeight);
 	if (this.ctx) this.drawPanel();
 }
 
@@ -39,17 +58,14 @@ Board.prototype.drawPanel = function () {
 
 	if (!field) return;
 
-	var totalWidth = 2 * this.marginX + field.width * this.unitSize + this.dotSize;
-	var totalHeight = 2 * this.marginX + field.height * this.unitSize + this.dotSize;
-
 	ctx.fillStyle = "#ffffff";
 	ctx.lineWidth = 1.0;
-	ctx.fillRect(1, this.controllerHeight, totalWidth, totalHeight);
+	ctx.fillRect(1, this.controllerHeight, this.totalWidth, this.totalHeight);
 
 	ctx.fillStyle = "#000000";
 	ctx.strokeStyle = "#666666";
 	ctx.lineWidth = 1;
-	ctx.strokeRect(1, this.controllerHeight, totalWidth - 2, totalHeight - 2);
+	ctx.strokeRect(1, this.controllerHeight, this.totalWidth - 2, this.totalHeight - 2);
 
 	ctx.fillStyle = "#000000";
 	ctx.strokeStyle = "#000000";
@@ -76,15 +92,18 @@ Board.prototype.drawPanel = function () {
 			}
 		}
 	}
+
+	for (var y = 0; y <= field.height * 2; ++y) {
+		for (var x = 0; x <= field.width * 2; ++x) {
+			if (y % 2 != x % 2 && field.getLineStyle(y, x) != Field.undecided) this.updatePanel(x, y);
+		}
+	}
 }
 
 Board.prototype.showComplete = function (type) {
-	var totalWidth = 2 * this.marginX + this.field.width * this.unitSize + this.dotSize;
-	var totalHeight = 2 * this.marginX + this.field.height * this.unitSize + this.dotSize;
-
 	this.ctx.lineWidth = 2;
 	this.ctx.strokeStyle = type ? "#ff0000" : "#ffffff";
-	this.ctx.strokeRect(4, 3 + this.controllerHeight, totalWidth - 8, totalHeight - 8);
+	this.ctx.strokeRect(4, 3 + this.controllerHeight, this.totalWidth - 8, this.totalHeight - 8);
 }
 
 Board.prototype.updatePanel = function (tx, ty) {
