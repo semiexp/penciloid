@@ -337,7 +337,7 @@ void SlitherlinkGenerator::GenerateConstraint(int height, int width, int n_hints
 	UnionFind hint_group(height * width);
 	ret.Init(height, width);
 
-	if ((symmetricity & SHAPE_ROTATION_90) && height == width) {
+	if ((symmetricity & (SHAPE_ROTATION_90 ^ SHAPE_ROTATION_180)) && height == width) {
 		for (int i = 0; i < height; ++i) {
 			for (int j = 0; j < height; ++j) {
 				int id = i * height + j;
