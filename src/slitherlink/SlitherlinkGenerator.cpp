@@ -10,7 +10,7 @@
 #include "SlitherlinkDatabase.h"
 #include "SlitherlinkProblemConstraint.h"
 
-int FieldHash(Penciloid::SlitherlinkField &field, int hash_size)
+static int FieldHash(Penciloid::SlitherlinkField &field, int hash_size)
 {
 	long long ret = 0;
 
