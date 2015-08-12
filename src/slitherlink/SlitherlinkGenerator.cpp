@@ -170,7 +170,6 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 		bool is_progress = false;
 
 		double temperature = 5.0; // 7.0 * exp(-2.0 * (double)step / max_step);
-
 		std::vector<std::pair<int, int> > locs;
 		for (int i = 0; i < height; ++i) {
 			for (int j = 0; j < width; ++j) if (constraint.GetCellConstraint(i, j) == SlitherlinkProblemConstraint::HINT_SOME) {
@@ -399,7 +398,10 @@ void SlitherlinkGenerator::GenerateConstraint(int height, int width, int n_hints
 				for (int dx = -2; dx <= 2; ++dx) {
 					int y2 = y + dy, x2 = x + dx;
 					if (0 <= y2 && y2 < height && 0 <= x2 && x2 < width) {
-						if (ret.IsHint(y2, x2)) score += 5 - abs(dy) - abs(dx);
+						if (ret.IsHint(y2, x2)) {
+							score += 5 - abs(dy) - abs(dx);
+							if (abs(dy) + abs(dx) == 1) score += 2;
+						}
 					}
 				}
 			}
