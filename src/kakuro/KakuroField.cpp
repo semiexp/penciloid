@@ -34,25 +34,25 @@ void KakuroField::Init(KakuroProblem &prob)
 		for (int x = 0; x < width; ++x) {
 			if (prob.IsNumberCell(y, x)) SetNumberCell(y, x);
 
-			if (prob.IsHintAvailableVertical(y, x)) {
+			if (prob.IsClueAvailableVertical(y, x)) {
 				int y_end = y + 1;
 				for (; y_end < height && prob.IsNumberCell(y_end, x); ++y_end);
 
 				for (int y2 = y + 1; y2 < y_end; ++y2) {
 					cells[CellId(y2, x)].group_num_cells = y_end - (y + 1);
-					cells[CellId(y2, x)].group_sum = prob.GetHintVertical(y, x);
+					cells[CellId(y2, x)].group_sum = prob.GetClueVertical(y, x);
 					if (y2 == y_end - 1) cells[CellId(y2, x)].group_next_cell = CellId(y + 1, x);
 					else cells[CellId(y2, x)].group_next_cell = CellId(y2 + 1, x);
 				}
 			}
 
-			if (prob.IsHintAvailableHorizontal(y, x)) {
+			if (prob.IsClueAvailableHorizontal(y, x)) {
 				int x_end = x + 1;
 				for (; x_end < width && prob.IsNumberCell(y, x_end); ++x_end);
 
 				for (int x2 = x + 1; x2 < x_end; ++x2) {
 					cells[CellId(y, x2) | 1].group_num_cells = x_end - (x + 1);
-					cells[CellId(y, x2) | 1].group_sum = prob.GetHintHorizontal(y, x);
+					cells[CellId(y, x2) | 1].group_sum = prob.GetClueHorizontal(y, x);
 					if (x2 == x_end - 1) cells[CellId(y, x2) | 1].group_next_cell = CellId(y, x + 1) | 1;
 					else cells[CellId(y, x2) | 1].group_next_cell = CellId(y, x2 + 1) | 1;
 				}
@@ -74,7 +74,7 @@ void KakuroField::SetNumberCell(int y, int x)
 {
 	int id = CellId(y, x);
 
-	if (cells[id].cell_value == CELL_HINT) {
+	if (cells[id].cell_value == CELL_CLUE) {
 		++num_undecided_cells;
 		cells[id].cell_value = cells[id | 1].cell_value = CELL_UNDECIDED;
 		cells[id].cell_candidate = cells[id | 1].cell_candidate = (2 << CELL_MAX_VALUE) - 2;

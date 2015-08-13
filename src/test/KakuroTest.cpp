@@ -16,10 +16,10 @@ void PenciloidTest::KakuroTest1()
 	prob.SetNumberCell(1, 2);
 	prob.SetNumberCell(2, 1);
 	prob.SetNumberCell(2, 2);
-	prob.SetHint(0, 1, 17, KakuroProblem::HINT_NONE);
-	prob.SetHint(0, 2, 11, KakuroProblem::HINT_NONE);
-	prob.SetHint(1, 0, KakuroProblem::HINT_NONE, 16);
-	prob.SetHint(2, 0, KakuroProblem::HINT_NONE, 12);
+	prob.SetClue(0, 1, 17, KakuroProblem::CLUE_NONE);
+	prob.SetClue(0, 2, 11, KakuroProblem::CLUE_NONE);
+	prob.SetClue(1, 0, KakuroProblem::CLUE_NONE, 16);
+	prob.SetClue(2, 0, KakuroProblem::CLUE_NONE, 12);
 
 	KakuroField field;
 	field.Init(prob);

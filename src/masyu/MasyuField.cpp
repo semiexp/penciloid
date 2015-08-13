@@ -5,31 +5,31 @@ namespace Penciloid
 {
 MasyuField::MasyuField()
 {
-	hints = nullptr;
+	clues = nullptr;
 }
 
 MasyuField::~MasyuField()
 {
-	if (hints) delete[] hints;
+	if (clues) delete[] clues;
 }
 
 void MasyuField::Init(int height_t, int width_t)
 {
 	GridLoop<MasyuField>::Init(height_t - 1, width_t - 1);
 
-	if (hints) delete[] hints;
-	hints = new int[(GetHeight() + 1) * (GetWidth() + 1)];
+	if (clues) delete[] clues;
+	clues = new int[(GetHeight() + 1) * (GetWidth() + 1)];
 
-	for (int i = 0; i < (GetHeight() + 1) * (GetWidth() + 1); ++i) hints[i] = HINT_NONE;
+	for (int i = 0; i < (GetHeight() + 1) * (GetWidth() + 1); ++i) clues[i] = CLUE_NONE;
 }
 
 void MasyuField::Init(MasyuField &field)
 {
 	GridLoop<MasyuField>::Init(field);
 
-	if (hints) delete[] hints;
-	hints = new int[(GetHeight() + 1) * (GetWidth() + 1)];
-	memcpy(hints, field.hints, sizeof(int) * (GetHeight() + 1) * (GetWidth() + 1));
+	if (clues) delete[] clues;
+	clues = new int[(GetHeight() + 1) * (GetWidth() + 1)];
+	memcpy(clues, field.clues, sizeof(int) * (GetHeight() + 1) * (GetWidth() + 1));
 }
 
 void MasyuField::Init(MasyuProblem &prob)
@@ -38,25 +38,25 @@ void MasyuField::Init(MasyuProblem &prob)
 
 	for (int i = 0; i <= GetHeight(); ++i) {
 		for (int j = 0; j <= GetWidth(); ++j) {
-			int hint = prob.GetHint(i, j);
+			int clue = prob.GetClue(i, j);
 
-			if (hint != HINT_NONE) SetHint(i, j, hint);
+			if (clue != CLUE_NONE) SetClue(i, j, clue);
 		}
 	}
 }
 
-int MasyuField::SetHint(int y, int x, int hint)
+int MasyuField::SetClue(int y, int x, int clue)
 {
-	int id = HintId(y, x);
+	int id = ClueId(y, x);
 
-	if (hints[id] != HINT_NONE) {
-		if (hints[id] != hint) {
+	if (clues[id] != CLUE_NONE) {
+		if (clues[id] != clue) {
 			return UpdateStatus(SolverStatus::INCONSISTENT);
 		}
 		return UpdateStatus(0);
 	}
 
-	hints[id] = hint;
+	clues[id] = clue;
 	CheckTheorem(y * 2, x * 2);
 	CheckVertex(y * 2, x * 2);
 
@@ -67,16 +67,16 @@ void MasyuField::CheckTheorem(int y, int x)
 {
 	// TODO: implement appropriately
 
-	int hint = GetHint(y / 2, x / 2); 
+	int clue = GetClue(y / 2, x / 2); 
 
-	if (hint == HINT_WHITE) {
+	if (clue == CLUE_WHITE) {
 		for (int i = 0; i < 2; ++i) {
 			int dy = GridConstant::GRID_DY[i], dx = GridConstant::GRID_DX[i];
 
 			for (int j = 0; j <= 2; ++j) {
-				if    (GetHintSafe(y / 2 + (j - 2) * dy, x / 2 + (j - 2) * dx) == HINT_WHITE
-					&& GetHintSafe(y / 2 + (j - 1) * dy, x / 2 + (j - 1) * dx) == HINT_WHITE
-					&& GetHintSafe(y / 2 + (j - 0) * dy, x / 2 + (j - 0) * dx) == HINT_WHITE) {
+				if    (GetClueSafe(y / 2 + (j - 2) * dy, x / 2 + (j - 2) * dx) == CLUE_WHITE
+					&& GetClueSafe(y / 2 + (j - 1) * dy, x / 2 + (j - 1) * dx) == CLUE_WHITE
+					&& GetClueSafe(y / 2 + (j - 0) * dy, x / 2 + (j - 0) * dx) == CLUE_WHITE) {
 					DetermineLine(y + 2 * (j - 2) * dy + dx, x + 2 * (j - 2) * dx + dy);
 					DetermineLine(y + 2 * (j - 2) * dy - dx, x + 2 * (j - 2) * dx - dy);
 					DetermineLine(y + 2 * (j - 1) * dy + dx, x + 2 * (j - 1) * dx + dy);
@@ -88,11 +88,11 @@ void MasyuField::CheckTheorem(int y, int x)
 		}
 	}
 
-	if (hint == HINT_BLACK) {
+	if (clue == CLUE_BLACK) {
 		for (int i = 0; i < 4; ++i) {
 			int dy = GridConstant::GRID_DY[i], dx = GridConstant::GRID_DX[i];
 
-			if (GetHintSafe(y / 2 + dy, x / 2 + dx) == HINT_BLACK) {
+			if (GetClueSafe(y / 2 + dy, x / 2 + dx) == CLUE_BLACK) {
 				DetermineBlank(y + dy, x + dx);
 			}
 		}
@@ -101,11 +101,11 @@ void MasyuField::CheckTheorem(int y, int x)
 
 void MasyuField::CheckVertexSpecific(int y, int x)
 {
-	if (hints == nullptr) return;
+	if (clues == nullptr) return;
 
-	int hint = hints[HintId(y / 2, x / 2)];
+	int clue = clues[ClueId(y / 2, x / 2)];
 
-	if (hint == HINT_WHITE) {
+	if (clue == CLUE_WHITE) {
 		// TODO: faster checker
 		int neighborhood_segment_style[16];
 
@@ -193,7 +193,7 @@ void MasyuField::CheckVertexSpecific(int y, int x)
 			}
 		}
 
-	} else if (hint == HINT_BLACK) {
+	} else if (clue == CLUE_BLACK) {
 		int line_direction_candidate = 15;
 
 		for (int i = 0; i < 4; ++i) {
@@ -226,11 +226,11 @@ void MasyuField::Debug()
 	for (int i = 0; i <= GetHeight() * 2; ++i) {
 		for (int j = 0; j <= GetWidth() * 2; ++j) {
 			if (i % 2 == 0 && j % 2 == 0) {
-				int hint = hints[HintId(i / 2, j / 2)];
+				int clue = clues[ClueId(i / 2, j / 2)];
 
-				if (hint == HINT_NONE) fprintf(stderr, "+");
-				else if (hint == HINT_WHITE) fprintf(stderr, "O");
-				else if (hint == HINT_BLACK) fprintf(stderr, "#");
+				if (clue == CLUE_NONE) fprintf(stderr, "+");
+				else if (clue == CLUE_WHITE) fprintf(stderr, "O");
+				else if (clue == CLUE_BLACK) fprintf(stderr, "#");
 			} else if (i % 2 == 0 && j % 2 == 1) {
 				int style = GetSegmentStyle(i, j);
 				if (style == LOOP_UNDECIDED) fprintf(stderr, "   ");

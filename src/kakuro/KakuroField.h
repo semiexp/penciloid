@@ -19,14 +19,14 @@ public:
 	int CheckAll();
 
 	void SetNumberCell(int y, int x);
-	bool IsNumberCell(int y, int x) { return cells[CellId(y, x)].cell_value != CELL_HINT; }
+	bool IsNumberCell(int y, int x) { return cells[CellId(y, x)].cell_value != CELL_CLUE; }
 	// TODO: Add group modifier
 
 	inline int GetCellValue(int y, int x) const { return cells[CellId(y, x)].cell_value; }
 
 	void Debug();
 
-	static const int CELL_HINT = -1;
+	static const int CELL_CLUE = -1;
 	static const int CELL_UNDECIDED = 0;
 	static const int CELL_MAX_VALUE = 9;
 
@@ -36,7 +36,7 @@ private:
 		int cell_value, cell_candidate;
 		int group_next_cell, group_sum, group_num_cells;
 
-		KakuroCell() : cell_value(CELL_HINT), cell_candidate(0), group_next_cell(-1), group_sum(0), group_num_cells(0) {}
+		KakuroCell() : cell_value(CELL_CLUE), cell_candidate(0), group_next_cell(-1), group_sum(0), group_num_cells(0) {}
 	};
 
 	KakuroCell *cells;

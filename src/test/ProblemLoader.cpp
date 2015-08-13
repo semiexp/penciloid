@@ -25,7 +25,7 @@ void PenciloidTest::InputSlitherlink(std::ifstream &ifs, SlitherlinkProblem &pro
 		ifs >> line;
 
 		for (int j = 0; j < width; ++j) {
-			if (line[j] >= '0' && line[j] <= '3') problem.SetHint(i, j, line[j] - '0');
+			if (line[j] >= '0' && line[j] <= '3') problem.SetClue(i, j, line[j] - '0');
 		}
 	}
 }
@@ -42,8 +42,8 @@ void PenciloidTest::InputMasyu(std::ifstream &ifs, MasyuProblem &problem)
 		ifs >> line;
 
 		for (int j = 0; j < width; ++j) {
-			if (line[j] == 'b' || line[j] == '1') problem.SetHint(i, j, MasyuProblem::HINT_BLACK);
-			if (line[j] == 'w' || line[j] == '2') problem.SetHint(i, j, MasyuProblem::HINT_WHITE);
+			if (line[j] == 'b' || line[j] == '1') problem.SetClue(i, j, MasyuProblem::CLUE_BLACK);
+			if (line[j] == 'w' || line[j] == '2') problem.SetClue(i, j, MasyuProblem::CLUE_WHITE);
 		}
 	}
 }
@@ -78,8 +78,8 @@ void PenciloidTest::InputKakuro(std::ifstream &ifs, KakuroProblem &problem)
 					if (solution[y * width + x2] == 0) break;
 					horizontal += solution[y * width + x2];
 				}
-				problem_data[cell_vertical] = (vertical == 0) ? KakuroProblem::HINT_NONE : vertical;
-				problem_data[cell_horizontal] = (horizontal == 0) ? KakuroProblem::HINT_NONE : horizontal;
+				problem_data[cell_vertical] = (vertical == 0) ? KakuroProblem::CLUE_NONE : vertical;
+				problem_data[cell_horizontal] = (horizontal == 0) ? KakuroProblem::CLUE_NONE : horizontal;
 			}
 		}
 	}

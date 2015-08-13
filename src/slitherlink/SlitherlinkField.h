@@ -10,7 +10,7 @@ class SlitherlinkProblem;
 class SlitherlinkField : public GridLoop<SlitherlinkField>
 {
 public:
-	static const int HINT_NONE = -1;
+	static const int CLUE_NONE = -1;
 
 	SlitherlinkField();
 	~SlitherlinkField();
@@ -25,9 +25,9 @@ public:
 	void CheckCellSpecific(int y, int x);
 	void SegmentDetermined(int y, int x);
 
-	inline int GetHint(int y, int x) { return hints[CellId(y, x)]; }
-	inline int GetHintSafe(int y, int x) { return (0 <= y && y < GetHeight() && 0 <= x && x < GetWidth()) ? GetHint(y, x) : HINT_NONE; }
-	int SetHint(int y, int x, int hint);
+	inline int GetClue(int y, int x) { return clues[CellId(y, x)]; }
+	inline int GetClueSafe(int y, int x) { return (0 <= y && y < GetHeight() && 0 <= x && x < GetWidth()) ? GetClue(y, x) : CLUE_NONE; }
+	int SetClue(int y, int x, int clue);
 	int Assume();
 
 	void Debug();
@@ -38,7 +38,7 @@ private:
 	inline int CellId(int y, int x) { return y * GetWidth() + x; }
 	inline void SetAssumptionCandidate(int y, int x) { if (IsProperCoordinate(y, x)) assumption_table[y * (2 * GetWidth() + 1) + x] = true; }
 
-	int *hints; bool *assumption_table;
+	int *clues; bool *assumption_table;
 	SlitherlinkMethod method;
 };
 

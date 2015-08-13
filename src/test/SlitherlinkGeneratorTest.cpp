@@ -19,19 +19,19 @@ void PenciloidTest::SlitherlinkGeneratorTest(int height, int width)
 	SlitherlinkGenerator::GenerateNaive(height, width, prob, true);
 	SlitherlinkGenerator::SimplifyProblem(prob, true);
 
-	int num_hints = 0;
+	int num_clues = 0;
 	std::cout << height << " " << width << std::endl;
 	for (int i = 0; i < height; ++i) {
 		for (int j = 0; j < width; ++j) {
-			if (prob.GetHint(i, j) == SlitherlinkField::HINT_NONE) std::cout << '.';
+			if (prob.GetClue(i, j) == SlitherlinkField::CLUE_NONE) std::cout << '.';
 			else {
-				std::cout << (char)(prob.GetHint(i, j) + '0');
-				++num_hints;
+				std::cout << (char)(prob.GetClue(i, j) + '0');
+				++num_clues;
 			}
 		}
 		std::cout << std::endl;
 	}
-	std::cout << "hint: " << num_hints << std::endl;
+	std::cout << "clue: " << num_clues << std::endl;
 	std::cout << std::endl;
 
 	SlitherlinkField field;
@@ -65,13 +65,19 @@ void PenciloidTest::SlitherlinkGeneratorOfShapeTest()
 
 	SlitherlinkDatabase::CreateDatabase();
 
-	while (!SlitherlinkGenerator::GenerateOfShape(constraint, prob, rnd, false));
-
+	time_t start, end;
+	start = clock();
+	for (int t = 0; t < 2000; ++t) {
+		while (!SlitherlinkGenerator::GenerateOfShape(constraint, prob, rnd, true));
+		end = clock();
+		double elaps = (double)(end - start) / CLOCKS_PER_SEC;
+		printf("%d (%.2f[s] elapsed, %.2f[prob/s])\n", t + 1, elaps, (t + 1) / elaps);
+	}
 	std::cout << height << " " << width << std::endl;
 	for (int i = 0; i < height; ++i) {
 		for (int j = 0; j < width; ++j) {
-			if (prob.GetHint(i, j) == SlitherlinkField::HINT_NONE) std::cout << '.';
-			else std::cout << (char)(prob.GetHint(i, j) + '0');
+			if (prob.GetClue(i, j) == SlitherlinkField::CLUE_NONE) std::cout << '.';
+			else std::cout << (char)(prob.GetClue(i, j) + '0');
 		}
 		std::cout << std::endl;
 	}

@@ -39,10 +39,10 @@ void PenciloidTest::SlitherlinkTest1()
 
 	field.Init(3, 3);
 	
-	field.SetHint(0, 0, 0);
-	field.SetHint(0, 1, 2);
-	field.SetHint(2, 0, 3);
-	field.SetHint(2, 1, 1);
+	field.SetClue(0, 0, 0);
+	field.SetClue(0, 1, 2);
+	field.SetClue(2, 0, 3);
+	field.SetClue(2, 1, 1);
 
 	assert(field.GetStatus() == SolverStatus::SUCCESS);
 	assert(SlitherlinkCheckGrid(field, expected));
@@ -63,9 +63,9 @@ void PenciloidTest::SlitherlinkTest2()
 
 	field.Init(3, 3);
 
-	field.SetHint(1, 0, 3);
-	field.SetHint(1, 1, 3);
-	field.SetHint(2, 2, 3);
+	field.SetClue(1, 0, 3);
+	field.SetClue(1, 1, 3);
+	field.SetClue(2, 2, 3);
 
 	assert(field.GetStatus() == SolverStatus::SUCCESS);
 	assert(SlitherlinkCheckGrid(field, expected));
@@ -77,13 +77,13 @@ void PenciloidTest::SlitherlinkTest3()
 		SlitherlinkProblem prob;
 		prob.Init(5, 3);
 
-		prob.SetHint(0, 0, 3);
-		prob.SetHint(0, 1, 3);
-		prob.SetHint(0, 2, 3);
-		prob.SetHint(1, 0, 2);
-		prob.SetHint(1, 1, 2);
-		prob.SetHint(1, 2, 2);
-		prob.SetHint(2, 2, 1);
+		prob.SetClue(0, 0, 3);
+		prob.SetClue(0, 1, 3);
+		prob.SetClue(0, 2, 3);
+		prob.SetClue(1, 0, 2);
+		prob.SetClue(1, 1, 2);
+		prob.SetClue(1, 2, 2);
+		prob.SetClue(2, 2, 1);
 
 		SlitherlinkField field;
 		field.Init(prob);
@@ -95,13 +95,13 @@ void PenciloidTest::SlitherlinkTest3()
 		SlitherlinkProblem prob;
 		prob.Init(5, 3);
 
-		prob.SetHint(0, 0, 3);
-		prob.SetHint(0, 1, 3);
-		prob.SetHint(0, 2, 3);
-		prob.SetHint(1, 0, 2);
-		prob.SetHint(1, 1, 2);
-		prob.SetHint(1, 2, 2);
-		prob.SetHint(3, 2, 2);
+		prob.SetClue(0, 0, 3);
+		prob.SetClue(0, 1, 3);
+		prob.SetClue(0, 2, 3);
+		prob.SetClue(1, 0, 2);
+		prob.SetClue(1, 1, 2);
+		prob.SetClue(1, 2, 2);
+		prob.SetClue(3, 2, 2);
 
 		SlitherlinkField field;
 		field.Init(prob);
@@ -117,9 +117,9 @@ void PenciloidTest::SlitherlinkTest4()
 		SlitherlinkProblem prob;
 		prob.Init(4, 4);
 
-		prob.SetHint(0, 0, 0);
-		prob.SetHint(1, 1, 2);
-		prob.SetHint(2, 2, 1);
+		prob.SetClue(0, 0, 0);
+		prob.SetClue(1, 1, 2);
+		prob.SetClue(2, 2, 1);
 
 		SlitherlinkField field;
 		field.Init(prob);
@@ -133,9 +133,9 @@ void PenciloidTest::SlitherlinkTest4()
 		SlitherlinkProblem prob;
 		prob.Init(4, 4);
 
-		prob.SetHint(0, 0, 1);
-		prob.SetHint(1, 1, 2);
-		prob.SetHint(2, 2, 1);
+		prob.SetClue(0, 0, 1);
+		prob.SetClue(1, 1, 2);
+		prob.SetClue(2, 2, 1);
 
 		SlitherlinkField field;
 		field.Init(prob);
@@ -149,9 +149,9 @@ void PenciloidTest::SlitherlinkTest4()
 		SlitherlinkProblem prob;
 		prob.Init(4, 4);
 
-		prob.SetHint(0, 0, 0);
-		prob.SetHint(1, 1, 2);
-		prob.SetHint(2, 2, 3);
+		prob.SetClue(0, 0, 0);
+		prob.SetClue(1, 1, 2);
+		prob.SetClue(2, 2, 3);
 
 		SlitherlinkField field;
 		field.Init(prob);
@@ -165,9 +165,9 @@ void PenciloidTest::SlitherlinkTest4()
 		SlitherlinkProblem prob;
 		prob.Init(4, 4);
 
-		prob.SetHint(0, 0, 1);
-		prob.SetHint(1, 1, 2);
-		prob.SetHint(2, 2, 3);
+		prob.SetClue(0, 0, 1);
+		prob.SetClue(1, 1, 2);
+		prob.SetClue(2, 2, 3);
 
 		SlitherlinkField field;
 		field.Init(prob);

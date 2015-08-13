@@ -19,26 +19,26 @@ static double ComputeSymmetricityOfField(Penciloid::SlitherlinkField &field, boo
 		for (int x = 0; x <= width2; ++x) {
 			if (y % 2 == x % 2) continue;
 
-			int adj_y1 = (y - 1) / 2, adj_x1 = (x - 1) / 2; bool adj1_valid = (y > 0 && x > 0) && field.GetHint(adj_y1, adj_x1) != Penciloid::SlitherlinkField::HINT_NONE;
-			int adj_y2 = y / 2, adj_x2 = x / 2; bool adj2_valid = (y < height2 && x < width2) && field.GetHint(adj_y2, adj_x2) != Penciloid::SlitherlinkField::HINT_NONE;
+			int adj_y1 = (y - 1) / 2, adj_x1 = (x - 1) / 2; bool adj1_valid = (y > 0 && x > 0) && field.GetClue(adj_y1, adj_x1) != Penciloid::SlitherlinkField::CLUE_NONE;
+			int adj_y2 = y / 2, adj_x2 = x / 2; bool adj2_valid = (y < height2 && x < width2) && field.GetClue(adj_y2, adj_x2) != Penciloid::SlitherlinkField::CLUE_NONE;
 
 			if (height2 == width2 && check_rot_90) {
 				possible_max += 2;
 
 				if (field.GetSegmentStyle(y, x) == field.GetSegmentStyle(x, width2 - y)
-					&& ((adj1_valid && field.GetHint(adj_y1, adj_x1) == field.GetHint(adj_x1, width - 1 - adj_y1))
-					|| (adj2_valid && field.GetHint(adj_y2, adj_x2) == field.GetHint(adj_x2, width - 1 - adj_y2)))
+					&& ((adj1_valid && field.GetClue(adj_y1, adj_x1) == field.GetClue(adj_x1, width - 1 - adj_y1))
+					|| (adj2_valid && field.GetClue(adj_y2, adj_x2) == field.GetClue(adj_x2, width - 1 - adj_y2)))
 					) ++symmetry_score;
 
 				if (field.GetSegmentStyle(y, x) == field.GetSegmentStyle(height2 - x, y)
-					&& ((adj1_valid && field.GetHint(adj_y1, adj_x1) == field.GetHint(height - 1 - adj_x1, adj_y1))
-					|| (adj2_valid && field.GetHint(adj_y2, adj_x2) == field.GetHint(height - 1 - adj_x2, adj_y2)))
+					&& ((adj1_valid && field.GetClue(adj_y1, adj_x1) == field.GetClue(height - 1 - adj_x1, adj_y1))
+					|| (adj2_valid && field.GetClue(adj_y2, adj_x2) == field.GetClue(height - 1 - adj_x2, adj_y2)))
 					) ++symmetry_score;
 			}
 
 			if (field.GetSegmentStyle(y, x) == field.GetSegmentStyle(height2 - y, width2 - x)
-				&& ((adj1_valid && field.GetHint(adj_y1, adj_x1) == field.GetHint(height - 1 - adj_y1, width - 1 - adj_x1))
-				|| (adj2_valid && field.GetHint(adj_y2, adj_x2) == field.GetHint(height - 1 - adj_y2, width - 1 - adj_x2)))
+				&& ((adj1_valid && field.GetClue(adj_y1, adj_x1) == field.GetClue(height - 1 - adj_y1, width - 1 - adj_x1))
+				|| (adj2_valid && field.GetClue(adj_y2, adj_x2) == field.GetClue(height - 1 - adj_y2, width - 1 - adj_x2)))
 				) ++symmetry_score;
 			++possible_max;
 		}

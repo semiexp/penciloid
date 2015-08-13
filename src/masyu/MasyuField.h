@@ -10,9 +10,9 @@ class MasyuField : public GridLoop<MasyuField>
 {
 public:
 	enum {
-		HINT_NONE = 0,
-		HINT_BLACK = 1,
-		HINT_WHITE = 2
+		CLUE_NONE = 0,
+		CLUE_BLACK = 1,
+		CLUE_WHITE = 2
 	};
 
 	MasyuField();
@@ -22,9 +22,9 @@ public:
 	void Init(MasyuField &field);
 	void Init(MasyuProblem &prob);
 
-	inline int GetHint(int y, int x) { return hints[HintId(y, x)]; }
-	inline int GetHintSafe(int y, int x) { return (0 <= y && y <= GetHeight() && 0 <= x && x <= GetWidth()) ? GetHint(y, x) : HINT_NONE; }
-	int SetHint(int y, int x, int hint);
+	inline int GetClue(int y, int x) { return clues[ClueId(y, x)]; }
+	inline int GetClueSafe(int y, int x) { return (0 <= y && y <= GetHeight() && 0 <= x && x <= GetWidth()) ? GetClue(y, x) : CLUE_NONE; }
+	int SetClue(int y, int x, int clue);
 	inline int Assume() { return GridLoopAssume(*this); }
 
 	void CheckVertexSpecific(int y, int x);
@@ -33,9 +33,9 @@ public:
 
 private:
 	void CheckTheorem(int y, int x);
-	inline int HintId(int y, int x) { return y * (GetWidth() + 1) + x; }
+	inline int ClueId(int y, int x) { return y * (GetWidth() + 1) + x; }
 
-	int *hints;
+	int *clues;
 };
 
 }

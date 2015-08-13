@@ -16,7 +16,7 @@ static int FieldHash(Penciloid::SlitherlinkField &field, int hash_size)
 
 	for (int i = 0; i < field.GetHeight(); ++i) {
 		for (int j = 0; j < field.GetWidth(); ++j) {
-			ret = (ret << 3) | (field.GetHint(i, j) + 1);
+			ret = (ret << 3) | (field.GetClue(i, j) + 1);
 			ret %= hash_size;
 		}
 	}
@@ -30,42 +30,42 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 	SlitherlinkField field;
 	field.Init(height, width);
 
-	std::vector<std::pair<std::pair<int, int>, int> > current_hints;
+	std::vector<std::pair<std::pair<int, int>, int> > current_clues;
 
 	for (;;) {
-		// put a hint randomly
-		printf("%d\n", current_hints.size());
+		// put a clue randomly
+		printf("%d\n", current_clues.size());
 		std::vector<std::pair<std::pair<int, int>, int> > cand;
 
 		for (int i = 0; i < height; ++i) {
 			for (int j = 0; j < width; ++j) {
-				if (symmetry && current_hints.size() % 2 == 1) {
+				if (symmetry && current_clues.size() % 2 == 1) {
 					// TODO: odd * odd case
-					if (i + current_hints[current_hints.size() - 1].first.first != height - 1) continue;
-					if (j + current_hints[current_hints.size() - 1].first.second != width - 1) continue;
+					if (i + current_clues[current_clues.size() - 1].first.first != height - 1) continue;
+					if (j + current_clues[current_clues.size() - 1].first.second != width - 1) continue;
 				}
 
-				if (field.GetHint(i, j) != SlitherlinkField::HINT_NONE) continue;
+				if (field.GetClue(i, j) != SlitherlinkField::CLUE_NONE) continue;
 				if (!symmetry && field.GetSegmentStyle(i * 2, j * 2 + 1) != SlitherlinkField::LOOP_UNDECIDED
 					&& field.GetSegmentStyle(i * 2 + 1, j * 2) != SlitherlinkField::LOOP_UNDECIDED
 					&& field.GetSegmentStyle(i * 2 + 2, j * 2 + 1) != SlitherlinkField::LOOP_UNDECIDED
 					&& field.GetSegmentStyle(i * 2 + 1, j * 2 + 2) != SlitherlinkField::LOOP_UNDECIDED) continue;
 
-				bool zero_validity = current_hints.size() >= 3;
-				if (field.GetHintSafe(i - 1, j - 1) == 0
-					|| field.GetHintSafe(i - 1, j) == 0
-					|| field.GetHintSafe(i - 1, j + 1) == 0
-					|| field.GetHintSafe(i, j - 1) == 0
-					|| field.GetHintSafe(i, j + 1) == 0
-					|| field.GetHintSafe(i + 1, j - 1) == 0
-					|| field.GetHintSafe(i + 1, j) == 0
-					|| field.GetHintSafe(i + 1, j + 1) == 0) zero_validity = false;
+				bool zero_validity = current_clues.size() >= 3;
+				if (field.GetClueSafe(i - 1, j - 1) == 0
+					|| field.GetClueSafe(i - 1, j) == 0
+					|| field.GetClueSafe(i - 1, j + 1) == 0
+					|| field.GetClueSafe(i, j - 1) == 0
+					|| field.GetClueSafe(i, j + 1) == 0
+					|| field.GetClueSafe(i + 1, j - 1) == 0
+					|| field.GetClueSafe(i + 1, j) == 0
+					|| field.GetClueSafe(i + 1, j + 1) == 0) zero_validity = false;
 
 				for (int k = zero_validity ? 0 : 1; k < 4; ++k) {
 					SlitherlinkField field2;
 					field2.Init(field);
 
-					field2.SetHint(i, j, k);
+					field2.SetClue(i, j, k);
 					if (field2.GetStatus() & SolverStatus::INCONSISTENT) continue;
 
 					// field2.Assume();
@@ -87,28 +87,28 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 
 			SlitherlinkField field2;
 			field2.Init(field);
-			field2.SetHint(next_step.first.first, next_step.first.second, next_step.second);
+			field2.SetClue(next_step.first.first, next_step.first.second, next_step.second);
 			field2.Assume();
 			field2.CheckInOutRule();
 			field2.CheckConnectability();
 
 			if (field2.GetStatus() & SolverStatus::INCONSISTENT) continue;
 
-			current_hints.push_back(next_step);
-			field.SetHint(next_step.first.first, next_step.first.second, next_step.second);
+			current_clues.push_back(next_step);
+			field.SetClue(next_step.first.first, next_step.first.second, next_step.second);
 			field.Assume();
 			field.CheckInOutRule();
 			field.CheckConnectability();
 
 			if (field.GetStatus() == SolverStatus::SUCCESS) {
-				if (symmetry && current_hints.size() % 2 == 1) {
+				if (symmetry && current_clues.size() % 2 == 1) {
 					break;
 				}
 
 				ret.Init(height, width);
 				for (int y = 0; y < height; ++y) {
-					for (int x = 0; x < width; ++x) if (field.GetHint(y, x) != SlitherlinkField::HINT_NONE) {
-						ret.SetHint(y, x, field.GetHint(y, x));
+					for (int x = 0; x < width; ++x) if (field.GetClue(y, x) != SlitherlinkField::CLUE_NONE) {
+						ret.SetClue(y, x, field.GetClue(y, x));
 					}
 				}
 				return true;
@@ -120,13 +120,13 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 		continue;
 
 	rollback:
-		for (int t = 0; t < 15 && !current_hints.empty(); ++t) {
-			current_hints.pop_back();
+		for (int t = 0; t < 15 && !current_clues.empty(); ++t) {
+			current_clues.pop_back();
 		}
 
 		field.Init(height, width);
-		for (auto step : current_hints) {
-			field.SetHint(step.first.first, step.first.second, step.second);
+		for (auto step : current_clues) {
+			field.SetClue(step.first.first, step.first.second, step.second);
 		}
 		field.Assume();
 		field.CheckInOutRule();
@@ -150,7 +150,7 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 	current_problem.Init(height, width);
 
 	int max_step = height * width * 10;
-	int number_of_unplaced_hints = 0;
+	int number_of_unplaced_clues = 0;
 	int no_progress = 0;
 	int moc = 0;
 
@@ -158,8 +158,8 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 		for (int j = 0; j < width; ++j) {
 			int cont = constraint.GetCellConstraint(i, j);
 
-			if (cont >= 0 && cont <= 3) current_problem.SetHint(i, j, cont);
-			else if (cont == SlitherlinkProblemConstraint::HINT_SOME) ++number_of_unplaced_hints;
+			if (cont >= 0 && cont <= 3) current_problem.SetClue(i, j, cont);
+			else if (cont == SlitherlinkProblemConstraint::CLUE_SOME) ++number_of_unplaced_clues;
 		}
 	}
 
@@ -172,9 +172,9 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 		double temperature = 5.0; // 7.0 * exp(-2.0 * (double)step / max_step);
 		std::vector<std::pair<int, int> > locs;
 		for (int i = 0; i < height; ++i) {
-			for (int j = 0; j < width; ++j) if (constraint.GetCellConstraint(i, j) == SlitherlinkProblemConstraint::HINT_SOME) {
+			for (int j = 0; j < width; ++j) if (constraint.GetCellConstraint(i, j) == SlitherlinkProblemConstraint::CLUE_SOME) {
 				bool check_flg = false;
-				if (field.GetHint(i, j) == SlitherlinkField::HINT_NONE) check_flg = true;
+				if (field.GetClue(i, j) == SlitherlinkField::CLUE_NONE) check_flg = true;
 
 				for (int k = -7; k <= 7; ++k) {
 					for (int l = -7; l <= 7; ++l) {
@@ -197,40 +197,40 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 		int trial = 0;
 		for (auto &t : locs) {
 			int i = t.first, j = t.second;
-			int current_hint = current_problem.GetHint(i, j);
+			int current_clue = current_problem.GetClue(i, j);
 
 			bool zero_validity = true;
-			if (field.GetHintSafe(i - 1, j - 1) == 0
-				|| field.GetHintSafe(i - 1, j) == 0
-				|| field.GetHintSafe(i - 1, j + 1) == 0
-				|| field.GetHintSafe(i, j - 1) == 0
-				|| field.GetHintSafe(i, j + 1) == 0
-				|| field.GetHintSafe(i + 1, j - 1) == 0
-				|| field.GetHintSafe(i + 1, j) == 0
-				|| field.GetHintSafe(i + 1, j + 1) == 0) zero_validity = false;
+			if (field.GetClueSafe(i - 1, j - 1) == 0
+				|| field.GetClueSafe(i - 1, j) == 0
+				|| field.GetClueSafe(i - 1, j + 1) == 0
+				|| field.GetClueSafe(i, j - 1) == 0
+				|| field.GetClueSafe(i, j + 1) == 0
+				|| field.GetClueSafe(i + 1, j - 1) == 0
+				|| field.GetClueSafe(i + 1, j) == 0
+				|| field.GetClueSafe(i + 1, j + 1) == 0) zero_validity = false;
 
 			std::vector<int> nums;
-			for (int n = zero_validity ? 0 : 1; n <= 3; ++n) if (n != current_hint) nums.push_back(n);
+			for (int n = zero_validity ? 0 : 1; n <= 3; ++n) if (n != current_clue) nums.push_back(n);
 			for (int i = 0; i < nums.size(); ++i) {
 				int j = i + rnd.NextInt() % (nums.size() - i);
 				if (i != j) std::swap(nums[i], nums[j]);
 			}
 
-			int previous_hint = current_problem.GetHint(i, j);
+			int previous_clue = current_problem.GetClue(i, j);
 			SlitherlinkField common;
 
-			if (previous_hint == SlitherlinkField::HINT_NONE) {
+			if (previous_clue == SlitherlinkField::CLUE_NONE) {
 				common.Init(field);
 			} else {
-				current_problem.SetHint(i, j, SlitherlinkField::HINT_NONE);
+				current_problem.SetClue(i, j, SlitherlinkField::CLUE_NONE);
 				common.Init(current_problem, use_assumption);
 			}
 
 			for (int n : nums) {
-				current_problem.SetHint(i, j, n);
+				current_problem.SetClue(i, j, n);
 				SlitherlinkField field2;
 				field2.Init(common); ++trial;
-				field2.SetHint(i, j, n);
+				field2.SetClue(i, j, n);
 				if (use_assumption) field2.Assume();
 
 				bool transition = false;
@@ -256,7 +256,7 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 				if (hash[hash_id] >= 10) continue;
 
 				if (transition) {
-					if (current_hint == SlitherlinkField::HINT_NONE) --number_of_unplaced_hints;
+					if (current_clue == SlitherlinkField::CLUE_NONE) --number_of_unplaced_clues;
 					moc = std::max(moc, ++hash[hash_id]);
 					current_progress = new_progress;
 					is_progress = true;
@@ -268,10 +268,10 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 
 			if (is_progress) break;
 			else {
-				current_problem.SetHint(i, j, previous_hint);
+				current_problem.SetClue(i, j, previous_clue);
 			}
 		}
-		if (field.GetStatus() == SolverStatus::SUCCESS && number_of_unplaced_hints == 0) {
+		if (field.GetStatus() == SolverStatus::SUCCESS && number_of_unplaced_clues == 0) {
 			break;
 		}
 
@@ -280,11 +280,11 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 		}
 	}
 
-	if (field.GetStatus() == SolverStatus::SUCCESS && number_of_unplaced_hints == 0) {
+	if (field.GetStatus() == SolverStatus::SUCCESS && number_of_unplaced_clues == 0) {
 		ret.Init(height, width);
 		for (int y = 0; y < height; ++y) {
-			for (int x = 0; x < width; ++x) if (field.GetHint(y, x) != SlitherlinkField::HINT_NONE) {
-				ret.SetHint(y, x, field.GetHint(y, x));
+			for (int x = 0; x < width; ++x) if (field.GetClue(y, x) != SlitherlinkField::CLUE_NONE) {
+				ret.SetClue(y, x, field.GetClue(y, x));
 			}
 		}
 		return true;
@@ -299,41 +299,41 @@ void SlitherlinkGenerator::SimplifyProblem(SlitherlinkProblem &problem, bool sym
 
 	for (int i = 0; i < height; ++i) {
 		for (int j = 0; j < width; ++j) {
-			if (problem.GetHint(i, j) == SlitherlinkField::HINT_NONE) continue;
+			if (problem.GetClue(i, j) == SlitherlinkField::CLUE_NONE) continue;
 
 			if (!symmetry) {
-				int hint_tmp = problem.GetHint(i, j);
-				problem.SetHint(i, j, SlitherlinkField::HINT_NONE);
+				int clue_tmp = problem.GetClue(i, j);
+				problem.SetClue(i, j, SlitherlinkField::CLUE_NONE);
 
 				SlitherlinkField field;
 				field.Init(problem);
 				field.Assume();
 
 				if (field.GetStatus() != SolverStatus::SUCCESS) {
-					problem.SetHint(i, j, hint_tmp);
+					problem.SetClue(i, j, clue_tmp);
 				}
 			} else {
 				int i2 = height - 1 - i, j2 = width - 1 - j;
-				int hint_tmp = problem.GetHint(i, j);
-				int hint_tmp2 = problem.GetHint(i2, j2);
-				problem.SetHint(i, j, SlitherlinkField::HINT_NONE);
-				problem.SetHint(i2, j2, SlitherlinkField::HINT_NONE);
+				int clue_tmp = problem.GetClue(i, j);
+				int clue_tmp2 = problem.GetClue(i2, j2);
+				problem.SetClue(i, j, SlitherlinkField::CLUE_NONE);
+				problem.SetClue(i2, j2, SlitherlinkField::CLUE_NONE);
 
 				SlitherlinkField field;
 				field.Init(problem);
 				field.Assume();
 
 				if (field.GetStatus() != SolverStatus::SUCCESS) {
-					problem.SetHint(i, j, hint_tmp);
-					problem.SetHint(i2, j2, hint_tmp2);
+					problem.SetClue(i, j, clue_tmp);
+					problem.SetClue(i2, j2, clue_tmp2);
 				}
 			}
 		}
 	}
 }
-void SlitherlinkGenerator::GenerateConstraint(int height, int width, int n_hints, int symmetricity, XorShift &rnd, SlitherlinkProblemConstraint &ret)
+void SlitherlinkGenerator::GenerateConstraint(int height, int width, int n_clues, int symmetricity, XorShift &rnd, SlitherlinkProblemConstraint &ret)
 {
-	UnionFind hint_group(height * width);
+	UnionFind clue_group(height * width);
 	ret.Init(height, width);
 
 	if ((symmetricity & (SHAPE_ROTATION_90 ^ SHAPE_ROTATION_180)) && height == width) {
@@ -342,7 +342,7 @@ void SlitherlinkGenerator::GenerateConstraint(int height, int width, int n_hints
 				int id = i * height + j;
 				int rot90 = j * height + (height - 1 - i);
 
-				hint_group.Join(id, rot90);
+				clue_group.Join(id, rot90);
 			}
 		}
 	} else if (symmetricity & SHAPE_ROTATION_180) {
@@ -351,7 +351,7 @@ void SlitherlinkGenerator::GenerateConstraint(int height, int width, int n_hints
 				int id = i * width + j;
 				int rot180 = (height - 1 - i) * width + (width - 1 - j);
 
-				hint_group.Join(id, rot180);
+				clue_group.Join(id, rot180);
 			}
 		}
 	}
@@ -362,7 +362,7 @@ void SlitherlinkGenerator::GenerateConstraint(int height, int width, int n_hints
 				int id = i * width + j;
 				int symm = i * width + (width - 1 - j);
 
-				hint_group.Join(id, symm);
+				clue_group.Join(id, symm);
 			}
 		}
 	}
@@ -373,24 +373,24 @@ void SlitherlinkGenerator::GenerateConstraint(int height, int width, int n_hints
 				int id = i * width + j;
 				int symm = (height - 1 - i) * width + j;
 
-				hint_group.Join(id, symm);
+				clue_group.Join(id, symm);
 			}
 		}
 	}
 
-	std::vector<std::pair<int, int> > possible_hints, candidates;
+	std::vector<std::pair<int, int> > possible_clues, candidates;
 
-	for (int i = 0; i < height * width; ++i) if (hint_group.Root(i) == i)
-		possible_hints.push_back(std::make_pair(i, hint_group.UnionSize(i)));
+	for (int i = 0; i < height * width; ++i) if (clue_group.Root(i) == i)
+		possible_clues.push_back(std::make_pair(i, clue_group.UnionSize(i)));
 
-	while (n_hints > 0) {
+	while (n_clues > 0) {
 		int score_sum = 0;
 		candidates.clear();
 
-		for (int i = 0; i < possible_hints.size(); ++i) if (possible_hints[i].second <= n_hints) {
-			int y = possible_hints[i].first / width, x = possible_hints[i].first % width;
+		for (int i = 0; i < possible_clues.size(); ++i) if (possible_clues[i].second <= n_clues) {
+			int y = possible_clues[i].first / width, x = possible_clues[i].first % width;
 
-			if (ret.IsHint(y, x)) continue;
+			if (ret.IsClue(y, x)) continue;
 
 			int score = 0;
 
@@ -398,7 +398,7 @@ void SlitherlinkGenerator::GenerateConstraint(int height, int width, int n_hints
 				for (int dx = -2; dx <= 2; ++dx) {
 					int y2 = y + dy, x2 = x + dx;
 					if (0 <= y2 && y2 < height && 0 <= x2 && x2 < width) {
-						if (ret.IsHint(y2, x2)) {
+						if (ret.IsClue(y2, x2)) {
 							score += 5 - abs(dy) - abs(dx);
 							if (abs(dy) + abs(dx) == 1) score += 2;
 						}
@@ -417,18 +417,18 @@ void SlitherlinkGenerator::GenerateConstraint(int height, int width, int n_hints
 		
 		for (int i = 0; i < candidates.size(); ++i) {
 			if (cand_pos < candidates[i].second) {
-				int representative = possible_hints[candidates[i].first].first;
+				int representative = possible_clues[candidates[i].first].first;
 
 				// TODO: improve time complexity
-				for (int j = 0; j < height * width; ++j) if (hint_group.Root(j) == hint_group.Root(representative)) {
-					--n_hints;
-					ret.SetCellConstraint(j / width, j % width, SlitherlinkProblemConstraint::HINT_SOME);
+				for (int j = 0; j < height * width; ++j) if (clue_group.Root(j) == clue_group.Root(representative)) {
+					--n_clues;
+					ret.SetCellConstraint(j / width, j % width, SlitherlinkProblemConstraint::CLUE_SOME);
 				}
 				break;
 			} else cand_pos -= candidates[i].second;
 		}
 	}
-	for (int i = 0; i < height; ++i) for (int j = 0; j < width; ++j) if (ret.IsHint(i, j)) ++n_hints;
+	for (int i = 0; i < height; ++i) for (int j = 0; j < width; ++j) if (ret.IsClue(i, j)) ++n_clues;
 }
 
 }

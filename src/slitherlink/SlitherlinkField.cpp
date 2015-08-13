@@ -6,13 +6,13 @@ namespace Penciloid
 {
 SlitherlinkField::SlitherlinkField()
 {
-	hints = nullptr;
+	clues = nullptr;
 	assumption_table = nullptr;
 }
 
 SlitherlinkField::~SlitherlinkField()
 {
-	if (hints) delete[] hints;
+	if (clues) delete[] clues;
 	if (assumption_table) delete[] assumption_table;
 }
 
@@ -28,10 +28,10 @@ void SlitherlinkField::Init(int height_t, int width_t, bool enable_assumption_ta
 		std::fill(assumption_table, assumption_table + (2 * GetHeight() + 1) + (2 * GetWidth() + 1), false);
 	} else assumption_table = nullptr;
 
-	if (hints) delete[] hints;
-	hints = new int[GetHeight() * GetWidth()];
+	if (clues) delete[] clues;
+	clues = new int[GetHeight() * GetWidth()];
 
-	for (int i = 0; i < GetHeight() * GetWidth(); ++i) hints[i] = HINT_NONE;
+	for (int i = 0; i < GetHeight() * GetWidth(); ++i) clues[i] = CLUE_NONE;
 }
 
 void SlitherlinkField::Init(SlitherlinkField &field)
@@ -41,9 +41,9 @@ void SlitherlinkField::Init(SlitherlinkField &field)
 
 	GridLoop<SlitherlinkField>::Init(field);
 
-	if (hints) delete[] hints;
-	hints = new int[GetHeight() * GetWidth()];
-	memcpy(hints, field.hints, sizeof(int) * GetHeight() * GetWidth());
+	if (clues) delete[] clues;
+	clues = new int[GetHeight() * GetWidth()];
+	memcpy(clues, field.clues, sizeof(int) * GetHeight() * GetWidth());
 
 	if (field.assumption_table != nullptr) {
 		assumption_table = new bool[(2 * GetHeight() + 1) * (2 * GetWidth() + 1)];
@@ -65,19 +65,19 @@ void SlitherlinkField::Init(SlitherlinkProblem &prob, bool enable_assumption_tab
 
 	for (int i = 0; i < GetHeight(); ++i) {
 		for (int j = 0; j < GetWidth(); ++j) {
-			int hint = prob.GetHint(i, j);
+			int clue = prob.GetClue(i, j);
 
-			if (hint != HINT_NONE) SetHint(i, j, hint);
+			if (clue != CLUE_NONE) SetClue(i, j, clue);
 		}
 	}
 }
 
-int SlitherlinkField::SetHint(int y, int x, int hint)
+int SlitherlinkField::SetClue(int y, int x, int clue)
 {
 	int id = CellId(y, x);
 
-	if (hints[id] != HINT_NONE) {
-		if (hints[id] != hint) {
+	if (clues[id] != CLUE_NONE) {
+		if (clues[id] != clue) {
 			return UpdateStatus(SolverStatus::INCONSISTENT);
 		}
 		return UpdateStatus(0);
@@ -89,7 +89,7 @@ int SlitherlinkField::SetHint(int y, int x, int hint)
 			if (GetSegmentStyle(y * 2 + 1 + GridConstant::GRID_DY[i], x * 2 + 1 + GridConstant::GRID_DX[i]) == LOOP_LINE) ++adjacent_lines;
 		}
 
-		if (adjacent_lines != hint) {
+		if (adjacent_lines != clue) {
 			return UpdateStatus(SolverStatus::INCONSISTENT);
 		}
 	}
@@ -102,7 +102,7 @@ int SlitherlinkField::SetHint(int y, int x, int hint)
 		}
 	}
 
-	hints[id] = hint;
+	clues[id] = clue;
 	CheckTheorem(y * 2 + 1, x * 2 + 1);
 	CheckCellSpecific(y * 2 + 1, x * 2 + 1);
 
@@ -132,12 +132,12 @@ void SlitherlinkField::SegmentDetermined(int y, int x)
 
 void SlitherlinkField::CheckTheorem(int y, int x)
 {
-	if (GetHint(y / 2, x / 2) == 3) {
+	if (GetClue(y / 2, x / 2) == 3) {
 		// vertically or horizontally adjacent 3
 
 		for (int i = 0; i < 4; ++i) {
 			int dy = GridConstant::GRID_DY[i], dx = GridConstant::GRID_DX[i];
-			if (GetHintSafe(y / 2 + dy, x / 2 + dx) == 3) {
+			if (GetClueSafe(y / 2 + dy, x / 2 + dx) == 3) {
 				DetermineLine(y - dy, x - dx);
 				DetermineLine(y + dy, x + dx);
 				DetermineBlank(y + dy + 2 * dx, x + dx + 2 * dy);
@@ -146,7 +146,7 @@ void SlitherlinkField::CheckTheorem(int y, int x)
 			}
 
 			int dy2 = GridConstant::GRID_DY[(i + 1) % 4], dx2 = GridConstant::GRID_DX[(i + 1) % 4];
-			if (GetHintSafe(y / 2 + dy + dy2, x / 2 + dx + dx2) == 3) {
+			if (GetClueSafe(y / 2 + dy + dy2, x / 2 + dx + dx2) == 3) {
 				DetermineLine(y - dy, x - dx);
 				DetermineLine(y - dy2, x - dx2);
 				DetermineLine(y + dy * 3 + dy2 * 2, x + dx * 3 + dx2 * 2);
@@ -160,12 +160,12 @@ void SlitherlinkField::CheckCellSpecific(int y, int x)
 {
 	int id = CellId(y / 2, x / 2);
 
-	if (hints == nullptr || hints[id] == HINT_NONE) return;
+	if (clues == nullptr || clues[id] == CLUE_NONE) return;
 
 	if (method.diagonal_chain) CheckDiagonalChain(y, x);
 
 	if (SlitherlinkDatabase::IsCreated()) {
-		int db_index = hints[id];
+		int db_index = clues[id];
 
 		for (int i = 11; i >= 0; --i) {
 			db_index = db_index * 3 + GetSegmentStyleSafe(y + SlitherlinkDatabase::DATABASE_DY[i], x + SlitherlinkDatabase::DATABASE_DX[i]);
@@ -196,7 +196,7 @@ void SlitherlinkField::CheckCellSpecific(int y, int x)
 	int segment_line = 15, segment_blank = 15;
 
 	for (int i = 0; i < 15; ++i) {
-		if (hints[id] != bits[i]) continue;
+		if (clues[id] != bits[i]) continue;
 
 		// checking the consistency with the current status
 
@@ -252,7 +252,7 @@ void SlitherlinkField::CheckCellSpecific(int y, int x)
 		}
 	}
 
-	if (hints[id] == 3) {
+	if (clues[id] == 3) {
 		for (int i = 0; i < 4; ++i) {
 			int dy1 = GridConstant::GRID_DY[i], dx1 = GridConstant::GRID_DX[i];
 			int dy2 = GridConstant::GRID_DY[(i + 1) & 3], dx2 = GridConstant::GRID_DX[(i + 1) & 3];
@@ -285,8 +285,8 @@ void SlitherlinkField::CheckDiagonalChain(int y, int x)
 		int style3 = GetSegmentStyle(y - dy1, x - dx1);
 		int style4 = GetSegmentStyle(y - dy2, x - dx2);
 
-		if (GetHint(y / 2, x / 2) != HINT_NONE && style3 != LOOP_UNDECIDED && style4 != LOOP_UNDECIDED) {
-			line_in = GetHint(y / 2, x / 2) - ((style3 == LOOP_LINE ? 1 : 0) + (style4 == LOOP_LINE ? 1 : 0));
+		if (GetClue(y / 2, x / 2) != CLUE_NONE && style3 != LOOP_UNDECIDED && style4 != LOOP_UNDECIDED) {
+			line_in = GetClue(y / 2, x / 2) - ((style3 == LOOP_LINE ? 1 : 0) + (style4 == LOOP_LINE ? 1 : 0));
 		}
 
 		if (line_in != -1) {
@@ -296,15 +296,15 @@ void SlitherlinkField::CheckDiagonalChain(int y, int x)
 			while (true) {
 				if (current_y < 0 || current_x < 0 || current_y > 2 * GetHeight() || current_x > 2 * GetWidth()) break;
 				
-				int hint2 = GetHint(current_y / 2, current_x / 2);
+				int clue2 = GetClue(current_y / 2, current_x / 2);
 
-				if (hint2 == HINT_NONE || hint2 == 0) break;
-				if (hint2 == 2) {
+				if (clue2 == CLUE_NONE || clue2 == 0) break;
+				if (clue2 == 2) {
 					current_y += 2 * (dy1 + dy2);
 					current_x += 2 * (dx1 + dx2);
 					continue;
 				}
-				if (hint2 == 1) {
+				if (clue2 == 1) {
 					if (line_in == 0) {
 						DetermineBlank(current_y - dy1, current_x - dx1);
 						DetermineBlank(current_y - dy2, current_x - dx2);
@@ -314,7 +314,7 @@ void SlitherlinkField::CheckDiagonalChain(int y, int x)
 					}
 					break;
 				}
-				if (hint2 == 3) {
+				if (clue2 == 3) {
 					if (line_in == 0) {
 						DetermineLine(current_y - dy1, current_x - dx1);
 						DetermineLine(current_y - dy2, current_x - dx2);
@@ -406,8 +406,8 @@ void SlitherlinkField::Debug()
 				if (style == LOOP_LINE) fprintf(stderr, "|");
 				if (style == LOOP_BLANK) fprintf(stderr, "X");
 			} else if (i % 2 == 1 && j % 2 == 1) {
-				if (GetHint(i / 2, j / 2) == HINT_NONE) fprintf(stderr, "   ");
-				else fprintf(stderr, " %d ", GetHint(i / 2, j / 2));
+				if (GetClue(i / 2, j / 2) == CLUE_NONE) fprintf(stderr, "   ");
+				else fprintf(stderr, " %d ", GetClue(i / 2, j / 2));
 			}
 		}
 		fprintf(stderr, "\n");
