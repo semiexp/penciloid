@@ -1,4 +1,5 @@
 #include "SlitherlinkDatabase.h"
+#include "SlitherlinkDatabaseMethod.hpp"
 
 namespace Penciloid
 {
@@ -60,7 +61,7 @@ void SlitherlinkDatabase::CreateDatabase()
 	}
 }
 
-void SlitherlinkDatabase::CreateReducedDatabase()
+void SlitherlinkDatabase::CreateReducedDatabase(SlitherlinkDatabaseMethod &method)
 {
 	const int pow3[] = { 1, 3, 9, 27, 81, 243, 729, 2187, 6561, 19683, 59049, 177147, 531441 };
 
@@ -78,7 +79,7 @@ void SlitherlinkDatabase::CreateReducedDatabase()
 				tmp /= 3;
 			}
 
-			database[hint * pow3[12] + id] = SolveLocal(hint, styles);
+			database[hint * pow3[12] + id] = SolveLocal(hint, styles, method);
 		}
 	}
 }
@@ -91,37 +92,50 @@ void SlitherlinkDatabase::ReleaseDatabase()
 	}
 }
 
-int SlitherlinkDatabase::SolveLocal(int hint, int styles[12])
+int SlitherlinkDatabase::SolveLocal(int clue, int styles[12], SlitherlinkDatabaseMethod &method)
 {
+	const int UNDECIDED = 0, LINE = 1, BLANK = 2;
+	int segments[5][5];
+
+	for (int i = 0; i < 12; ++i) segments[2 + DATABASE_DY[i]][2 + DATABASE_DX[i]] = styles[i];
+
+	if (method.adjacent_lines) {
+		int n_lines =
+			(segments[2][1] == LINE ? 1 : 0) +
+			(segments[2][3] == LINE ? 1 : 0) +
+			(segments[1][2] == LINE ? 1 : 0) +
+			(segments[3][2] == LINE ? 1 : 0);
+		int n_blanks =
+			(segments[2][1] == BLANK ? 1 : 0) +
+			(segments[2][3] == BLANK ? 1 : 0) +
+			(segments[1][2] == BLANK ? 1 : 0) +
+			(segments[3][2] == BLANK ? 1 : 0);
+
+		if (n_lines > clue || 4 - n_blanks < clue) return -1;
+		
+		if (n_lines == clue) {
+			if (segments[2][1] == UNDECIDED) segments[2][1] = BLANK;
+			if (segments[2][3] == UNDECIDED) segments[2][3] = BLANK;
+			if (segments[1][2] == UNDECIDED) segments[1][2] = BLANK;
+			if (segments[3][2] == UNDECIDED) segments[3][2] = BLANK;
+		}
+		if (4 - n_blanks == clue) {
+			if (segments[2][1] == UNDECIDED) segments[2][1] = LINE;
+			if (segments[2][3] == UNDECIDED) segments[2][3] = LINE;
+			if (segments[1][2] == UNDECIDED) segments[1][2] = LINE;
+			if (segments[3][2] == UNDECIDED) segments[3][2] = LINE;
+		}
+	}
+
+	// TODO: support other methods
+
 	int ret = 0;
-
-	for (int i = 0; i < 12; ++i) ret |= styles[i] << (2 * i);
-
-	// around the cell
-#define AT(x) ((ret >> (x * 2)) & 3)
-#define SET_L(x) (ret |= 1 << (x * 2))
-#define SET_B(x) (ret |= 2 << (x * 2))
-
-	int n_lines = (AT(3) == 1 ? 1 : 0) + (AT(5) == 1 ? 1 : 0) + (AT(6) == 1 ? 1 : 0) + (AT(8) == 1 ? 1 : 0);
-	int n_blanks = (AT(3) == 2 ? 1 : 0) + (AT(5) == 2 ? 1 : 0) + (AT(6) == 2 ? 1 : 0) + (AT(8) == 2 ? 1 : 0);
-
-	if (n_lines > hint) return -1;
-	if (4 - n_blanks < hint) return -1;
-
-	if (n_lines == hint) {
-		if (AT(3) == 0)  SET_B(3);
-		if (AT(5) == 0)  SET_B(5);
-		if (AT(6) == 0)  SET_B(6);
-		if (AT(8) == 0)  SET_B(8);
-	}
-	if (4 - n_blanks == hint) {
-		if (AT(3) == 0)  SET_L(3);
-		if (AT(5) == 0)  SET_L(5);
-		if (AT(6) == 0)  SET_L(6);
-		if (AT(8) == 0)  SET_L(8);
+	for (int i = 0; i < 12; ++i) {
+		int y = 2 + DATABASE_DY[i], x = 2 + DATABASE_DX[i];
+		if (segments[y][x] == 3) return -1;
+		ret |= segments[y][x] << (2 * i);
 	}
 
-	for (int i = 0; i < 12; ++i) if (AT(i) == 3) return -1;
 	return ret;
 }
 }

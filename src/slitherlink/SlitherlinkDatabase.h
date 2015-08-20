@@ -2,12 +2,13 @@
 
 namespace Penciloid
 {
+class SlitherlinkDatabaseMethod;
 
 class SlitherlinkDatabase
 {
 public:
 	static void CreateDatabase();
-	static void CreateReducedDatabase();
+	static void CreateReducedDatabase(SlitherlinkDatabaseMethod &method);
 	static void ReleaseDatabase();
 	static bool IsCreated() { return database != nullptr; }
 
@@ -16,7 +17,7 @@ public:
 	static const int DATABASE_DX[12];
 
 private:
-	static int SolveLocal(int hint, int styles[12]);
+	static int SolveLocal(int clue, int styles[12], SlitherlinkDatabaseMethod &method);
 };
 
 }
