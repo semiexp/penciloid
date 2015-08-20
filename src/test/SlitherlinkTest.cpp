@@ -2,6 +2,7 @@
 #include <ctime>
 
 #include "../slitherlink/SlitherlinkDatabase.h"
+#include "../slitherlink/SlitherlinkDatabaseMethod.hpp"
 #include "../slitherlink/SlitherlinkField.h"
 #include "../slitherlink/SlitherlinkProblem.h"
 #include "Test.h"
@@ -177,6 +178,55 @@ void PenciloidTest::SlitherlinkTest4()
 		assert(field.GetSegmentStyle(6, 5) == SlitherlinkField::LOOP_LINE);
 		assert(field.GetSegmentStyle(5, 6) == SlitherlinkField::LOOP_LINE);
 	}
+}
+
+void PenciloidTest::SlitherlinkTest5()
+{
+	SlitherlinkDatabase::CreateReducedDatabase(SlitherlinkDatabaseMethod());
+
+	{
+		SlitherlinkProblem prob;
+		prob.Init(4, 4);
+		prob.SetClue(0, 0, 1);
+
+		SlitherlinkField field;
+		field.Init(prob);
+		field.CheckAll();
+
+		assert(field.GetStatus() == SolverStatus::NORMAL);
+		assert(field.GetSegmentStyle(0, 1) == SlitherlinkField::LOOP_BLANK);
+		assert(field.GetSegmentStyle(1, 0) == SlitherlinkField::LOOP_BLANK);
+	}
+
+	{
+		SlitherlinkProblem prob;
+		prob.Init(4, 4);
+		prob.SetClue(0, 0, 3);
+
+		SlitherlinkField field;
+		field.Init(prob);
+		field.CheckAll();
+
+		assert(field.GetStatus() == SolverStatus::NORMAL);
+		assert(field.GetSegmentStyle(0, 1) == SlitherlinkField::LOOP_LINE);
+		assert(field.GetSegmentStyle(1, 0) == SlitherlinkField::LOOP_LINE);
+	}
+
+	{
+		SlitherlinkProblem prob;
+		prob.Init(4, 4);
+		prob.SetClue(0, 0, 2);
+
+		SlitherlinkField field;
+		field.Init(prob);
+		field.CheckAll();
+
+		assert(field.GetStatus() == SolverStatus::NORMAL);
+		assert(field.GetSegmentStyle(0, 3) == SlitherlinkField::LOOP_LINE);
+		assert(field.GetSegmentStyle(3, 0) == SlitherlinkField::LOOP_LINE);
+	}
+
+	SlitherlinkDatabase::ReleaseDatabase();
 }
 
 }
