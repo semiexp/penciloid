@@ -1,5 +1,7 @@
 #pragma once
 
+#include "SlitherlinkMethod.hpp"
+
 namespace Penciloid
 {
 class SlitherlinkProblemConstraint
@@ -20,6 +22,11 @@ public:
 	inline int GetCellConstraint(int y, int x) const { return field[CellId(y, x)]; }
 	inline void SetCellConstraint(int y, int x, int v) { field[CellId(y, x)] = v; }
 
+	inline bool GetUseAssumption() const { return use_assumption; }
+	inline void SetUseAssumption(bool assumption) { use_assumption = assumption; }
+	inline SlitherlinkMethod GetMethod() const { return method; }
+	inline void SetMethod(SlitherlinkMethod &met) { method = met; }
+
 	static const int CLUE_NONE = -1;
 	static const int CLUE_SOME = -2;
 
@@ -28,6 +35,8 @@ private:
 
 	int height, width;
 	int *field;
+	SlitherlinkMethod method;
+	bool use_assumption;
 };
 
 }

@@ -71,9 +71,10 @@ void PenciloidExamples::SymmetricGenerator()
 			rotation_90 ? SlitherlinkGenerator::SHAPE_ROTATION_90 : SlitherlinkGenerator::SHAPE_ROTATION_180,
 			xs,
 			cond);
+		cond.SetUseAssumption(false);
 
 		SlitherlinkProblem prob;
-		if (!SlitherlinkGenerator::GenerateOfShape(cond, prob, xs, false)) continue;
+		if (!SlitherlinkGenerator::GenerateOfShape(cond, prob, xs)) continue;
 
 		SlitherlinkField field;
 		field.Init(prob);

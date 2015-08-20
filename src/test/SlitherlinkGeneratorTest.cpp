@@ -60,7 +60,8 @@ void PenciloidTest::SlitherlinkGeneratorOfShapeTest()
 	SlitherlinkProblem prob;
 	SlitherlinkProblemConstraint constraint;
 	constraint.Init(height, width, shape);
-	
+	constraint.SetUseAssumption(false);
+
 	XorShift rnd((int)time(NULL));
 
 	SlitherlinkDatabase::CreateDatabase();
@@ -68,7 +69,7 @@ void PenciloidTest::SlitherlinkGeneratorOfShapeTest()
 	time_t start, end;
 	start = clock();
 	for (int t = 0; t < 2000; ++t) {
-		while (!SlitherlinkGenerator::GenerateOfShape(constraint, prob, rnd, true));
+		while (!SlitherlinkGenerator::GenerateOfShape(constraint, prob, rnd));
 		end = clock();
 		double elaps = (double)(end - start) / CLOCKS_PER_SEC;
 		printf("%d (%.2f[s] elapsed, %.2f[prob/s])\n", t + 1, elaps, (t + 1) / elaps);

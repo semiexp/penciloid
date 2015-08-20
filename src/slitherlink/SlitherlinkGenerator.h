@@ -10,7 +10,7 @@ class SlitherlinkGenerator
 {
 public:
 	static bool GenerateNaive(int height, int width, SlitherlinkProblem &ret, bool symmetry = false);
-	static bool GenerateOfShape(SlitherlinkProblemConstraint &constraint, SlitherlinkProblem &ret, XorShift &rnd, bool use_assumption = false);
+	static bool GenerateOfShape(SlitherlinkProblemConstraint &constraint, SlitherlinkProblem &ret, XorShift &rnd);
 	static void SimplifyProblem(SlitherlinkProblem &problem, bool symmetry = false);
 	static void GenerateConstraint(int height, int width, int n_hints, int symmetricity, XorShift &rnd, SlitherlinkProblemConstraint &ret);
 

@@ -140,7 +140,7 @@ bool SlitherlinkGenerator::GenerateNaive(int height, int width, SlitherlinkProbl
 	return false;
 }
 
-bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constraint, SlitherlinkProblem &ret, XorShift &rnd, bool use_assumption)
+bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constraint, SlitherlinkProblem &ret, XorShift &rnd)
 {
 	int height = constraint.GetHeight(), width = constraint.GetWidth();
 	const int hash_size = 100007;
@@ -164,6 +164,7 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 	}
 
 	SlitherlinkField field;
+	field.SetMethod(constraint.GetMethod());
 	field.Init(current_problem);
 	for (int step = 0; step < max_step; ++step) {
 		int current_progress = field.GetProgress();
@@ -218,20 +219,22 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 
 			int previous_clue = current_problem.GetClue(i, j);
 			SlitherlinkField common;
+			common.SetMethod(constraint.GetMethod());
 
 			if (previous_clue == SlitherlinkField::CLUE_NONE) {
 				common.Init(field);
 			} else {
 				current_problem.SetClue(i, j, SlitherlinkField::CLUE_NONE);
-				common.Init(current_problem, use_assumption);
+				common.Init(current_problem, constraint.GetUseAssumption());
 			}
 
 			for (int n : nums) {
 				current_problem.SetClue(i, j, n);
 				SlitherlinkField field2;
+				field2.SetMethod(constraint.GetMethod());
 				field2.Init(common); ++trial;
 				field2.SetClue(i, j, n);
-				if (use_assumption) field2.Assume();
+				if (constraint.GetUseAssumption()) field2.Assume();
 
 				bool transition = false;
 
@@ -247,6 +250,7 @@ bool SlitherlinkGenerator::GenerateOfShape(SlitherlinkProblemConstraint &constra
 				if (!transition) continue;
 
 				SlitherlinkField field3;
+				field3.SetMethod(constraint.GetMethod());
 				field3.Init(field2);
 				field3.CheckInOutRule();
 				field3.CheckConnectability();
