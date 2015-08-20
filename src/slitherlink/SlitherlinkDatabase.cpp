@@ -1,5 +1,6 @@
 #include "SlitherlinkDatabase.h"
 #include "SlitherlinkDatabaseMethod.hpp"
+#include "../common/SolverConstant.h"
 
 namespace Penciloid
 {
@@ -124,6 +125,41 @@ int SlitherlinkDatabase::SolveLocal(int clue, int styles[12], SlitherlinkDatabas
 			if (segments[2][3] == UNDECIDED) segments[2][3] = LINE;
 			if (segments[1][2] == UNDECIDED) segments[1][2] = LINE;
 			if (segments[3][2] == UNDECIDED) segments[3][2] = LINE;
+		}
+	}
+
+	for (int dir = 0; dir < 4; ++dir) {
+		int dy1 = GridConstant::GRID_DY[dir], dx1 = GridConstant::GRID_DX[dir];
+		int dy2 = GridConstant::GRID_DY[(dir + 1) % 4], dx2 = GridConstant::GRID_DX[(dir + 1) % 4];
+
+		if (segments[2 + dy1 * 2 + dy2][2 + dx1 * 2 + dx2] == BLANK && segments[2 + dy1 + dy2 * 2][2 + dx1 + dx2 * 2] == BLANK) {
+			// this cell is corner
+
+			if (clue == 1 && method.corner_1) {
+				segments[2 + dy1][2 + dx1] = segments[2 + dy2][2 + dx2] = BLANK;
+			}
+			if (clue == 2 && method.corner_2) {
+				int out_y1, out_x1, out_y2, out_x2;
+
+				out_y1 = 2 + dy1 * 2 - dy2, out_x1 = 2 + dx1 * 2 - dx2;
+				out_y2 = 2 + dy1 - dy2 * 2, out_x2 = 2 + dx1 - dx2 * 2;
+
+				if (segments[out_y1][out_x1] == LINE) segments[out_y2][out_x2] |= BLANK;
+				if (segments[out_y1][out_x1] == BLANK) segments[out_y2][out_x2] |= LINE;
+				if (segments[out_y2][out_x2] == LINE) segments[out_y1][out_x1] |= BLANK;
+				if (segments[out_y2][out_x2] == BLANK) segments[out_y1][out_x1] |= LINE;
+
+				out_y1 = 2 - dy1 * 2 + dy2, out_x1 = 2 - dx1 * 2 + dx2;
+				out_y2 = 2 - dy1 + dy2 * 2, out_x2 = 2 - dx1 + dx2 * 2;
+
+				if (segments[out_y1][out_x1] == LINE) segments[out_y2][out_x2] |= BLANK;
+				if (segments[out_y1][out_x1] == BLANK) segments[out_y2][out_x2] |= LINE;
+				if (segments[out_y2][out_x2] == LINE) segments[out_y1][out_x1] |= BLANK;
+				if (segments[out_y2][out_x2] == BLANK) segments[out_y1][out_x1] |= LINE;
+			}
+			if (clue == 3 && method.corner_3) {
+				segments[2 + dy1][2 + dx1] = segments[2 + dy2][2 + dx2] = LINE;
+			}
 		}
 	}
 
