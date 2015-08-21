@@ -1,5 +1,8 @@
 #include <cassert>
 #include <ctime>
+#include <iostream>
+#include <cstdlib>
+#include <vector>
 
 #include "../slitherlink/SlitherlinkDatabase.h"
 #include "../slitherlink/SlitherlinkDatabaseMethod.hpp"
@@ -9,6 +12,37 @@
 
 namespace Penciloid
 {
+void PenciloidTest::SlitherlinkClueTest(int height, int width, std::vector<const char*> board, int expected_status, int test_id = -1)
+{
+	SlitherlinkField field;
+	field.Init(height, width);
+
+	for (int y = 0; y < height; ++y) {
+		for (int x = 0; x < width; ++x) {
+			char clue = board[y * 2 + 1][x * 2 + 1];
+			if ('0' <= clue && clue <= '3') field.SetClue(y, x, clue - '0');
+		}
+	}
+
+	field.CheckAll();
+
+	for (int y = 0; y <= height * 2; ++y) {
+		for (int x = 0; x <= width * 2; ++x) {
+			if (y % 2 == x % 2) continue; // this is not a segment
+
+			int expected =
+				board[y][x] == ' ' ? SlitherlinkField::LOOP_UNDECIDED :
+				board[y][x] == 'x' ? SlitherlinkField::LOOP_BLANK : SlitherlinkField::LOOP_LINE;
+
+			if (field.GetSegmentStyle(y, x) != expected) {
+				std::cerr << "SlitherlinkClueTest failed in test #" << test_id << std::endl;
+				std::cerr << "expected: " << expected << ", actual: " << field.GetSegmentStyle(y, x) << " at (" << y << "," << x << ")" << std::endl;
+				exit(1);
+			}
+		}
+	}
+}
+
 bool PenciloidTest::SlitherlinkCheckGrid(SlitherlinkField &field, const int *expected)
 {
 	int height = field.GetHeight() * 2 + 1, width = field.GetWidth() * 2 + 1;
