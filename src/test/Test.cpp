@@ -15,11 +15,8 @@ void PenciloidTest::RunTestAll()
 
 	BlackCellForestTest1();
 
-	SlitherlinkTest1();
-	SlitherlinkTest2();
-	SlitherlinkTest3();
-	SlitherlinkTest4();
-	SlitherlinkTest5();
+	SlitherlinkFieldTestByProblems();
+	SlitherlinkReducedDatabaseTest();
 
 	MasyuTest1();
 	MasyuTest2();

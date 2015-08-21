@@ -25,11 +25,8 @@ public:
 
 	static bool SlitherlinkCheckGrid(SlitherlinkField &field, const int *expected);
 	static void SlitherlinkClueTest(int height, int width, std::vector<const char*> board, int expected_status, int test_id);
-	static void SlitherlinkTest1();
-	static void SlitherlinkTest2();
-	static void SlitherlinkTest3();
-	static void SlitherlinkTest4();
-	static void SlitherlinkTest5();
+	static void SlitherlinkFieldTestByProblems();
+	static void SlitherlinkReducedDatabaseTest();
 
 	static void SlitherlinkProblemTest(SlitherlinkProblem &problem);
 

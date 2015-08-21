@@ -26,6 +26,18 @@ void PenciloidTest::SlitherlinkClueTest(int height, int width, std::vector<const
 
 	field.CheckAll();
 
+	bool is_status_ok = true;
+	if (expected_status == SolverStatus::NORMAL && field.GetStatus() != expected_status) is_status_ok = false;
+	if (expected_status == SolverStatus::SUCCESS && field.GetStatus() != expected_status) is_status_ok = false;
+	if (expected_status == SolverStatus::INCONSISTENT && (field.GetStatus() & SolverStatus::INCONSISTENT) == 0) is_status_ok = false;
+
+	if (!is_status_ok) {
+		std::cerr << "SlitherlinkClueTest failed in test #" << test_id << std::endl;
+		std::cerr << "expected: " << expected_status << ", actual: " << field.GetStatus() << " (field status)" << std::endl;
+	}
+
+	if (expected_status == SolverStatus::INCONSISTENT) return;
+
 	for (int y = 0; y <= height * 2; ++y) {
 		for (int x = 0; x <= width * 2; ++x) {
 			if (y % 2 == x % 2) continue; // this is not a segment
@@ -59,208 +71,138 @@ bool PenciloidTest::SlitherlinkCheckGrid(SlitherlinkField &field, const int *exp
 	return true;
 }
 
-void PenciloidTest::SlitherlinkTest1()
+void PenciloidTest::SlitherlinkFieldTestByProblems()
 {
-	SlitherlinkField field;
-	static const int expected[] = {
-		0, 0, 0, 0, 0, 1, 0,
-		0, 0, 0, 0, 1, 0, 1,
-		0, 0, 0, 1, 0, 0, 0,
-		0, 0, 1, 0, 0, 0, 1,
-		0, 1, 0, 0, 0, 0, 0,
-		1, 0, 0, 0, 0, 0, 1,
-		0, 1, 0, 1, 0, 1, 0,
-	};
+	for (int t = 0; t < 2; ++t) {
+		// t: enable database or not
+		// t is specified in test_id by adding t * 1000
 
-	field.Init(3, 3);
-	
-	field.SetClue(0, 0, 0);
-	field.SetClue(0, 1, 2);
-	field.SetClue(2, 0, 3);
-	field.SetClue(2, 1, 1);
+		if (t == 0) {
+			if (SlitherlinkDatabase::IsCreated()) SlitherlinkDatabase::ReleaseDatabase();
+		} else if (t == 1) {
+			if (!SlitherlinkDatabase::IsCreated()) SlitherlinkDatabase::CreateDatabase();
+		}
 
-	assert(field.GetStatus() == SolverStatus::SUCCESS);
-	assert(SlitherlinkCheckGrid(field, expected));
-}
+		SlitherlinkClueTest(3, 3, {
+			"+x+x+-+",
+			"x0x2| |",
+			"+x+-+x+",
+			"x | x |",
+			"+-+x+x+",
+			"|3x1x |",
+			"+-+-+-+",
+		}, SolverStatus::SUCCESS, t * 1000 + 0);
 
-void PenciloidTest::SlitherlinkTest2()
-{
-	SlitherlinkField field;
-	static const int expected[] = {
-		0, 1, 0, 1, 0, 1, 0,
-		1, 0, 0, 0, 0, 0, 1,
-		0, 0, 0, 1, 0, 0, 0,
-		1, 0, 1, 0, 1, 0, 1,
-		0, 1, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 0, 1,
-		0, 0, 0, 0, 0, 1, 0,
-	};
+		SlitherlinkClueTest(3, 3, {
+			"+-+-+-+",
+			"| x x |",
+			"+x+-+x+",
+			"|3|3| |",
+			"+-+x+x+",
+			"x x |3|",
+			"+x+x+-+",
+		}, SolverStatus::SUCCESS, t * 1000 + 1);
 
-	field.Init(3, 3);
+		// 2: closed loop test
+		SlitherlinkClueTest(5, 3, {
+			"+-+x+-+",
+			"|3|3|3|",
+			"+x+-+x+",
+			"|2x2x2|",
+			"+-+-+-+",
+			"x x1x x",
+			"+x+x+x+",
+			"x x x x",
+			"+x+x+x+",
+			"x x x x",
+			"+x+x+x+",
+		}, SolverStatus::SUCCESS, t * 1000 + 2);
 
-	field.SetClue(1, 0, 3);
-	field.SetClue(1, 1, 3);
-	field.SetClue(2, 2, 3);
+		// 3: closed loop (inconsistent) test
+		SlitherlinkClueTest(5, 3, {
+			"+ + + +",
+			" 3 3 3 ",
+			"+ + + +",
+			" 2 2 2 ",
+			"+ + + +",
+			"       ",
+			"+ + + +",
+			"     2 ",
+			"+ + + +",
+			"       ",
+			"+ + + +",
+		}, SolverStatus::INCONSISTENT, t * 1000 + 3);
 
-	assert(field.GetStatus() == SolverStatus::SUCCESS);
-	assert(SlitherlinkCheckGrid(field, expected));
-}
+		// 1xx: diagonal chain test
+		SlitherlinkClueTest(4, 4, {
+			"+x+x+ + +",
+			"x0x      ",
+			"+x+ + + +",
+			"x  2     ",
+			"+ + +x+ +",
+			"    x1   ",
+			"+ + + + +",
+			"         ",
+			"+ + + + +",
+		}, SolverStatus::NORMAL, t * 1000 + 100);
 
-void PenciloidTest::SlitherlinkTest3()
-{
-	{
-		SlitherlinkProblem prob;
-		prob.Init(5, 3);
+		SlitherlinkClueTest(4, 4, {
+			"+x+x+ + +",
+			"x0x      ",
+			"+x+-+ + +",
+			"x |2x    ",
+			"+ +x+-+ +",
+			"    |3   ",
+			"+ + + + +",
+			"         ",
+			"+ + + + +",
+		}, SolverStatus::NORMAL, t * 1000 + 101);
 
-		prob.SetClue(0, 0, 3);
-		prob.SetClue(0, 1, 3);
-		prob.SetClue(0, 2, 3);
-		prob.SetClue(1, 0, 2);
-		prob.SetClue(1, 1, 2);
-		prob.SetClue(1, 2, 2);
-		prob.SetClue(2, 2, 1);
-
-		SlitherlinkField field;
-		field.Init(prob);
-
-		assert(field.GetStatus() == SolverStatus::SUCCESS);
-	}
-
-	{
-		SlitherlinkProblem prob;
-		prob.Init(5, 3);
-
-		prob.SetClue(0, 0, 3);
-		prob.SetClue(0, 1, 3);
-		prob.SetClue(0, 2, 3);
-		prob.SetClue(1, 0, 2);
-		prob.SetClue(1, 1, 2);
-		prob.SetClue(1, 2, 2);
-		prob.SetClue(3, 2, 2);
-
-		SlitherlinkField field;
-		field.Init(prob);
-
-		assert(field.GetStatus() & SolverStatus::INCONSISTENT);
-	}
-
-}
-
-void PenciloidTest::SlitherlinkTest4()
-{
-	{
-		SlitherlinkProblem prob;
-		prob.Init(4, 4);
-
-		prob.SetClue(0, 0, 0);
-		prob.SetClue(1, 1, 2);
-		prob.SetClue(2, 2, 1);
-
-		SlitherlinkField field;
-		field.Init(prob);
-		field.CheckAll();
-
-		assert(field.GetStatus() == SolverStatus::NORMAL);
-		assert(field.GetSegmentStyle(4, 5) == SlitherlinkField::LOOP_BLANK);
-		assert(field.GetSegmentStyle(5, 4) == SlitherlinkField::LOOP_BLANK);
-	}
-	{
-		SlitherlinkProblem prob;
-		prob.Init(4, 4);
-
-		prob.SetClue(0, 0, 1);
-		prob.SetClue(1, 1, 2);
-		prob.SetClue(2, 2, 1);
-
-		SlitherlinkField field;
-		field.Init(prob);
-		field.CheckAll();
-
-		assert(field.GetStatus() == SolverStatus::NORMAL);
-		assert(field.GetSegmentStyle(6, 5) == SlitherlinkField::LOOP_BLANK);
-		assert(field.GetSegmentStyle(5, 6) == SlitherlinkField::LOOP_BLANK);
-	}
-	{
-		SlitherlinkProblem prob;
-		prob.Init(4, 4);
-
-		prob.SetClue(0, 0, 0);
-		prob.SetClue(1, 1, 2);
-		prob.SetClue(2, 2, 3);
-
-		SlitherlinkField field;
-		field.Init(prob);
-		field.CheckAll();
-
-		assert(field.GetStatus() == SolverStatus::NORMAL);
-		assert(field.GetSegmentStyle(4, 5) == SlitherlinkField::LOOP_LINE);
-		assert(field.GetSegmentStyle(5, 4) == SlitherlinkField::LOOP_LINE);
-	}
-	{
-		SlitherlinkProblem prob;
-		prob.Init(4, 4);
-
-		prob.SetClue(0, 0, 1);
-		prob.SetClue(1, 1, 2);
-		prob.SetClue(2, 2, 3);
-
-		SlitherlinkField field;
-		field.Init(prob);
-		field.CheckAll();
-
-		assert(field.GetStatus() == SolverStatus::NORMAL);
-		assert(field.GetSegmentStyle(6, 5) == SlitherlinkField::LOOP_LINE);
-		assert(field.GetSegmentStyle(5, 6) == SlitherlinkField::LOOP_LINE);
+		if (t == 1) SlitherlinkDatabase::ReleaseDatabase();
 	}
 }
 
-void PenciloidTest::SlitherlinkTest5()
+void PenciloidTest::SlitherlinkReducedDatabaseTest()
 {
+	if (SlitherlinkDatabase::IsCreated()) SlitherlinkDatabase::ReleaseDatabase();
 	SlitherlinkDatabase::CreateReducedDatabase(SlitherlinkDatabaseMethod());
 
-	{
-		SlitherlinkProblem prob;
-		prob.Init(4, 4);
-		prob.SetClue(0, 0, 1);
+	SlitherlinkClueTest(4, 4, {
+		"+x+ + + +",
+		"x1       ",
+		"+ + + + +",
+		"         ",
+		"+ + + + +",
+		"         ",
+		"+ + + + +",
+		"         ",
+		"+ + + + +",
+	}, SolverStatus::NORMAL, 2000);
 
-		SlitherlinkField field;
-		field.Init(prob);
-		field.CheckAll();
+	SlitherlinkClueTest(4, 4, {
+		"+ +-+ + +",
+		" 2       ",
+		"+ + + + +",
+		"|        ",
+		"+ + + + +",
+		"         ",
+		"+ + + + +",
+		"         ",
+		"+ + + + +",
+	}, SolverStatus::NORMAL, 2001);
 
-		assert(field.GetStatus() == SolverStatus::NORMAL);
-		assert(field.GetSegmentStyle(0, 1) == SlitherlinkField::LOOP_BLANK);
-		assert(field.GetSegmentStyle(1, 0) == SlitherlinkField::LOOP_BLANK);
-	}
-
-	{
-		SlitherlinkProblem prob;
-		prob.Init(4, 4);
-		prob.SetClue(0, 0, 3);
-
-		SlitherlinkField field;
-		field.Init(prob);
-		field.CheckAll();
-
-		assert(field.GetStatus() == SolverStatus::NORMAL);
-		assert(field.GetSegmentStyle(0, 1) == SlitherlinkField::LOOP_LINE);
-		assert(field.GetSegmentStyle(1, 0) == SlitherlinkField::LOOP_LINE);
-	}
-
-	{
-		SlitherlinkProblem prob;
-		prob.Init(4, 4);
-		prob.SetClue(0, 0, 2);
-
-		SlitherlinkField field;
-		field.Init(prob);
-		field.CheckAll();
-
-		assert(field.GetStatus() == SolverStatus::NORMAL);
-		assert(field.GetSegmentStyle(0, 3) == SlitherlinkField::LOOP_LINE);
-		assert(field.GetSegmentStyle(3, 0) == SlitherlinkField::LOOP_LINE);
-	}
+	SlitherlinkClueTest(4, 4, {
+		"+-+ + + +",
+		"|3       ",
+		"+ + + + +",
+		"         ",
+		"+ + + + +",
+		"         ",
+		"+ + + + +",
+		"         ",
+		"+ + + + +",
+	}, SolverStatus::NORMAL, 2002);
 
 	SlitherlinkDatabase::ReleaseDatabase();
 }
-
 }
