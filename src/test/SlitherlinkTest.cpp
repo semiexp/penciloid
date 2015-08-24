@@ -6,15 +6,19 @@
 
 #include "../slitherlink/SlitherlinkDatabase.h"
 #include "../slitherlink/SlitherlinkDatabaseMethod.hpp"
+#include "../slitherlink/SlitherlinkMethod.hpp"
 #include "../slitherlink/SlitherlinkField.h"
 #include "../slitherlink/SlitherlinkProblem.h"
 #include "Test.h"
 
 namespace Penciloid
 {
-void PenciloidTest::SlitherlinkClueTest(int height, int width, std::vector<const char*> board, int expected_status, int test_id = -1)
+void PenciloidTest::SlitherlinkClueTest(int height, int width, std::vector<const char*> board, int expected_status, bool use_diagonal_chain, int test_id = -1)
 {
 	SlitherlinkField field;
+	SlitherlinkMethod method;
+	method.diagonal_chain = use_diagonal_chain;
+	field.SetMethod(method);
 	field.Init(height, width);
 
 	for (int y = 0; y < height; ++y) {
@@ -91,7 +95,7 @@ void PenciloidTest::SlitherlinkFieldTestByProblems()
 			"+-+x+x+",
 			"|3x1x |",
 			"+-+-+-+",
-		}, SolverStatus::SUCCESS, t * 1000 + 0);
+		}, SolverStatus::SUCCESS, false, t * 1000 + 0);
 
 		SlitherlinkClueTest(3, 3, {
 			"+-+-+-+",
@@ -101,7 +105,7 @@ void PenciloidTest::SlitherlinkFieldTestByProblems()
 			"+-+x+x+",
 			"x x |3|",
 			"+x+x+-+",
-		}, SolverStatus::SUCCESS, t * 1000 + 1);
+		}, SolverStatus::SUCCESS, false, t * 1000 + 1);
 
 		// 2: closed loop test
 		SlitherlinkClueTest(5, 3, {
@@ -116,7 +120,7 @@ void PenciloidTest::SlitherlinkFieldTestByProblems()
 			"+x+x+x+",
 			"x x x x",
 			"+x+x+x+",
-		}, SolverStatus::SUCCESS, t * 1000 + 2);
+		}, SolverStatus::SUCCESS, false, t * 1000 + 2);
 
 		// 3: closed loop (inconsistent) test
 		SlitherlinkClueTest(5, 3, {
@@ -131,7 +135,7 @@ void PenciloidTest::SlitherlinkFieldTestByProblems()
 			"+ + + +",
 			"       ",
 			"+ + + +",
-		}, SolverStatus::INCONSISTENT, t * 1000 + 3);
+		}, SolverStatus::INCONSISTENT, false, t * 1000 + 3);
 
 		// 1xx: diagonal chain test
 		SlitherlinkClueTest(4, 4, {
@@ -144,7 +148,7 @@ void PenciloidTest::SlitherlinkFieldTestByProblems()
 			"+ + + + +",
 			"         ",
 			"+ + + + +",
-		}, SolverStatus::NORMAL, t * 1000 + 100);
+		}, SolverStatus::NORMAL, true, t * 1000 + 100);
 
 		SlitherlinkClueTest(4, 4, {
 			"+x+x+ + +",
@@ -156,7 +160,7 @@ void PenciloidTest::SlitherlinkFieldTestByProblems()
 			"+ + + + +",
 			"         ",
 			"+ + + + +",
-		}, SolverStatus::NORMAL, t * 1000 + 101);
+		}, SolverStatus::NORMAL, true, t * 1000 + 101);
 
 		if (t == 1) SlitherlinkDatabase::ReleaseDatabase();
 	}
@@ -177,7 +181,7 @@ void PenciloidTest::SlitherlinkReducedDatabaseTest()
 		"+ + + + +",
 		"         ",
 		"+ + + + +",
-	}, SolverStatus::NORMAL, 2000);
+	}, SolverStatus::NORMAL, false, 2000);
 
 	SlitherlinkClueTest(4, 4, {
 		"+ +-+ + +",
@@ -189,7 +193,7 @@ void PenciloidTest::SlitherlinkReducedDatabaseTest()
 		"+ + + + +",
 		"         ",
 		"+ + + + +",
-	}, SolverStatus::NORMAL, 2001);
+	}, SolverStatus::NORMAL, false, 2001);
 
 	SlitherlinkClueTest(4, 4, {
 		"+-+ + + +",
@@ -201,7 +205,7 @@ void PenciloidTest::SlitherlinkReducedDatabaseTest()
 		"+ + + + +",
 		"         ",
 		"+ + + + +",
-	}, SolverStatus::NORMAL, 2002);
+	}, SolverStatus::NORMAL, false, 2002);
 
 	SlitherlinkClueTest(4, 4, {
 		"+x+x+-+ +",
@@ -213,7 +217,7 @@ void PenciloidTest::SlitherlinkReducedDatabaseTest()
 		"+ +-+x+ +",
 		"    x    ",
 		"+ + + + +",
-	}, SolverStatus::NORMAL, 2003);
+	}, SolverStatus::NORMAL, false, 2003);
 
 	SlitherlinkClueTest(4, 4, {
 		"+x+x+-+ +",
@@ -225,7 +229,7 @@ void PenciloidTest::SlitherlinkReducedDatabaseTest()
 		"+ + + + +",
 		"         ",
 		"+ + + + +",
-	}, SolverStatus::NORMAL, 2004);
+	}, SolverStatus::NORMAL, false, 2004);
 
 	SlitherlinkClueTest(4, 4, {
 		"+x+x+-+ +",
@@ -237,7 +241,7 @@ void PenciloidTest::SlitherlinkReducedDatabaseTest()
 		"+ +x+ + +",
 		"         ",
 		"+ + + + +",
-	}, SolverStatus::NORMAL, 2005);
+	}, SolverStatus::NORMAL, false, 2005);
 
 	SlitherlinkDatabase::ReleaseDatabase();
 }

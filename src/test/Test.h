@@ -24,7 +24,7 @@ public:
 	static void BlackCellForestTest1();
 
 	static bool SlitherlinkCheckGrid(SlitherlinkField &field, const int *expected);
-	static void SlitherlinkClueTest(int height, int width, std::vector<const char*> board, int expected_status, int test_id);
+	static void SlitherlinkClueTest(int height, int width, std::vector<const char*> board, int expected_status, bool use_diagonal_chain, int test_id);
 	static void SlitherlinkFieldTestByProblems();
 	static void SlitherlinkReducedDatabaseTest();
 
