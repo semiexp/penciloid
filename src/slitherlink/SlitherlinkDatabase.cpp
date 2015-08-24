@@ -183,6 +183,29 @@ int SlitherlinkDatabase::SolveLocal(int clue, int styles[12], SlitherlinkDatabas
 				segments[2 - dy2][2 - dx2] |= BLANK;
 			}
 		}
+
+		if (clue == 2 && method.line_to_2) {
+			if ((segments[in_y1][in_x1] == LINE && segments[in_y2][in_x2] == BLANK) ||
+				(segments[in_y1][in_x1] == BLANK && segments[in_y2][in_x2] == LINE)) {
+				int out_y1, out_x1, out_y2, out_x2;
+
+				out_y1 = 2 - dy1, out_x1 = 2 - dx1;
+				out_y2 = 2 - dy2, out_x2 = 2 - dx2;
+
+				if (segments[out_y1][out_x1] == BLANK) segments[out_y2][out_x2] |= LINE;
+				if (segments[out_y1][out_x1] == LINE) segments[out_y2][out_x2] |= BLANK;
+				if (segments[out_y2][out_x2] == BLANK) segments[out_y1][out_x1] |= LINE;
+				if (segments[out_y2][out_x2] == LINE) segments[out_y1][out_x1] |= BLANK;
+
+				out_y1 = 2 - dy1 * 2 - dy2, out_x1 = 2 - dx1 * 2 - dx2;
+				out_y2 = 2 - dy1 - dy2 * 2, out_x2 = 2 - dx1 - dx2 * 2;
+
+				if (segments[out_y1][out_x1] == BLANK) segments[out_y2][out_x2] |= LINE;
+				if (segments[out_y1][out_x1] == LINE) segments[out_y2][out_x2] |= BLANK;
+				if (segments[out_y2][out_x2] == BLANK) segments[out_y1][out_x1] |= LINE;
+				if (segments[out_y2][out_x2] == LINE) segments[out_y1][out_x1] |= BLANK;
+			}
+		}
 	}
 
 	// TODO: support other methods
