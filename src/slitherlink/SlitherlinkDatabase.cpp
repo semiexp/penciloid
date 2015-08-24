@@ -161,6 +161,20 @@ int SlitherlinkDatabase::SolveLocal(int clue, int styles[12], SlitherlinkDatabas
 				segments[2 + dy1][2 + dx1] = segments[2 + dy2][2 + dx2] = LINE;
 			}
 		}
+
+		int in_y1, in_x1, in_y2, in_x2;
+		in_y1 = 2 + dy1 * 2 + dy2, in_x1 = 2 + dx1 * 2 + dx2;
+		in_y2 = 2 + dy1 + dy2 * 2, in_x2 = 2 + dx1 + dx2 * 2;
+
+		if (clue == 3 && method.line_to_3) {
+			if (segments[in_y1][in_x1] == LINE || segments[in_y2][in_x2] == LINE) {
+				segments[2 - dy1][2 - dx1] |= LINE;
+				segments[2 - dy2][2 - dx2] |= LINE;
+
+				if (segments[in_y1][in_x1] == LINE) segments[in_y2][in_x2] |= BLANK;
+				if (segments[in_y2][in_x2] == LINE) segments[in_y1][in_x1] |= BLANK;
+			}
+		}
 	}
 
 	// TODO: support other methods
