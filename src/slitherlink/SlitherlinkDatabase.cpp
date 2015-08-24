@@ -175,6 +175,14 @@ int SlitherlinkDatabase::SolveLocal(int clue, int styles[12], SlitherlinkDatabas
 				if (segments[in_y2][in_x2] == LINE) segments[in_y1][in_x1] |= BLANK;
 			}
 		}
+
+		if (clue == 1 && method.line_to_1) {
+			if ((segments[in_y1][in_x1] == LINE && segments[in_y2][in_x2] == BLANK) ||
+				(segments[in_y1][in_x1] == BLANK && segments[in_y2][in_x2] == LINE)) {
+				segments[2 - dy1][2 - dx1] |= BLANK;
+				segments[2 - dy2][2 - dx2] |= BLANK;
+			}
+		}
 	}
 
 	// TODO: support other methods
