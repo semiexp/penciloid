@@ -213,7 +213,7 @@ void PenciloidTest::SlitherlinkReducedDatabaseTest()
 		"+ +-+x+ +",
 		"    x    ",
 		"+ + + + +",
-	}, SolverStatus::NORMAL, 2002);
+	}, SolverStatus::NORMAL, 2003);
 
 	SlitherlinkDatabase::ReleaseDatabase();
 }
