@@ -116,7 +116,7 @@ int SlitherlinkDatabase::SolveLocal(int clue, int styles[12], SlitherlinkDatabas
 					if (segments[dys[j]][dxs[j]] == BLANK) ++n_blanks;
 				}
 
-				if (n_lines >= 3) return -1;
+				if (n_lines >= 3 || (n_lines == 1 && n_blanks == 3)) return -1;
 				if (n_lines == 2 || n_blanks >= 3) {
 					for (int j = 0; j < 4; ++j) {
 						if (segments[dys[j]][dxs[j]] == UNDECIDED) segments[dys[j]][dxs[j]] = BLANK;
@@ -169,6 +169,22 @@ int SlitherlinkDatabase::SolveLocal(int clue, int styles[12], SlitherlinkDatabas
 					segments[2 + dy1][2 + dx1] = segments[2 + dy2][2 + dx2] = BLANK;
 				}
 				if (clue == 2 && method.corner_2) {
+					if (segments[2 + dy1][2 + dx1] == LINE || segments[2 + dy2][2 + dx2] == LINE ||
+						segments[2 - dy1][2 - dx1] == BLANK || segments[2 - dy2][2 - dx2] == BLANK) {
+						segments[2 + dy1][2 + dx1] |= LINE;
+						segments[2 + dy2][2 + dx2] |= LINE;
+						segments[2 - dy1][2 - dx1] |= BLANK;
+						segments[2 - dy2][2 - dx2] |= BLANK;
+					}
+
+					if (segments[2 + dy1][2 + dx1] == BLANK || segments[2 + dy2][2 + dx2] == BLANK ||
+						segments[2 - dy1][2 - dx1] == LINE || segments[2 - dy2][2 - dx2] == LINE) {
+						segments[2 + dy1][2 + dx1] |= BLANK;
+						segments[2 + dy2][2 + dx2] |= BLANK;
+						segments[2 - dy1][2 - dx1] |= LINE;
+						segments[2 - dy2][2 - dx2] |= LINE;
+					}
+
 					int out_y1, out_x1, out_y2, out_x2;
 
 					out_y1 = 2 + dy1 * 2 - dy2, out_x1 = 2 + dx1 * 2 - dx2;
