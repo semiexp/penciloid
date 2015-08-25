@@ -104,6 +104,32 @@ int SlitherlinkDatabase::SolveLocal(int clue, int styles[12], SlitherlinkDatabas
 	int nt = 0;
 	do {
 		ret_previous = ret;
+
+		if (method.vertex_rule) {
+			for (int i = 0; i < 4; ++i) {
+				int dys[] = { i / 2 * 2 + 0, i / 2 * 2 + 1, i / 2 * 2 + 1, i / 2 * 2 + 2 };
+				int dxs[] = { i % 2 * 2 + 1, i % 2 * 2 + 0, i % 2 * 2 + 2, i % 2 * 2 + 1 };
+
+				int n_lines = 0, n_blanks = 0;
+				for (int j = 0; j < 4; ++j) {
+					if (segments[dys[j]][dxs[j]] == LINE) ++n_lines;
+					if (segments[dys[j]][dxs[j]] == BLANK) ++n_blanks;
+				}
+
+				if (n_lines >= 3) return -1;
+				if (n_lines == 2 || n_blanks >= 3) {
+					for (int j = 0; j < 4; ++j) {
+						if (segments[dys[j]][dxs[j]] == UNDECIDED) segments[dys[j]][dxs[j]] = BLANK;
+					}
+				}
+				if (n_lines == 1 && n_blanks == 2) {
+					for (int j = 0; j < 4; ++j) {
+						if (segments[dys[j]][dxs[j]] == UNDECIDED) segments[dys[j]][dxs[j]] = LINE;
+					}
+				}
+			}
+		}
+
 		if (method.adjacent_lines) {
 			int n_lines =
 				(segments[2][1] == LINE ? 1 : 0) +
