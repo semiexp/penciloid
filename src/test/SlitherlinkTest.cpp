@@ -255,6 +255,52 @@ void PenciloidTest::SlitherlinkReducedDatabaseTest()
 		"+x+-+-+ +",
 	}, SolverStatus::NORMAL, false, 2006);
 
+	SlitherlinkClueTest(4, 4, {
+		"+ + + +-+",
+		"    x1  |",
+		"+ +-+x+ +",
+		"   3|    ",
+		"+ + + + +",
+		"|3       ",
+		"+-+ + + +",
+		"x        ",
+		"+x+ + + +",
+	}, SolverStatus::NORMAL, false, 2007);
+
+	SlitherlinkClueTest(3, 5, {
+		"+ + + +-+ +",
+		"    |3     ",
+		"+ +x+-+ + +",
+		"  x0x      ",
+		"+ +x+ + + +",
+		"           ",
+		"+ + + + + +",
+	}, SolverStatus::NORMAL, false, 2008);
+
+	SlitherlinkClueTest(4, 6, {
+		"+ + + + + + +",
+		"             ",
+		"+ + + +x+ + +",
+		"    x x0x    ",
+		"+ + +-+x+-+ +",
+		"x x1  |3|    ",
+		"+x+x+x+-+x+ +",
+		"x0x   x x    ",
+		"+x+x+ + + + +",
+	}, SolverStatus::NORMAL, false, 2009);
+
+	SlitherlinkClueTest(4, 6, {
+		"+ + + + + + +",
+		"             ",
+		"+ + + +x+ + +",
+		"    x x0x    ",
+		"+ + +-+x+-+ +",
+		"x |3  |3|    ",
+		"+x+-+x+-+x+ +",
+		"x0x   x x    ",
+		"+x+x+ + + + +",
+	}, SolverStatus::NORMAL, false, 2010);
+
 	SlitherlinkDatabase::ReleaseDatabase();
 }
 }
