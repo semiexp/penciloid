@@ -516,8 +516,10 @@ void GridLoop<T>::CheckVertex(int y, int x)
 	}
 
 	if (line.size() == 2) {
-		for (auto &nb : undecided) {
-			DetermineBlank(nb.y, nb.x);
+		if (method.already_two_lines) {
+			for (auto &nb : undecided) {
+				DetermineBlank(nb.y, nb.x);
+			}
 		}
 
 		Join(
@@ -533,7 +535,7 @@ void GridLoop<T>::CheckVertex(int y, int x)
 		int line_dest = line[0].dest, line_weight = line[0].weight;
 
 		for (auto& nb : undecided) {
-			if (nb.dest == line_dest && line_weight < total_lines) {
+			if (nb.dest == line_dest && line_weight < total_lines && method.avoid_cycle) {
 				DetermineBlank(nb.y, nb.x);
 			} else {
 				if (valid_y == -1) {
