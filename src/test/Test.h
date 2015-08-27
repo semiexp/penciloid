@@ -27,6 +27,7 @@ public:
 	static void SlitherlinkClueTest(int height, int width, std::vector<const char*> board, int expected_status, bool use_diagonal_chain, int test_id);
 	static void SlitherlinkFieldTestByProblems();
 	static void SlitherlinkReducedDatabaseTest();
+	static void SlitherlinkReducedDatabaseCompletenessTest();
 
 	static void SlitherlinkProblemTest(SlitherlinkProblem &problem);
 

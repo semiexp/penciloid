@@ -17,6 +17,7 @@ void PenciloidTest::RunTestAll()
 
 	SlitherlinkFieldTestByProblems();
 	SlitherlinkReducedDatabaseTest();
+	SlitherlinkReducedDatabaseCompletenessTest();
 
 	MasyuTest1();
 	MasyuTest2();

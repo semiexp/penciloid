@@ -303,4 +303,54 @@ void PenciloidTest::SlitherlinkReducedDatabaseTest()
 
 	SlitherlinkDatabase::ReleaseDatabase();
 }
+
+void PenciloidTest::SlitherlinkReducedDatabaseCompletenessTest()
+{
+	if (SlitherlinkDatabase::IsCreated()) SlitherlinkDatabase::ReleaseDatabase();
+
+	SlitherlinkDatabase::CreateDatabase();
+
+	int *database_complete = new int[531441 * 4];
+	memcpy(database_complete, SlitherlinkDatabase::database, 531441 * 4 * sizeof(int));
+
+	SlitherlinkDatabase::ReleaseDatabase();
+	SlitherlinkDatabase::CreateReducedDatabase(SlitherlinkDatabaseMethod());
+
+	for (int clue = 0; clue <= 3; ++clue) {
+		for (int idx = 0; idx < 531441; ++idx) {
+			bool non_sound = false, non_complete = false;
+
+			int loc = clue * 531441 + idx;
+			if (database_complete[loc] == SlitherlinkDatabase::database[loc]) continue;
+			if (database_complete[loc] != -1 && SlitherlinkDatabase::database[loc] == -1) non_sound = true;
+			if (database_complete[loc] == -1 && SlitherlinkDatabase::database[loc] != -1) non_complete = true;
+
+			for (int i = 0; i < 12; ++i) {
+				int val_complete = (database_complete[loc] >> (2 * i)) & 3;
+				int val_reduced = (SlitherlinkDatabase::database[loc] >> (2 * i)) & 3;
+
+				if (val_complete == 0 && val_reduced != 0) non_sound = true;
+				if (val_complete != 0 && val_reduced == 0) non_complete = true;
+			}
+
+			if (non_sound || non_complete) {
+				if (non_sound) std::cerr << "Soundness";
+				else std::cerr << "Completeness";
+
+				std::cerr << " is not satisfied" << std::endl << "clue: " << clue << ", segments : [";
+				for (int i = 0, v = idx; i < 12; ++i, v /= 3) {
+					std::cerr << (v % 3);
+					if (i != 11) std::cerr << ", ";
+				}
+				std::cerr << "]" << std::endl;
+				goto end;
+			}
+		}
+	}
+
+end:
+	delete[] database_complete;
+	SlitherlinkDatabase::ReleaseDatabase();
+}
+
 }
