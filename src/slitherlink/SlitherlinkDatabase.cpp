@@ -162,6 +162,10 @@ int SlitherlinkDatabase::SolveLocal(int clue, int styles[12], SlitherlinkDatabas
 			int dy1 = GridConstant::GRID_DY[dir], dx1 = GridConstant::GRID_DX[dir];
 			int dy2 = GridConstant::GRID_DY[(dir + 1) % 4], dx2 = GridConstant::GRID_DX[(dir + 1) % 4];
 
+			int in_y1, in_x1, in_y2, in_x2;
+			in_y1 = 2 + dy1 * 2 + dy2, in_x1 = 2 + dx1 * 2 + dx2;
+			in_y2 = 2 + dy1 + dy2 * 2, in_x2 = 2 + dx1 + dx2 * 2;
+
 			if (segments[2 + dy1 * 2 + dy2][2 + dx1 * 2 + dx2] == BLANK && segments[2 + dy1 + dy2 * 2][2 + dx1 + dx2 * 2] == BLANK) {
 				// this cell is corner
 
@@ -170,7 +174,8 @@ int SlitherlinkDatabase::SolveLocal(int clue, int styles[12], SlitherlinkDatabas
 				}
 				if (clue == 2 && method.corner_2) {
 					if (segments[2 + dy1][2 + dx1] == LINE || segments[2 + dy2][2 + dx2] == LINE ||
-						segments[2 - dy1][2 - dx1] == BLANK || segments[2 - dy2][2 - dx2] == BLANK) {
+						segments[2 - dy1][2 - dx1] == BLANK || segments[2 - dy2][2 - dx2] == BLANK || 
+						segments[4 - in_y1][4 - in_x1] == LINE || segments[4 - in_y2][4 - in_x2] == LINE) {
 						segments[2 + dy1][2 + dx1] |= LINE;
 						segments[2 + dy2][2 + dx2] |= LINE;
 						segments[2 - dy1][2 - dx1] |= BLANK;
@@ -185,6 +190,10 @@ int SlitherlinkDatabase::SolveLocal(int clue, int styles[12], SlitherlinkDatabas
 						segments[2 - dy2][2 - dx2] |= LINE;
 					}
 
+					if (segments[4 - in_y1][4 - in_x1] == BLANK || segments[4 - in_y2][4 - in_x2] == BLANK) {
+						segments[4 - in_y1][4 - in_x1] |= BLANK;
+						segments[4 - in_y2][4 - in_x2] |= BLANK;
+					}
 					int out_y1, out_x1, out_y2, out_x2;
 
 					out_y1 = 2 + dy1 * 2 - dy2, out_x1 = 2 + dx1 * 2 - dx2;
@@ -208,10 +217,6 @@ int SlitherlinkDatabase::SolveLocal(int clue, int styles[12], SlitherlinkDatabas
 				}
 			}
 
-			int in_y1, in_x1, in_y2, in_x2;
-			in_y1 = 2 + dy1 * 2 + dy2, in_x1 = 2 + dx1 * 2 + dx2;
-			in_y2 = 2 + dy1 + dy2 * 2, in_x2 = 2 + dx1 + dx2 * 2;
-
 			if (clue == 3 && method.line_to_3) {
 				if (segments[in_y1][in_x1] == LINE || segments[in_y2][in_x2] == LINE) {
 					segments[2 - dy1][2 - dx1] |= LINE;
@@ -232,7 +237,9 @@ int SlitherlinkDatabase::SolveLocal(int clue, int styles[12], SlitherlinkDatabas
 
 			if (clue == 2 && method.line_to_2) {
 				if ((segments[in_y1][in_x1] == LINE && segments[in_y2][in_x2] == BLANK) ||
-					(segments[in_y1][in_x1] == BLANK && segments[in_y2][in_x2] == LINE)) {
+					(segments[in_y1][in_x1] == BLANK && segments[in_y2][in_x2] == LINE) || 
+					(segments[2 + dy1][2 + dx1] == LINE && segments[2 + dy2][2 + dx2] == BLANK) ||
+					(segments[2 + dy1][2 + dx1] == BLANK && segments[2 + dy2][2 + dx2] == LINE)) {
 					int out_y1, out_x1, out_y2, out_x2;
 
 					out_y1 = 2 - dy1, out_x1 = 2 - dx1;
@@ -250,6 +257,24 @@ int SlitherlinkDatabase::SolveLocal(int clue, int styles[12], SlitherlinkDatabas
 					if (segments[out_y1][out_x1] == LINE) segments[out_y2][out_x2] |= BLANK;
 					if (segments[out_y2][out_x2] == BLANK) segments[out_y1][out_x1] |= LINE;
 					if (segments[out_y2][out_x2] == LINE) segments[out_y1][out_x1] |= BLANK;
+				}
+			}
+
+			if (clue == 2 && method.almost_line_to_2) {
+				if ((segments[in_y1][in_x1] == LINE || segments[in_y2][in_x2] == LINE) &&
+					(segments[2 - dy1][2 - dx1] == BLANK || segments[2 - dy2][2 - dx2] == BLANK)) {
+					if (segments[in_y1][in_x1] == LINE) segments[in_y2][in_x2] |= BLANK;
+					if (segments[in_y2][in_x2] == LINE) segments[in_y1][in_x1] |= BLANK;
+					if (segments[2 - dy1][2 - dx1] == BLANK) segments[2 - dy2][2 - dx2] |= LINE;
+					if (segments[2 - dy2][2 - dx2] == BLANK) segments[2 - dy1][2 - dx1] |= LINE;
+				}
+
+				if ((segments[in_y1][in_x1] == LINE || segments[in_y2][in_x2] == LINE) &&
+					(segments[4 - in_y1][4 - in_x1] == LINE || segments[4 - in_y2][4 - in_x2] == LINE)) {
+					if (segments[in_y1][in_x1] == LINE) segments[in_y2][in_x2] |= BLANK;
+					if (segments[in_y2][in_x2] == LINE) segments[in_y1][in_x1] |= BLANK;
+					if (segments[4 - in_y1][4 - in_x1] == LINE) segments[4 - in_y2][4 - in_x2] |= BLANK;
+					if (segments[4 - in_y2][4 - in_x2] == LINE) segments[4 - in_y1][4 - in_x1] |= BLANK;
 				}
 			}
 
