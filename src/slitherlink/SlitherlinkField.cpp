@@ -158,6 +158,8 @@ void SlitherlinkField::CheckTheorem(int y, int x)
 
 void SlitherlinkField::CheckCellSpecific(int y, int x)
 {
+	if (!method.check_cell) return;
+
 	int id = CellId(y / 2, x / 2);
 
 	if (clues == nullptr || clues[id] == CLUE_NONE) return;
