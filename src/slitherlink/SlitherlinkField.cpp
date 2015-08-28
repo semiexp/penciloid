@@ -137,7 +137,7 @@ void SlitherlinkField::CheckTheorem(int y, int x)
 
 		for (int i = 0; i < 4; ++i) {
 			int dy = GridConstant::GRID_DY[i], dx = GridConstant::GRID_DX[i];
-			if (GetClueSafe(y / 2 + dy, x / 2 + dx) == 3) {
+			if (GetClueSafe(y / 2 + dy, x / 2 + dx) == 3 && method.adjacent_3) {
 				DetermineLine(y - dy, x - dx);
 				DetermineLine(y + dy, x + dx);
 				DetermineBlank(y + dy + 2 * dx, x + dx + 2 * dy);
@@ -146,7 +146,7 @@ void SlitherlinkField::CheckTheorem(int y, int x)
 			}
 
 			int dy2 = GridConstant::GRID_DY[(i + 1) % 4], dx2 = GridConstant::GRID_DX[(i + 1) % 4];
-			if (GetClueSafe(y / 2 + dy + dy2, x / 2 + dx + dx2) == 3) {
+			if (GetClueSafe(y / 2 + dy + dy2, x / 2 + dx + dx2) == 3 && method.diagonal_3) {
 				DetermineLine(y - dy, x - dx);
 				DetermineLine(y - dy2, x - dx2);
 				DetermineLine(y + dy * 3 + dy2 * 2, x + dx * 3 + dx2 * 2);
