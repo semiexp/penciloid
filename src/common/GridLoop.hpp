@@ -34,12 +34,16 @@ public:
 	inline int GetSegmentStyle(int y, int x) const { return segments[SegmentId(y, x)].segment_style; }
 	inline int GetSegmentStyleSafe(int y, int x) const { return (IsProperCoordinate(y, x) ? segments[SegmentId(y, x)].segment_style : LOOP_BLANK); }
 
+	inline int GetSegmentGroupSize(int y, int x) { return -segments[SegmentRoot(SegmentId(y, x))].group_root; }
+	inline int GetSegmentDestination(int sy, int sx, int vy, int vx) { return segments[SegmentRoot(SegmentId(sy, sx))].GetAnotherEndSafe(SegmentId(vy, vx));; }
+
 	inline bool IsProperCoordinate(int y, int x) const { return 0 <= y && y <= 2 * height && 0 <= x && x <= 2 * width; }
 	inline bool IsRepresentative(int y, int x) { return IsRepresentative(SegmentId(y, x)); }
 
 	inline int UpdateStatus(int status) { return field_status |= status; }
 	inline int GetStatus() const { return field_status; }
 	inline int GetProgress() const { return progress; }
+	inline int GetTotalLines() const { return total_lines; }
 
 	int DetermineLine(int y, int x);
 	int DetermineBlank(int y, int x);
