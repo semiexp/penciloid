@@ -96,7 +96,7 @@ void SlitherlinkEvaluator::EliminateDoneMoves(std::vector<move> &moves)
 		move m2(m.difficulty);
 
 		for (int i = 0; i < m.xs.size(); ++i) {
-			if (field.GetSegmentStyle(m.ys[i], m.xs[i]) == SlitherlinkField::LOOP_UNDECIDED) {
+			if (field.GetSegmentStyleSafe(m.ys[i], m.xs[i]) == SlitherlinkField::LOOP_UNDECIDED) {
 				m2.ys.push_back(m.ys[i]);
 				m2.xs.push_back(m.xs[i]);
 				m2.styles.push_back(m.styles[i]);
@@ -263,8 +263,8 @@ void SlitherlinkEvaluator::CheckCornerCell(int y, int x, std::vector<move> &move
 		int dy1 = GridConstant::GRID_DY[i], dx1 = GridConstant::GRID_DX[i];
 		int dy2 = GridConstant::GRID_DY[(i + 1) % 4], dx2 = GridConstant::GRID_DX[(i + 1) % 4];
 		
-		if (field.GetSegmentStyle(y * 2 + 1 + dy1 * 2 + dy2, x * 2 + 1 + dx1 * 2 + dx2) == SlitherlinkField::LOOP_BLANK &&
-			field.GetSegmentStyle(y * 2 + 1 + dy2 * 2 + dy1, x * 2 + 1 + dx2 * 2 + dx1) == SlitherlinkField::LOOP_BLANK) {
+		if (field.GetSegmentStyleSafe(y * 2 + 1 + dy1 * 2 + dy2, x * 2 + 1 + dx1 * 2 + dx2) == SlitherlinkField::LOOP_BLANK &&
+			field.GetSegmentStyleSafe(y * 2 + 1 + dy2 * 2 + dy1, x * 2 + 1 + dx2 * 2 + dx1) == SlitherlinkField::LOOP_BLANK) {
 			if (clue == 1) {
 				move m(DIFFICULTY_CORNER_CLUE[1]);
 				m.add(y * 2 + 1 + dy1, x * 2 + 1 + dx1, SlitherlinkField::LOOP_BLANK);
