@@ -39,6 +39,7 @@ private:
 	void CheckTheoremsAbout3(std::vector<move> &moves);
 	bool CheckAdjacentLinesRule(int y, int x, std::vector<move> &moves);
 	void CheckCornerCell(int y, int x, std::vector<move> &moves);
+	void CheckLineToClue(int y, int x, std::vector<move> &moves);
 
 	SlitherlinkField field;
 
@@ -46,5 +47,6 @@ private:
 	static const double DIFFICULTY_ADJACENT_LINES[4];
 	static const double DIFFICULTY_ADJACENT_3, DIFFICULTY_DIAGONAL_3;
 	static const double DIFFICULTY_CORNER_CLUE[4];
+	static const double DIFFICULTY_LINE_TO_CLUE[4];
 };
 }
