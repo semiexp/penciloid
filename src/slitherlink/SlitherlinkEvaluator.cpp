@@ -61,8 +61,8 @@ double SlitherlinkEvaluator::Evaluate()
 
 		move &m = valid_moves[easiest_move];
 		for (int i = 0; i < m.xs.size(); ++i) {
-			if (m.styles[i] == SlitherlinkField::LOOP_LINE) field.DetermineLine(m.ys[i], m.xs[i]);
-			else if (m.styles[i] == SlitherlinkField::LOOP_BLANK) field.DetermineBlank(m.ys[i], m.xs[i]);
+			if (m.styles[i] == LOOP_LINE) field.DetermineLine(m.ys[i], m.xs[i]);
+			else if (m.styles[i] == LOOP_BLANK) field.DetermineBlank(m.ys[i], m.xs[i]);
 		}
 	}
 
@@ -103,7 +103,7 @@ void SlitherlinkEvaluator::EliminateDoneMoves(std::vector<move> &moves)
 		move m2(m.difficulty);
 
 		for (int i = 0; i < m.xs.size(); ++i) {
-			if (field.GetSegmentStyleSafe(m.ys[i], m.xs[i]) == SlitherlinkField::LOOP_UNDECIDED) {
+			if (field.GetSegmentStyleSafe(m.ys[i], m.xs[i]) == LOOP_UNDECIDED) {
 				m2.ys.push_back(m.ys[i]);
 				m2.xs.push_back(m.xs[i]);
 				m2.styles.push_back(m.styles[i]);
@@ -126,7 +126,7 @@ void SlitherlinkEvaluator::CheckTwoLinesRule(std::vector<SlitherlinkEvaluator::m
 				int y2 = y + GridConstant::GRID_DY[i], x2 = x + GridConstant::GRID_DX[i];
 				int style = field.GetSegmentStyleSafe(y2, x2);
 
-				if (style == SlitherlinkField::LOOP_LINE) ++n_lines;
+				if (style == LOOP_LINE) ++n_lines;
 			}
 
 			if (n_lines == 2) {
@@ -134,8 +134,8 @@ void SlitherlinkEvaluator::CheckTwoLinesRule(std::vector<SlitherlinkEvaluator::m
 					int y2 = y + GridConstant::GRID_DY[i], x2 = x + GridConstant::GRID_DX[i];
 					int style = field.GetSegmentStyleSafe(y2, x2);
 
-					if (style == SlitherlinkField::LOOP_UNDECIDED) {
-						moves.push_back(move(y2, x2, SlitherlinkField::LOOP_BLANK, DIFFICULTY_TWO_LINES));
+					if (style == LOOP_UNDECIDED) {
+						moves.push_back(move(y2, x2, LOOP_BLANK, DIFFICULTY_TWO_LINES));
 					}
 				}
 			}
@@ -153,7 +153,7 @@ void SlitherlinkEvaluator::CheckAvoidCycleRule(std::vector<move> &moves)
 				int y2 = y + GridConstant::GRID_DY[i], x2 = x + GridConstant::GRID_DX[i];
 				int style = field.GetSegmentStyleSafe(y2, x2);
 
-				if (style == SlitherlinkField::LOOP_LINE) {
+				if (style == LOOP_LINE) {
 					if (line_destination != -1) line_destination = -2;
 					else {
 						line_destination = field.GetSegmentDestination(y2, x2, y, x);
@@ -168,9 +168,9 @@ void SlitherlinkEvaluator::CheckAvoidCycleRule(std::vector<move> &moves)
 				int y2 = y + GridConstant::GRID_DY[i], x2 = x + GridConstant::GRID_DX[i];
 				int style = field.GetSegmentStyleSafe(y2, x2);
 
-				if (style == SlitherlinkField::LOOP_UNDECIDED) {
+				if (style == LOOP_UNDECIDED) {
 					if (field.GetSegmentDestination(y2, x2, y, x) == line_destination) {
-						moves.push_back(move(y2, x2, SlitherlinkField::LOOP_BLANK, 1.0 /* TODO */));
+						moves.push_back(move(y2, x2, LOOP_BLANK, 1.0 /* TODO */));
 					}
 				}
 			}
@@ -185,10 +185,10 @@ void SlitherlinkEvaluator::CheckHourglassRule(int y, int x, std::vector<move> &m
 
 	for (int d = 0; d < 4; ++d) {
 		int style = field.GetSegmentStyleSafe(y + GridConstant::GRID_DY[d], x + GridConstant::GRID_DX[d]);
-		if (style == SlitherlinkField::LOOP_LINE) {
+		if (style == LOOP_LINE) {
 			line.push_back(std::make_pair(y + GridConstant::GRID_DY[d], x + GridConstant::GRID_DX[d]));
 			line_weight = field.GetSegmentGroupSize(y + GridConstant::GRID_DY[d], x + GridConstant::GRID_DX[d]);
-		} else if (style == SlitherlinkField::LOOP_UNDECIDED) {
+		} else if (style == LOOP_UNDECIDED) {
 			undecided.push_back(std::make_pair(y + GridConstant::GRID_DY[d], x + GridConstant::GRID_DX[d]));
 		}
 	}
@@ -202,7 +202,7 @@ void SlitherlinkEvaluator::CheckHourglassRule(int y, int x, std::vector<move> &m
 		bool there_triangle = false;
 
 		for (int d = 0; d < 4; ++d) {
-			if (field.GetSegmentStyleSafe(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d]) == SlitherlinkField::LOOP_LINE) {
+			if (field.GetSegmentStyleSafe(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d]) == LOOP_LINE) {
 				// check if there is a 'triangle'?
 				if (field.GetSegmentDestination(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d], ty, tx) ==
 					field.GetSegmentDestination(undecided[1 - t_].first, undecided[1 - t_].second, y, x)) {
@@ -214,10 +214,10 @@ void SlitherlinkEvaluator::CheckHourglassRule(int y, int x, std::vector<move> &m
 		if (!there_triangle || line_weight2 >= field.GetTotalLines()) return; // no other 'line' segments
 
 		for (int d = 0; d < 4; ++d) {
-			if (field.GetSegmentStyleSafe(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d]) == SlitherlinkField::LOOP_UNDECIDED) {
+			if (field.GetSegmentStyleSafe(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d]) == LOOP_UNDECIDED) {
 				if (field.GetSegmentDestination(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d], ty, tx) == line_companion) {
 					// TODO: set the difficulty more carefully
-					moves.push_back(move(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d], SlitherlinkField::LOOP_BLANK, 4.0));
+					moves.push_back(move(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d], LOOP_BLANK, 4.0));
 				}
 			}
 		}
@@ -230,40 +230,40 @@ void SlitherlinkEvaluator::CheckTheoremsAbout3(std::vector<move> &moves)
 		for (int x = 0; x < field.GetWidth(); ++x) if (field.GetClue(y, x) == 3) {
 			if (y != field.GetHeight() - 1 && field.GetClue(y + 1, x) == 3) {
 				move m(DIFFICULTY_ADJACENT_3);
-				m.add(y * 2 + 0, x * 2 + 1, SlitherlinkField::LOOP_LINE);
-				m.add(y * 2 + 2, x * 2 + 1, SlitherlinkField::LOOP_LINE);
-				m.add(y * 2 + 4, x * 2 + 1, SlitherlinkField::LOOP_LINE);
-				m.add(y * 2 + 2, x * 2 - 1, SlitherlinkField::LOOP_BLANK);
-				m.add(y * 2 + 2, x * 2 + 3, SlitherlinkField::LOOP_BLANK);
+				m.add(y * 2 + 0, x * 2 + 1, LOOP_LINE);
+				m.add(y * 2 + 2, x * 2 + 1, LOOP_LINE);
+				m.add(y * 2 + 4, x * 2 + 1, LOOP_LINE);
+				m.add(y * 2 + 2, x * 2 - 1, LOOP_BLANK);
+				m.add(y * 2 + 2, x * 2 + 3, LOOP_BLANK);
 
 				moves.push_back(m);
 			}
 			if (x != field.GetWidth() - 1 && field.GetClue(y, x + 1) == 3) {
 				move m(DIFFICULTY_ADJACENT_3);
-				m.add(y * 2 + 1, x * 2 + 0, SlitherlinkField::LOOP_LINE);
-				m.add(y * 2 + 1, x * 2 + 2, SlitherlinkField::LOOP_LINE);
-				m.add(y * 2 + 1, x * 2 + 4, SlitherlinkField::LOOP_LINE);
-				m.add(y * 2 - 1, x * 2 + 2, SlitherlinkField::LOOP_BLANK);
-				m.add(y * 2 + 3, x * 2 + 2, SlitherlinkField::LOOP_BLANK);
+				m.add(y * 2 + 1, x * 2 + 0, LOOP_LINE);
+				m.add(y * 2 + 1, x * 2 + 2, LOOP_LINE);
+				m.add(y * 2 + 1, x * 2 + 4, LOOP_LINE);
+				m.add(y * 2 - 1, x * 2 + 2, LOOP_BLANK);
+				m.add(y * 2 + 3, x * 2 + 2, LOOP_BLANK);
 
 				moves.push_back(m);
 			}
 
 			if (y != field.GetHeight() - 1 && x != field.GetWidth() - 1 && field.GetClue(y + 1, x + 1) == 3) {
 				move m(DIFFICULTY_DIAGONAL_3);
-				m.add(y * 2 + 0, x * 2 + 1, SlitherlinkField::LOOP_LINE);
-				m.add(y * 2 + 1, x * 2 + 0, SlitherlinkField::LOOP_LINE);
-				m.add(y * 2 + 3, x * 2 + 4, SlitherlinkField::LOOP_LINE);
-				m.add(y * 2 + 4, x * 2 + 3, SlitherlinkField::LOOP_LINE);
+				m.add(y * 2 + 0, x * 2 + 1, LOOP_LINE);
+				m.add(y * 2 + 1, x * 2 + 0, LOOP_LINE);
+				m.add(y * 2 + 3, x * 2 + 4, LOOP_LINE);
+				m.add(y * 2 + 4, x * 2 + 3, LOOP_LINE);
 
 				moves.push_back(m);
 			}
 			if (y != field.GetHeight() - 1 && x != 0 && field.GetClue(y + 1, x - 1) == 3) {
 				move m(DIFFICULTY_DIAGONAL_3);
-				m.add(y * 2 + 1, x * 2 + 2, SlitherlinkField::LOOP_LINE);
-				m.add(y * 2 + 0, x * 2 + 1, SlitherlinkField::LOOP_LINE);
-				m.add(y * 2 + 3, x * 2 - 2, SlitherlinkField::LOOP_LINE);
-				m.add(y * 2 + 4, x * 2 - 1, SlitherlinkField::LOOP_LINE);
+				m.add(y * 2 + 1, x * 2 + 2, LOOP_LINE);
+				m.add(y * 2 + 0, x * 2 + 1, LOOP_LINE);
+				m.add(y * 2 + 3, x * 2 - 2, LOOP_LINE);
+				m.add(y * 2 + 4, x * 2 - 1, LOOP_LINE);
 
 				moves.push_back(m);
 			}
@@ -282,16 +282,16 @@ bool SlitherlinkEvaluator::CheckAdjacentLinesRule(int y, int x, std::vector<move
 	for (int i = 0; i < 4; ++i) {
 		int style = field.GetSegmentStyle(y * 2 + 1 + GridConstant::GRID_DY[i], x * 2 + 1 + GridConstant::GRID_DX[i]);
 
-		if (style == SlitherlinkField::LOOP_LINE) ++n_lines;
-		else if (style == SlitherlinkField::LOOP_BLANK) ++n_blanks;
+		if (style == LOOP_LINE) ++n_lines;
+		else if (style == LOOP_BLANK) ++n_blanks;
 	}
 
 	if (n_lines == clue) {
 		for (int i = 0; i < 4; ++i) {
 			int y2 = y * 2 + 1 + GridConstant::GRID_DY[i], x2 = x * 2 + 1 + GridConstant::GRID_DX[i];
 
-			if (field.GetSegmentStyle(y2, x2) == SlitherlinkField::LOOP_UNDECIDED) {
-				moves.push_back(move(y2, x2, SlitherlinkField::LOOP_BLANK, DIFFICULTY_ADJACENT_LINES[clue]));
+			if (field.GetSegmentStyle(y2, x2) == LOOP_UNDECIDED) {
+				moves.push_back(move(y2, x2, LOOP_BLANK, DIFFICULTY_ADJACENT_LINES[clue]));
 			}
 		}
 	}
@@ -299,8 +299,8 @@ bool SlitherlinkEvaluator::CheckAdjacentLinesRule(int y, int x, std::vector<move
 		for (int i = 0; i < 4; ++i) {
 			int y2 = y * 2 + 1 + GridConstant::GRID_DY[i], x2 = x * 2 + 1 + GridConstant::GRID_DX[i];
 
-			if (field.GetSegmentStyle(y2, x2) == SlitherlinkField::LOOP_UNDECIDED) {
-				moves.push_back(move(y2, x2, SlitherlinkField::LOOP_LINE, DIFFICULTY_ADJACENT_LINES[clue]));
+			if (field.GetSegmentStyle(y2, x2) == LOOP_UNDECIDED) {
+				moves.push_back(move(y2, x2, LOOP_LINE, DIFFICULTY_ADJACENT_LINES[clue]));
 			}
 		}
 	}
@@ -316,35 +316,35 @@ void SlitherlinkEvaluator::CheckCornerCell(int y, int x, std::vector<move> &move
 		int dy1 = GridConstant::GRID_DY[i], dx1 = GridConstant::GRID_DX[i];
 		int dy2 = GridConstant::GRID_DY[(i + 1) % 4], dx2 = GridConstant::GRID_DX[(i + 1) % 4];
 		
-		if (field.GetSegmentStyleSafe(y * 2 + 1 + dy1 * 2 + dy2, x * 2 + 1 + dx1 * 2 + dx2) == SlitherlinkField::LOOP_BLANK &&
-			field.GetSegmentStyleSafe(y * 2 + 1 + dy2 * 2 + dy1, x * 2 + 1 + dx2 * 2 + dx1) == SlitherlinkField::LOOP_BLANK) {
+		if (field.GetSegmentStyleSafe(y * 2 + 1 + dy1 * 2 + dy2, x * 2 + 1 + dx1 * 2 + dx2) == LOOP_BLANK &&
+			field.GetSegmentStyleSafe(y * 2 + 1 + dy2 * 2 + dy1, x * 2 + 1 + dx2 * 2 + dx1) == LOOP_BLANK) {
 			if (clue == 1) {
 				move m(DIFFICULTY_CORNER_CLUE[1]);
-				m.add(y * 2 + 1 + dy1, x * 2 + 1 + dx1, SlitherlinkField::LOOP_BLANK);
-				m.add(y * 2 + 1 + dy2, x * 2 + 1 + dx2, SlitherlinkField::LOOP_BLANK);
+				m.add(y * 2 + 1 + dy1, x * 2 + 1 + dx1, LOOP_BLANK);
+				m.add(y * 2 + 1 + dy2, x * 2 + 1 + dx2, LOOP_BLANK);
 				moves.push_back(m);
 			}
 			if (clue == 2) {
 				{
 					move m(DIFFICULTY_CORNER_CLUE[2]);
 
-					if (field.GetSegmentStyleSafe(y * 2 + 1 + dy1, x * 2 + 1 + dx1) == SlitherlinkField::LOOP_LINE ||
-						field.GetSegmentStyleSafe(y * 2 + 1 + dy2, x * 2 + 1 + dx2) == SlitherlinkField::LOOP_LINE ||
-						field.GetSegmentStyleSafe(y * 2 + 1 - dy1, x * 2 + 1 - dx1) == SlitherlinkField::LOOP_BLANK ||
-						field.GetSegmentStyleSafe(y * 2 + 1 - dy2, x * 2 + 1 - dx2) == SlitherlinkField::LOOP_BLANK) {
-						m.add(y * 2 + 1 + dy1, x * 2 + 1 + dx1, SlitherlinkField::LOOP_LINE);
-						m.add(y * 2 + 1 + dy2, x * 2 + 1 + dx2, SlitherlinkField::LOOP_LINE);
-						m.add(y * 2 + 1 - dy1, x * 2 + 1 - dx1, SlitherlinkField::LOOP_BLANK);
-						m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, SlitherlinkField::LOOP_BLANK);
+					if (field.GetSegmentStyleSafe(y * 2 + 1 + dy1, x * 2 + 1 + dx1) == LOOP_LINE ||
+						field.GetSegmentStyleSafe(y * 2 + 1 + dy2, x * 2 + 1 + dx2) == LOOP_LINE ||
+						field.GetSegmentStyleSafe(y * 2 + 1 - dy1, x * 2 + 1 - dx1) == LOOP_BLANK ||
+						field.GetSegmentStyleSafe(y * 2 + 1 - dy2, x * 2 + 1 - dx2) == LOOP_BLANK) {
+						m.add(y * 2 + 1 + dy1, x * 2 + 1 + dx1, LOOP_LINE);
+						m.add(y * 2 + 1 + dy2, x * 2 + 1 + dx2, LOOP_LINE);
+						m.add(y * 2 + 1 - dy1, x * 2 + 1 - dx1, LOOP_BLANK);
+						m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, LOOP_BLANK);
 					}
-					if (field.GetSegmentStyleSafe(y * 2 + 1 + dy1, x * 2 + 1 + dx1) == SlitherlinkField::LOOP_BLANK ||
-						field.GetSegmentStyleSafe(y * 2 + 1 + dy2, x * 2 + 1 + dx2) == SlitherlinkField::LOOP_BLANK ||
-						field.GetSegmentStyleSafe(y * 2 + 1 - dy1, x * 2 + 1 - dx1) == SlitherlinkField::LOOP_LINE ||
-						field.GetSegmentStyleSafe(y * 2 + 1 - dy2, x * 2 + 1 - dx2) == SlitherlinkField::LOOP_LINE) {
-						m.add(y * 2 + 1 + dy1, x * 2 + 1 + dx1, SlitherlinkField::LOOP_BLANK);
-						m.add(y * 2 + 1 + dy2, x * 2 + 1 + dx2, SlitherlinkField::LOOP_BLANK);
-						m.add(y * 2 + 1 - dy1, x * 2 + 1 - dx1, SlitherlinkField::LOOP_LINE);
-						m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, SlitherlinkField::LOOP_LINE);
+					if (field.GetSegmentStyleSafe(y * 2 + 1 + dy1, x * 2 + 1 + dx1) == LOOP_BLANK ||
+						field.GetSegmentStyleSafe(y * 2 + 1 + dy2, x * 2 + 1 + dx2) == LOOP_BLANK ||
+						field.GetSegmentStyleSafe(y * 2 + 1 - dy1, x * 2 + 1 - dx1) == LOOP_LINE ||
+						field.GetSegmentStyleSafe(y * 2 + 1 - dy2, x * 2 + 1 - dx2) == LOOP_LINE) {
+						m.add(y * 2 + 1 + dy1, x * 2 + 1 + dx1, LOOP_BLANK);
+						m.add(y * 2 + 1 + dy2, x * 2 + 1 + dx2, LOOP_BLANK);
+						m.add(y * 2 + 1 - dy1, x * 2 + 1 - dx1, LOOP_LINE);
+						m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, LOOP_LINE);
 					}
 
 					moves.push_back(m);
@@ -352,8 +352,8 @@ void SlitherlinkEvaluator::CheckCornerCell(int y, int x, std::vector<move> &move
 			}
 			if (clue == 3) {
 				move m(DIFFICULTY_CORNER_CLUE[3]);
-				m.add(y * 2 + 1 + dy1, x * 2 + 1 + dx1, SlitherlinkField::LOOP_LINE);
-				m.add(y * 2 + 1 + dy2, x * 2 + 1 + dx2, SlitherlinkField::LOOP_LINE);
+				m.add(y * 2 + 1 + dy1, x * 2 + 1 + dx1, LOOP_LINE);
+				m.add(y * 2 + 1 + dy2, x * 2 + 1 + dx2, LOOP_LINE);
 				moves.push_back(m);
 			}
 		}
@@ -373,25 +373,25 @@ void SlitherlinkEvaluator::CheckLineToClue(int y, int x, std::vector<move> &move
 		int in_y2 = y * 2 + 1 + dy2 * 2 + dy1, in_x2 = x * 2 + 1 + dx2 * 2 + dx1;
 
 		if (clue == 1) {
-			if ((field.GetSegmentStyleSafe(in_y1, in_x1) == SlitherlinkField::LOOP_LINE && field.GetSegmentStyleSafe(in_y2, in_x2) == SlitherlinkField::LOOP_BLANK) || 
-				(field.GetSegmentStyleSafe(in_y2, in_x2) == SlitherlinkField::LOOP_LINE && field.GetSegmentStyleSafe(in_y1, in_x1) == SlitherlinkField::LOOP_BLANK)) {
+			if ((field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_LINE && field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_BLANK) || 
+				(field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_LINE && field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_BLANK)) {
 				move m(DIFFICULTY_LINE_TO_CLUE[1]);
 
-				m.add(y * 2 + 1 - dy1, x * 2 + 1 - dx1, SlitherlinkField::LOOP_BLANK);
-				m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, SlitherlinkField::LOOP_BLANK);
+				m.add(y * 2 + 1 - dy1, x * 2 + 1 - dx1, LOOP_BLANK);
+				m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, LOOP_BLANK);
 				moves.push_back(m);
 			}
 		}
 
 		if (clue == 3) {
-			if (field.GetSegmentStyleSafe(in_y1, in_x1) == SlitherlinkField::LOOP_LINE ||
-				field.GetSegmentStyleSafe(in_y2, in_x2) == SlitherlinkField::LOOP_LINE) {
+			if (field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_LINE ||
+				field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_LINE) {
 				move m(DIFFICULTY_LINE_TO_CLUE[3]);
 
-				if (field.GetSegmentStyleSafe(in_y1, in_x1) == SlitherlinkField::LOOP_LINE) m.add(in_y2, in_x2, SlitherlinkField::LOOP_BLANK);
-				if (field.GetSegmentStyleSafe(in_y2, in_x2) == SlitherlinkField::LOOP_LINE) m.add(in_y1, in_x1, SlitherlinkField::LOOP_BLANK);
-				m.add(y * 2 + 1 - dy1, x * 2 + 1 - dx1, SlitherlinkField::LOOP_LINE);
-				m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, SlitherlinkField::LOOP_LINE);
+				if (field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_LINE) m.add(in_y2, in_x2, LOOP_BLANK);
+				if (field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_LINE) m.add(in_y1, in_x1, LOOP_BLANK);
+				m.add(y * 2 + 1 - dy1, x * 2 + 1 - dx1, LOOP_LINE);
+				m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, LOOP_LINE);
 				moves.push_back(m);
 			}
 		}

@@ -17,6 +17,12 @@ public:
 	const double SCORE_INCONSISTENT = -2.0;
 
 private:
+	enum {
+		LOOP_UNDECIDED = SlitherlinkField::LOOP_UNDECIDED,
+		LOOP_LINE = SlitherlinkField::LOOP_LINE,
+		LOOP_BLANK = SlitherlinkField::LOOP_BLANK
+	};
+
 	struct move
 	{
 		move(double difficulty) : difficulty(difficulty) {}
