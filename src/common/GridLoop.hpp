@@ -39,6 +39,9 @@ public:
 
 	inline bool IsProperCoordinate(int y, int x) const { return 0 <= y && y <= 2 * height && 0 <= x && x <= 2 * width; }
 	inline bool IsRepresentative(int y, int x) { return IsRepresentative(SegmentId(y, x)); }
+	inline int SegmentId(int y, int x) const { return y * (2 * width + 1) + x; }
+	inline int SegmentY(int segment) const { return segment / (2 * width + 1); }
+	inline int SegmentX(int segment) const { return segment % (2 * width + 1); }
 
 	inline int UpdateStatus(int status) { return field_status |= status; }
 	inline int GetStatus() const { return field_status; }
@@ -126,9 +129,6 @@ private:
 		LoopSegment() {}
 	};
 
-	inline int SegmentId(int y, int x) const { return y * (2 * width + 1) + x; }
-	inline int SegmentY(int segment) const { return segment / (2 * width + 1); }
-	inline int SegmentX(int segment) const { return segment % (2 * width + 1); }
 	inline int VertexId(int y, int x) const { return SegmentId(y, x); }
 	inline int CellId(int y, int x) const { return SegmentId(y, x); }
 	inline bool IsRepresentative(int id) { return SegmentRoot(id) == id; }
