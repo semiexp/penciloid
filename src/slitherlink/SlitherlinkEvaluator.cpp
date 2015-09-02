@@ -77,6 +77,11 @@ void SlitherlinkEvaluator::EnumerateValidMoves(std::vector<move> &moves)
 	CheckAvoidCycleRule(moves);
 	CheckTheoremsAbout3(moves);
 
+	for (int y = 0; y <= field.GetHeight(); ++y) {
+		for (int x = 0; x <= field.GetWidth(); ++x) {
+			CheckHourglassRule(y * 2, x * 2, moves);
+		}
+	}
 	for (int y = 0; y < field.GetHeight(); ++y) {
 		for (int x = 0; x < field.GetWidth(); ++x) {
 			if (!CheckAdjacentLinesRule(y, x, moves)) {
@@ -167,6 +172,52 @@ void SlitherlinkEvaluator::CheckAvoidCycleRule(std::vector<move> &moves)
 					if (field.GetSegmentDestination(y2, x2, y, x) == line_destination) {
 						moves.push_back(move(y2, x2, SlitherlinkField::LOOP_BLANK, 1.0 /* TODO */));
 					}
+				}
+			}
+		}
+	}
+}
+
+void SlitherlinkEvaluator::CheckHourglassRule(int y, int x, std::vector<move> &moves)
+{
+	MiniVector<std::pair<int, int>, 4> line, undecided;
+	int line_weight = 0;
+
+	for (int d = 0; d < 4; ++d) {
+		int style = field.GetSegmentStyleSafe(y + GridConstant::GRID_DY[d], x + GridConstant::GRID_DX[d]);
+		if (style == SlitherlinkField::LOOP_LINE) {
+			line.push_back(std::make_pair(y + GridConstant::GRID_DY[d], x + GridConstant::GRID_DX[d]));
+			line_weight = field.GetSegmentGroupSize(y + GridConstant::GRID_DY[d], x + GridConstant::GRID_DX[d]);
+		} else if (style == SlitherlinkField::LOOP_UNDECIDED) {
+			undecided.push_back(std::make_pair(y + GridConstant::GRID_DY[d], x + GridConstant::GRID_DX[d]));
+		}
+	}
+	if (!(line.size() == 1 && undecided.size() == 2)) return;
+
+	int line_companion = field.GetSegmentDestination(line[0].first, line[0].second, y, x);
+	for (int t_ = 0; t_ < 2; ++t_) {
+		int target = field.GetSegmentDestination(undecided[t_].first, undecided[t_].second, y, x);
+		int ty = field.SegmentY(target), tx = field.SegmentX(target);
+		int line_weight2 = line_weight;
+		bool there_triangle = false;
+
+		for (int d = 0; d < 4; ++d) {
+			if (field.GetSegmentStyleSafe(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d]) == SlitherlinkField::LOOP_LINE) {
+				// check if there is a 'triangle'?
+				if (field.GetSegmentDestination(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d], ty, tx) ==
+					field.GetSegmentDestination(undecided[1 - t_].first, undecided[1 - t_].second, y, x)) {
+					line_weight2 += field.GetSegmentGroupSize(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d]);
+					there_triangle = true;
+				} else return;
+			}
+		}
+		if (!there_triangle || line_weight2 >= field.GetTotalLines()) return; // no other 'line' segments
+
+		for (int d = 0; d < 4; ++d) {
+			if (field.GetSegmentStyleSafe(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d]) == SlitherlinkField::LOOP_UNDECIDED) {
+				if (field.GetSegmentDestination(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d], ty, tx) == line_companion) {
+					// TODO: set the difficulty more carefully
+					moves.push_back(move(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d], SlitherlinkField::LOOP_BLANK, 4.0));
 				}
 			}
 		}

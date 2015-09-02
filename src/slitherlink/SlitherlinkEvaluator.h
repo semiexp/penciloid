@@ -35,6 +35,7 @@ private:
 	void EliminateDoneMoves(std::vector<move> &moves);
 
 	void CheckAvoidCycleRule(std::vector<move> &moves);
+	void CheckHourglassRule(int y, int x, std::vector<move> &moves);
 	void CheckTwoLinesRule(std::vector<move> &moves);
 	void CheckTheoremsAbout3(std::vector<move> &moves);
 	bool CheckAdjacentLinesRule(int y, int x, std::vector<move> &moves);
