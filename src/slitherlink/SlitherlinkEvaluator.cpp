@@ -5,11 +5,11 @@
 namespace Penciloid
 {
 const double SlitherlinkEvaluator::DIFFICULTY_TWO_LINES = 0.0;
-const double SlitherlinkEvaluator::DIFFICULTY_ADJACENT_LINES[4] = { 1.0, 1.5, 1.5, 1.5 };
+const double SlitherlinkEvaluator::DIFFICULTY_ADJACENT_LINES[4] = { 0.3, 1.5, 1.5, 1.5 };
 const double SlitherlinkEvaluator::DIFFICULTY_ADJACENT_3 = 3.0;
 const double SlitherlinkEvaluator::DIFFICULTY_DIAGONAL_3 = 3.0;
 const double SlitherlinkEvaluator::DIFFICULTY_CORNER_CLUE[4] = { 0.0, 2.0, 2.0, 2.0 };
-const double SlitherlinkEvaluator::DIFFICULTY_LINE_TO_CLUE[4] = { 0.0, 2.0, 2.5, 2.0 };
+const double SlitherlinkEvaluator::DIFFICULTY_LINE_TO_CLUE[4] = { 0.0, 2.0, 2.0, 2.0 };
 
 void SlitherlinkEvaluator::Init(SlitherlinkProblem &problem)
 {
@@ -50,13 +50,19 @@ double SlitherlinkEvaluator::Evaluate()
 		else {
 			current_score = pow(current_score, -1.0 / 2.0);
 		}
+		current_score *= sqrt((field.GetHeight() + 1) * field.GetWidth() + (field.GetWidth() + 1) * field.GetHeight() - field.GetProgress());
 		score += current_score;
 
 		// choose a move and apply it
-		int easiest_move = 0;
+		int easiest_move = 0; double easiest_score = 1e5;
 
-		for (int i = 1; i < valid_moves.size(); ++i) {
-			if (valid_moves[easiest_move].difficulty > valid_moves[i].difficulty) easiest_move = i;
+		for (int i = 0; i < valid_moves.size(); ++i) {
+			double score_this_move = valid_moves[i].difficulty / valid_moves[i].xs.size();
+
+			if (easiest_score > score_this_move) {
+				easiest_score = score_this_move;
+				easiest_move = i;
+			}
 		}
 
 		move &m = valid_moves[easiest_move];
