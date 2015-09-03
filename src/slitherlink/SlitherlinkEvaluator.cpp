@@ -30,7 +30,7 @@ double SlitherlinkEvaluator::Evaluate()
 		EnumerateValidMoves(valid_moves);
 
 		if (valid_moves.size() == 0) {
-			field.Debug();
+		//	field.Debug();
 			return SCORE_IMPOSSIBLE;
 		}
 
@@ -351,6 +351,29 @@ void SlitherlinkEvaluator::CheckCornerCell(int y, int x, std::vector<move> &move
 						m.add(y * 2 + 1 + dy2, x * 2 + 1 + dx2, LOOP_BLANK);
 						m.add(y * 2 + 1 - dy1, x * 2 + 1 - dx1, LOOP_LINE);
 						m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, LOOP_LINE);
+					}
+
+					moves.push_back(m);
+				}
+
+				{
+					move m(DIFFICULTY_CORNER_CLUE[2]);
+
+					for (int t = 0; t < 2; ++t) {
+						int sgn = (t == 0 ? 1 : -1);
+
+						if (field.GetSegmentStyleSafe(y * 2 + 1 + sgn * (dy1 * 2 - dy2), x * 2 + 1 + sgn * (dx1 * 2 - dx2)) == LOOP_BLANK) {
+							m.add(y * 2 + 1 + sgn * (dy1 - dy2 * 2), x * 2 + 1 + sgn * (dx1 - dx2 * 2), LOOP_LINE);
+						}
+						if (field.GetSegmentStyleSafe(y * 2 + 1 + sgn * (dy1 * 2 - dy2), x * 2 + 1 + sgn * (dx1 * 2 - dx2)) == LOOP_LINE) {
+							m.add(y * 2 + 1 + sgn * (dy1 - dy2 * 2), x * 2 + 1 + sgn * (dx1 - dx2 * 2), LOOP_BLANK);
+						}
+						if (field.GetSegmentStyleSafe(y * 2 + 1 + sgn * (dy2 * 2 - dy1), x * 2 + 1 + sgn * (dx2 * 2 - dx1)) == LOOP_BLANK) {
+							m.add(y * 2 + 1 + sgn * (dy2 - dy1 * 2), x * 2 + 1 + sgn * (dx2 - dx1 * 2), LOOP_LINE);
+						}
+						if (field.GetSegmentStyleSafe(y * 2 + 1 + sgn * (dy2 * 2 - dy1), x * 2 + 1 + sgn * (dx2 * 2 - dx1)) == LOOP_LINE) {
+							m.add(y * 2 + 1 + sgn * (dy2 - dy1 * 2), x * 2 + 1 + sgn * (dx2 - dx1 * 2), LOOP_BLANK);
+						}
 					}
 
 					moves.push_back(m);
