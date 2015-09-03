@@ -10,6 +10,7 @@ const double SlitherlinkEvaluator::DIFFICULTY_ADJACENT_3 = 3.0;
 const double SlitherlinkEvaluator::DIFFICULTY_DIAGONAL_3 = 3.0;
 const double SlitherlinkEvaluator::DIFFICULTY_CORNER_CLUE[4] = { 0.0, 2.0, 2.0, 2.0 };
 const double SlitherlinkEvaluator::DIFFICULTY_LINE_TO_CLUE[4] = { 0.0, 2.0, 2.0, 2.0 };
+const double SlitherlinkEvaluator::DIFFICULTY_LINE_FROM_CLUE[4] = { 0.0, 4.5, 0.0, 4.5 };
 
 void SlitherlinkEvaluator::Init(SlitherlinkProblem &problem)
 {
@@ -94,6 +95,7 @@ void SlitherlinkEvaluator::EnumerateValidMoves(std::vector<move> &moves)
 				// apply other rules
 				CheckCornerCell(y, x, moves);
 				CheckLineToClue(y, x, moves);
+				CheckLineFromClue(y, x, moves);
 			}
 		}
 	}
@@ -421,6 +423,56 @@ void SlitherlinkEvaluator::CheckLineToClue(int y, int x, std::vector<move> &move
 				if (field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_LINE) m.add(in_y1, in_x1, LOOP_BLANK);
 				m.add(y * 2 + 1 - dy1, x * 2 + 1 - dx1, LOOP_LINE);
 				m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, LOOP_LINE);
+				moves.push_back(m);
+			}
+		}
+	}
+}
+
+void SlitherlinkEvaluator::CheckLineFromClue(int y, int x, std::vector<move> &moves)
+{
+	int clue = field.GetClue(y, x);
+	if (clue == SlitherlinkField::CLUE_NONE) return;
+
+	for (int i = 0; i < 4; ++i) {
+		int dy1 = GridConstant::GRID_DY[i], dx1 = GridConstant::GRID_DX[i];
+		int dy2 = GridConstant::GRID_DY[(i + 1) % 4], dx2 = GridConstant::GRID_DX[(i + 1) % 4];
+
+		int in_y1 = y * 2 + 1 + dy1 * 2 + dy2, in_x1 = x * 2 + 1 + dx1 * 2 + dx2;
+		int in_y2 = y * 2 + 1 + dy2 * 2 + dy1, in_x2 = x * 2 + 1 + dx2 * 2 + dx1;
+
+		if (clue == 1) {
+			if (field.GetSegmentStyleSafe(y * 2 + 1 - dy1, x * 2 + 1 - dx1) == LOOP_BLANK &&
+				field.GetSegmentStyleSafe(y * 2 + 1 - dy2, x * 2 + 1 - dx2) == LOOP_BLANK) {
+				move m(DIFFICULTY_LINE_FROM_CLUE[1]);
+
+				if (field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_LINE)
+					m.add(in_y2, in_x2, LOOP_BLANK);
+				if (field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_BLANK)
+					m.add(in_y2, in_x2, LOOP_LINE);
+				if (field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_LINE)
+					m.add(in_y1, in_x1, LOOP_BLANK);
+				if (field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_BLANK)
+					m.add(in_y1, in_x1, LOOP_LINE);
+
+				moves.push_back(m);
+			}
+		}
+
+		if (clue == 3) {
+			if (field.GetSegmentStyleSafe(y * 2 + 1 - dy1, x * 2 + 1 - dx1) == LOOP_LINE &&
+				field.GetSegmentStyleSafe(y * 2 + 1 - dy2, x * 2 + 1 - dx2) == LOOP_LINE) {
+				move m(DIFFICULTY_LINE_FROM_CLUE[3]);
+
+				if (field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_LINE)
+					m.add(in_y2, in_x2, LOOP_BLANK);
+				if (field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_BLANK)
+					m.add(in_y2, in_x2, LOOP_LINE);
+				if (field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_LINE)
+					m.add(in_y1, in_x1, LOOP_BLANK);
+				if (field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_BLANK)
+					m.add(in_y1, in_x1, LOOP_LINE);
+
 				moves.push_back(m);
 			}
 		}
