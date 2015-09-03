@@ -13,10 +13,11 @@
 
 namespace Penciloid
 {
-void PenciloidTest::InputSlitherlink(std::ifstream &ifs, SlitherlinkProblem &problem)
+bool PenciloidTest::InputSlitherlink(std::ifstream &ifs, SlitherlinkProblem &problem)
 {
-	int height, width;
+	int height = -1, width = -1;
 	ifs >> height >> width;
+	if (width == -1) return false;
 
 	problem.Init(height, width);
 
@@ -28,12 +29,15 @@ void PenciloidTest::InputSlitherlink(std::ifstream &ifs, SlitherlinkProblem &pro
 			if (line[j] >= '0' && line[j] <= '3') problem.SetClue(i, j, line[j] - '0');
 		}
 	}
+
+	return true;
 }
 
-void PenciloidTest::InputMasyu(std::ifstream &ifs, MasyuProblem &problem)
+bool PenciloidTest::InputMasyu(std::ifstream &ifs, MasyuProblem &problem)
 {
-	int height, width;
+	int height = -1, width = -1;
 	ifs >> height >> width;
+	if (width == -1) return false;
 
 	problem.Init(height, width);
 
@@ -46,15 +50,19 @@ void PenciloidTest::InputMasyu(std::ifstream &ifs, MasyuProblem &problem)
 			if (line[j] == 'w' || line[j] == '2') problem.SetClue(i, j, MasyuProblem::CLUE_WHITE);
 		}
 	}
+
+	return true;
 }
 
-void PenciloidTest::InputKakuro(std::ifstream &ifs, KakuroProblem &problem)
+bool PenciloidTest::InputKakuro(std::ifstream &ifs, KakuroProblem &problem)
 {
 	using namespace Penciloid;
 
-	int height, width, *solution = nullptr, *problem_data = nullptr;
+	int height = -1, width = -1, *solution = nullptr, *problem_data = nullptr;
 
 	ifs >> height >> width;
+	if (width == -1) return false;
+
 	solution = new int[height * width];
 	for (int i = 0; i < height * width; ++i) ifs >> solution[i];
 
@@ -87,6 +95,8 @@ void PenciloidTest::InputKakuro(std::ifstream &ifs, KakuroProblem &problem)
 	problem.Init(height, width, problem_data);
 	delete[] solution;
 	delete[] problem_data;
+
+	return true;
 }
 
 }

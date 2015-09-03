@@ -38,9 +38,9 @@ public:
 
 	static void KakuroTest1();
 
-	static void InputSlitherlink(std::ifstream &ifs, SlitherlinkProblem &problem);
-	static void InputMasyu(std::ifstream &ifs, MasyuProblem &problem);
-	static void InputKakuro(std::ifstream &ifs, KakuroProblem &problem);
+	static bool InputSlitherlink(std::ifstream &ifs, SlitherlinkProblem &problem);
+	static bool InputMasyu(std::ifstream &ifs, MasyuProblem &problem);
+	static bool InputKakuro(std::ifstream &ifs, KakuroProblem &problem);
 
 	static void SlitherlinkGeneratorTest(int height, int width);
 	static void SlitherlinkGeneratorOfShapeTest();
