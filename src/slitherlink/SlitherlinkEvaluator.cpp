@@ -339,7 +339,9 @@ void SlitherlinkEvaluator::CheckCornerCell(int y, int x, std::vector<move> &move
 					if (field.GetSegmentStyleSafe(y * 2 + 1 + dy1, x * 2 + 1 + dx1) == LOOP_LINE ||
 						field.GetSegmentStyleSafe(y * 2 + 1 + dy2, x * 2 + 1 + dx2) == LOOP_LINE ||
 						field.GetSegmentStyleSafe(y * 2 + 1 - dy1, x * 2 + 1 - dx1) == LOOP_BLANK ||
-						field.GetSegmentStyleSafe(y * 2 + 1 - dy2, x * 2 + 1 - dx2) == LOOP_BLANK) {
+						field.GetSegmentStyleSafe(y * 2 + 1 - dy2, x * 2 + 1 - dx2) == LOOP_BLANK ||
+						field.GetSegmentStyleSafe(y * 2 + 1 - dy1 * 2 - dy2, x * 2 + 1 - dx1 * 2 - dx2) == LOOP_LINE ||
+						field.GetSegmentStyleSafe(y * 2 + 1 - dy2 * 2 - dy1, x * 2 + 1 - dx2 * 2 - dx1) == LOOP_LINE) {
 						m.add(y * 2 + 1 + dy1, x * 2 + 1 + dx1, LOOP_LINE);
 						m.add(y * 2 + 1 + dy2, x * 2 + 1 + dx2, LOOP_LINE);
 						m.add(y * 2 + 1 - dy1, x * 2 + 1 - dx1, LOOP_BLANK);
