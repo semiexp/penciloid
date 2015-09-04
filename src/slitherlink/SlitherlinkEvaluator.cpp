@@ -26,6 +26,9 @@ void SlitherlinkEvaluator::Init(SlitherlinkProblem &problem)
 double SlitherlinkEvaluator::Evaluate()
 {
 	double score = 0.0;
+
+	double last_y = 1e8, last_x = 1e8;
+
 	while (field.GetStatus() == SolverStatus::NORMAL) {
 		std::vector<move> valid_moves;
 		EnumerateValidMoves(valid_moves);
@@ -33,6 +36,21 @@ double SlitherlinkEvaluator::Evaluate()
 		if (valid_moves.size() == 0) {
 		//	field.Debug();
 			return SCORE_IMPOSSIBLE;
+		}
+
+		// modify the score according to the locality
+		for (move &m : valid_moves) {
+			double locality_weight = 0.0;
+			for (int i = 0; i < m.xs.size(); ++i) {
+				if ((abs(last_y - m.ys[i]) <= 2 && abs(last_x - m.xs[i]) <= 2)) {
+				} else if ((abs(last_y - m.ys[i]) <= 4 && abs(last_x - m.xs[i]) <= 4)) {
+					locality_weight += 0.5;
+				} else {
+					locality_weight += 1;
+				}
+			}
+			locality_weight = pow(3.0, locality_weight / m.xs.size() - 1);
+			m.difficulty *= locality_weight;
 		}
 
 		// calculate the score of this move
@@ -67,10 +85,14 @@ double SlitherlinkEvaluator::Evaluate()
 		}
 
 		move &m = valid_moves[easiest_move];
+		last_x = last_y = 0;
+
 		for (int i = 0; i < m.xs.size(); ++i) {
+			last_x += m.xs[i]; last_y += m.ys[i];
 			if (m.styles[i] == LOOP_LINE) field.DetermineLine(m.ys[i], m.xs[i]);
 			else if (m.styles[i] == LOOP_BLANK) field.DetermineBlank(m.ys[i], m.xs[i]);
 		}
+		last_x /= m.xs.size(); last_y /= m.xs.size();
 	}
 
 	if (field.GetStatus() != SolverStatus::SUCCESS) return SCORE_INCONSISTENT;
