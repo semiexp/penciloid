@@ -317,22 +317,30 @@ bool SlitherlinkEvaluator::CheckAdjacentLinesRule(int y, int x, std::vector<move
 	}
 
 	if (n_lines == clue) {
+		move m(DIFFICULTY_ADJACENT_LINES[clue]);
+
 		for (int i = 0; i < 4; ++i) {
 			int y2 = y * 2 + 1 + GridConstant::GRID_DY[i], x2 = x * 2 + 1 + GridConstant::GRID_DX[i];
 
 			if (field.GetSegmentStyle(y2, x2) == LOOP_UNDECIDED) {
-				moves.push_back(move(y2, x2, LOOP_BLANK, DIFFICULTY_ADJACENT_LINES[clue]));
+				// moves.push_back(move(y2, x2, LOOP_BLANK, DIFFICULTY_ADJACENT_LINES[clue]));
+				m.add(y2, x2, LOOP_BLANK);
 			}
 		}
+		moves.push_back(m);
 	}
 	if (4 - n_blanks == clue) {
+		move m(DIFFICULTY_ADJACENT_LINES[clue]);
+
 		for (int i = 0; i < 4; ++i) {
 			int y2 = y * 2 + 1 + GridConstant::GRID_DY[i], x2 = x * 2 + 1 + GridConstant::GRID_DX[i];
 
 			if (field.GetSegmentStyle(y2, x2) == LOOP_UNDECIDED) {
-				moves.push_back(move(y2, x2, LOOP_LINE, DIFFICULTY_ADJACENT_LINES[clue]));
+				// moves.push_back(move(y2, x2, LOOP_LINE, DIFFICULTY_ADJACENT_LINES[clue]));
+				m.add(y2, x2, LOOP_LINE);
 			}
 		}
+		moves.push_back(m);
 	}
 	return n_lines == clue || 4 - n_blanks == clue;
 }
