@@ -446,6 +446,33 @@ void SlitherlinkEvaluator::CheckLineToClue(int y, int x, std::vector<move> &move
 			}
 		}
 
+		if (clue == 2) {
+			bool is_applicable = false;
+
+			if (field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_LINE && field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_BLANK) is_applicable = true;
+			if (field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_LINE && field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_BLANK) is_applicable = true;
+			if (field.GetSegmentStyleSafe(y * 2 + 1 + dy1, x * 2 + 1 + dx1) == LOOP_LINE && field.GetSegmentStyleSafe(y * 2 + 1 + dy2, x * 2 + 1 + dx2))
+				is_applicable = true;
+			if (field.GetSegmentStyleSafe(y * 2 + 1 + dy2, x * 2 + 1 + dx2) == LOOP_LINE && field.GetSegmentStyleSafe(y * 2 + 1 + dy1, x * 2 + 1 + dx1))
+				is_applicable = true;
+
+			if (!is_applicable) continue;
+
+			move m(DIFFICULTY_LINE_TO_CLUE[2]);
+
+			if (field.GetSegmentStyleSafe(y * 2 + 1 - dy1, x * 2 + 1 - dx1) == LOOP_LINE) m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, LOOP_BLANK);
+			if (field.GetSegmentStyleSafe(y * 2 + 1 - dy1, x * 2 + 1 - dx1) == LOOP_BLANK) m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, LOOP_LINE);
+			if (field.GetSegmentStyleSafe(y * 2 + 1 - dy2, x * 2 + 1 - dx2) == LOOP_LINE) m.add(y * 2 + 1 - dy1, x * 2 + 1 - dx1, LOOP_BLANK);
+			if (field.GetSegmentStyleSafe(y * 2 + 1 - dy2, x * 2 + 1 - dx2) == LOOP_BLANK) m.add(y * 2 + 1 - dy1, x * 2 + 1 - dx1, LOOP_LINE);
+
+			if (field.GetSegmentStyleSafe(y * 2 + 1 - dy1 * 2 - dy2, x * 2 + 1 - dx1 * 2 - dx2) == LOOP_LINE) m.add(y * 2 + 1 - dy2 * 2 - dy1, x * 2 + 1 - dx2 * 2 - dx1, LOOP_BLANK);
+			if (field.GetSegmentStyleSafe(y * 2 + 1 - dy1 * 2 - dy2, x * 2 + 1 - dx1 * 2 - dx2) == LOOP_BLANK) m.add(y * 2 + 1 - dy2 * 2 - dy1, x * 2 + 1 - dx2 * 2 - dx1, LOOP_LINE);
+			if (field.GetSegmentStyleSafe(y * 2 + 1 - dy2 * 2 - dy1, x * 2 + 1 - dx2 * 2 - dx1) == LOOP_LINE) m.add(y * 2 + 1 - dy1 * 2 - dy2, x * 2 + 1 - dx1 * 2 - dx2, LOOP_BLANK);
+			if (field.GetSegmentStyleSafe(y * 2 + 1 - dy2 * 2 - dy1, x * 2 + 1 - dx2 * 2 - dx1) == LOOP_BLANK) m.add(y * 2 + 1 - dy1 * 2 - dy2, x * 2 + 1 - dx1 * 2 - dx2, LOOP_LINE);
+
+			moves.push_back(m);
+		}
+
 		if (clue == 3) {
 			if (field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_LINE ||
 				field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_LINE) {
