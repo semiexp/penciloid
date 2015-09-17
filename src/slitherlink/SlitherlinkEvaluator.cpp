@@ -61,7 +61,7 @@ double SlitherlinkEvaluator::Evaluate()
 				score_zero = true;
 				break;
 			} else {
-				current_score += pow(m.difficulty, -2.0);
+				current_score += pow(m.difficulty / m.xs.size(), -2.0);
 			}
 		}
 
@@ -70,7 +70,6 @@ double SlitherlinkEvaluator::Evaluate()
 			current_score = pow(current_score, -1.0 / 2.0);
 		}
 		current_score *= sqrt((field.GetHeight() + 1) * field.GetWidth() + (field.GetWidth() + 1) * field.GetHeight() - field.GetProgress());
-		score += current_score;
 
 		// choose a move and apply it
 		int easiest_move = 0; double easiest_score = 1e5;
@@ -85,6 +84,7 @@ double SlitherlinkEvaluator::Evaluate()
 		}
 
 		move &m = valid_moves[easiest_move];
+		score += current_score * m.xs.size();
 		last_x = last_y = 0;
 
 		for (int i = 0; i < m.xs.size(); ++i) {
