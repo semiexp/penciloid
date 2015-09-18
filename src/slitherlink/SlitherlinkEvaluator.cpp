@@ -44,12 +44,7 @@ double SlitherlinkEvaluator::Evaluate()
 		for (move &m : valid_moves) {
 			double locality_weight = 0.0;
 			for (int i = 0; i < m.xs.size(); ++i) {
-				if ((abs(last_y - m.ys[i]) <= 2 && abs(last_x - m.xs[i]) <= 2)) {
-				} else if ((abs(last_y - m.ys[i]) <= 4 && abs(last_x - m.xs[i]) <= 4)) {
-					locality_weight += 0.5;
-				} else {
-					locality_weight += 1;
-				}
+				locality_weight += std::min(1.0, (std::max(abs(last_y - m.ys[i]), abs(last_y - m.ys[i])) - 1) / 4.0);
 			}
 			locality_weight = pow(3.0, locality_weight / m.xs.size() - 1);
 			m.difficulty *= locality_weight;
@@ -588,10 +583,10 @@ void SlitherlinkEvaluator::CheckInOutRule(std::vector<move> &moves)
 			} else continue;
 
 			if (uf.Root(cell1 * 2) == uf.Root(cell2 * 2)) {
-				if (field.IsRepresentative(y, x)) moves.push_back(move(y, x, LOOP_BLANK, 3.0 /* TODO */));
+				if (field.IsRepresentative(y, x)) moves.push_back(move(y, x, LOOP_BLANK, 3.5 /* TODO */));
 			}
 			if (uf.Root(cell1 * 2) == uf.Root(cell2 * 2 + 1)) {
-				if (field.IsRepresentative(y, x)) moves.push_back(move(y, x, LOOP_LINE, 3.0 /* TODO */));
+				if (field.IsRepresentative(y, x)) moves.push_back(move(y, x, LOOP_LINE, 3.5 /* TODO */));
 			}
 		}
 	}
