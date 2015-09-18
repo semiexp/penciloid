@@ -1,6 +1,8 @@
 #include "SlitherlinkEvaluator.h"
 #include "SlitherlinkMethod.hpp"
 #include "../common/MiniVector.hpp"
+#include "../common/UnionFind.h"
+#include <set>
 
 namespace Penciloid
 {
@@ -121,6 +123,8 @@ void SlitherlinkEvaluator::EnumerateValidMoves(std::vector<move> &moves)
 			}
 		}
 	}
+
+	CheckInOutRule(moves);
 
 	EliminateDoneMoves(moves);
 }
@@ -536,6 +540,62 @@ void SlitherlinkEvaluator::CheckLineFromClue(int y, int x, std::vector<move> &mo
 			}
 		}
 	}
+}
+
+void SlitherlinkEvaluator::CheckInOutRule(std::vector<move> &moves)
+{
+	UnionFind uf(field.GetHeight() * field.GetWidth() * 2 + 2);
+	int out_of_grid = field.GetHeight() * field.GetWidth();
+
+	for (int y = 0; y <= 2 * field.GetHeight(); ++y) {
+		for (int x = 0; x <= 2 * field.GetWidth(); ++x) {
+			if (y % 2 == 1 && x % 2 == 0) {
+				int cell1 = field.IsProperCoordinate(y, x - 1) ? ((y / 2) * field.GetWidth() + (x / 2 - 1)) : out_of_grid;
+				int cell2 = field.IsProperCoordinate(y, x + 1) ? ((y / 2) * field.GetWidth() + (x / 2)) : out_of_grid;
+
+				if (field.GetSegmentStyle(y, x) == LOOP_LINE) {
+					uf.Join(cell1 * 2, cell2 * 2 + 1);
+					uf.Join(cell1 * 2 + 1, cell2 * 2);
+				} else if (field.GetSegmentStyle(y, x) == LOOP_BLANK) {
+					uf.Join(cell1 * 2, cell2 * 2);
+					uf.Join(cell1 * 2 + 1, cell2 * 2 + 1);
+				}
+			} else if (y % 2 == 0 && x % 2 == 1) {
+				int cell1 = field.IsProperCoordinate(y - 1, x) ? ((y / 2 - 1) * field.GetWidth() + (x / 2)) : out_of_grid;
+				int cell2 = field.IsProperCoordinate(y + 1, x) ? ((y / 2) * field.GetWidth() + (x / 2)) : out_of_grid;
+
+				if (field.GetSegmentStyle(y, x) == LOOP_LINE) {
+					uf.Join(cell1 * 2, cell2 * 2 + 1);
+					uf.Join(cell1 * 2 + 1, cell2 * 2);
+				} else if (field.GetSegmentStyle(y, x) == LOOP_BLANK) {
+					uf.Join(cell1 * 2, cell2 * 2);
+					uf.Join(cell1 * 2 + 1, cell2 * 2 + 1);
+				}
+			}
+		}
+	}
+
+	for (int y = 0; y <= field.GetHeight() * 2; ++y) {
+		for (int x = 0; x <= field.GetWidth() * 2; ++x) {
+			int cell1, cell2;
+
+			if (y % 2 == 1 && x % 2 == 0) {
+				cell1 = field.IsProperCoordinate(y, x - 1) ? ((y / 2) * field.GetWidth() + (x / 2 - 1)) : out_of_grid;
+				cell2 = field.IsProperCoordinate(y, x + 1) ? ((y / 2) * field.GetWidth() + (x / 2)) : out_of_grid;
+			} else if (y % 2 == 0 && x % 2 == 1) {
+				cell1 = field.IsProperCoordinate(y - 1, x) ? ((y / 2 - 1) * field.GetWidth() + (x / 2)) : out_of_grid;
+				cell2 = field.IsProperCoordinate(y + 1, x) ? ((y / 2) * field.GetWidth() + (x / 2)) : out_of_grid;
+			} else continue;
+
+			if (uf.Root(cell1 * 2) == uf.Root(cell2 * 2)) {
+				if (field.IsRepresentative(y, x)) moves.push_back(move(y, x, LOOP_BLANK, 3.0 /* TODO */));
+			}
+			if (uf.Root(cell1 * 2) == uf.Root(cell2 * 2 + 1)) {
+				if (field.IsRepresentative(y, x)) moves.push_back(move(y, x, LOOP_LINE, 3.0 /* TODO */));
+			}
+		}
+	}
+
 }
 
 }

@@ -48,6 +48,7 @@ private:
 	void CheckCornerCell(int y, int x, std::vector<move> &moves);
 	void CheckLineToClue(int y, int x, std::vector<move> &moves);
 	void CheckLineFromClue(int y, int x, std::vector<move> &moves);
+	void CheckInOutRule(std::vector<move> &moves);
 
 	SlitherlinkField field;
 
