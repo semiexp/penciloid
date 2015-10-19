@@ -13,7 +13,7 @@
 
 namespace Penciloid
 {
-bool PenciloidTest::InputSlitherlink(std::ifstream &ifs, SlitherlinkProblem &problem)
+bool PenciloidTest::InputSlitherlink(std::istream &ifs, SlitherlinkProblem &problem)
 {
 	int height = -1, width = -1;
 	ifs >> height >> width;
@@ -33,7 +33,7 @@ bool PenciloidTest::InputSlitherlink(std::ifstream &ifs, SlitherlinkProblem &pro
 	return true;
 }
 
-bool PenciloidTest::InputMasyu(std::ifstream &ifs, MasyuProblem &problem)
+bool PenciloidTest::InputMasyu(std::istream &ifs, MasyuProblem &problem)
 {
 	int height = -1, width = -1;
 	ifs >> height >> width;
@@ -54,7 +54,7 @@ bool PenciloidTest::InputMasyu(std::ifstream &ifs, MasyuProblem &problem)
 	return true;
 }
 
-bool PenciloidTest::InputKakuro(std::ifstream &ifs, KakuroProblem &problem)
+bool PenciloidTest::InputKakuro(std::istream &ifs, KakuroProblem &problem)
 {
 	using namespace Penciloid;
 
