@@ -48,6 +48,8 @@ public:
 	static void ConsecutiveSolve(const char* filename);
 	static void ConsecutivePerformanceTest(const char* filename);
 
+	static void SlitherlinkEvaluatorTestWithProblem();
+
 	static void RunTestAll();
 };
 }
