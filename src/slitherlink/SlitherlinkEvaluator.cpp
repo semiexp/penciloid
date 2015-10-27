@@ -564,7 +564,26 @@ void SlitherlinkEvaluator::CheckDiagonalChain(int y, int x, std::vector<move> &m
 
 			int clue = field.GetClue(y / 2, x / 2);
 
-			if (clue == 2) continue;
+			if (clue == 2) {
+				move m(DIFFICULTY_DIAGONAL_CHAIN);
+
+				if (field.GetSegmentStyleSafe(y + dy, x) != LOOP_UNDECIDED) {
+					m.add(y, x + dx, ((field.GetSegmentStyleSafe(y + dy, x) == LOOP_LINE) ^ (cnt == 1)) ? LOOP_LINE : LOOP_BLANK);
+				}
+				if (field.GetSegmentStyleSafe(y, x + dx) != LOOP_UNDECIDED) {
+					m.add(y + dy, x, ((field.GetSegmentStyleSafe(y, x + dx) == LOOP_LINE) ^ (cnt == 1)) ? LOOP_LINE : LOOP_BLANK);
+				}
+				if (field.GetSegmentStyleSafe(y - dy, x) != LOOP_UNDECIDED) {
+					m.add(y, x - dx, ((field.GetSegmentStyleSafe(y - dy, x) == LOOP_LINE) ^ (cnt == 1)) ? LOOP_LINE : LOOP_BLANK);
+				}
+				if (field.GetSegmentStyleSafe(y, x - dx) != LOOP_UNDECIDED) {
+					m.add(y - dy, x, ((field.GetSegmentStyleSafe(y, x - dx) == LOOP_LINE) ^ (cnt == 1)) ? LOOP_LINE : LOOP_BLANK);
+				}
+
+				moves.push_back(m);
+				continue;
+			}
+
 			if (clue == 1) {
 				move m(DIFFICULTY_DIAGONAL_CHAIN);
 
