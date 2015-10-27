@@ -13,6 +13,7 @@ const double SlitherlinkEvaluator::DIFFICULTY_DIAGONAL_3 = 3.0;
 const double SlitherlinkEvaluator::DIFFICULTY_CORNER_CLUE[4] = { 0.0, 2.0, 2.0, 2.0 };
 const double SlitherlinkEvaluator::DIFFICULTY_LINE_TO_CLUE[4] = { 0.0, 2.0, 2.0, 2.0 };
 const double SlitherlinkEvaluator::DIFFICULTY_LINE_FROM_CLUE[4] = { 0.0, 4.5, 0.0, 4.5 };
+const double SlitherlinkEvaluator::DIFFICULTY_DIAGONAL_CHAIN = 3.0;
 
 void SlitherlinkEvaluator::Init(SlitherlinkProblem &problem)
 {
@@ -115,6 +116,7 @@ void SlitherlinkEvaluator::EnumerateValidMoves(std::vector<move> &moves)
 				CheckCornerCell(y, x, moves);
 				CheckLineToClue(y, x, moves);
 				CheckLineFromClue(y, x, moves);
+				CheckDiagonalChain(y, x, moves);
 			}
 		}
 	}
@@ -533,6 +535,63 @@ void SlitherlinkEvaluator::CheckLineFromClue(int y, int x, std::vector<move> &mo
 
 				moves.push_back(m);
 			}
+		}
+	}
+}
+
+void SlitherlinkEvaluator::CheckDiagonalChain(int y, int x, std::vector<move> &moves)
+{
+	int y0 = y, x0 = x;
+
+	for (int dir = 0; dir < 4; ++dir) {
+		int dy = GridConstant::GRID_DY[dir] + GridConstant::GRID_DY[(dir + 1) % 4];
+		int dx = GridConstant::GRID_DX[dir] + GridConstant::GRID_DX[(dir + 1) % 4];
+
+		y = y0 * 2 + 1; x = x0 * 2 + 1;
+		int cnt = -1;
+		if (field.GetSegmentStyleSafe(y + dy, x) != LOOP_UNDECIDED && field.GetSegmentStyleSafe(y, x + dx) != LOOP_UNDECIDED) {
+			cnt = ((field.GetSegmentStyleSafe(y + dy, x) == LOOP_LINE ? 1 : 0) + (field.GetSegmentStyleSafe(y, x + dx) == LOOP_LINE ? 1 : 0)) % 2;
+		}
+		if (field.GetSegmentStyleSafe(y - dy, x) != LOOP_UNDECIDED && field.GetSegmentStyleSafe(y, x - dx) != LOOP_UNDECIDED && field.GetClue(y / 2, x / 2) != SlitherlinkField::CLUE_NONE) {
+			cnt = ((field.GetSegmentStyleSafe(y - dy, x) == LOOP_LINE ? 1 : 0) + (field.GetSegmentStyleSafe(y, x - dx) == LOOP_LINE ? 1 : 0) + field.GetClue(y / 2, x / 2)) % 2;
+		}
+
+		if (cnt == -1) continue;
+
+		for (;;) {
+			y += dy * 2; x += dx * 2;
+			if (!field.IsProperCoordinate(y, x)) break;
+
+			int clue = field.GetClue(y / 2, x / 2);
+
+			if (clue == 2) continue;
+			if (clue == 1) {
+				move m(DIFFICULTY_DIAGONAL_CHAIN);
+
+				if (cnt == 0) {
+					m.add(y - dy, x, LOOP_BLANK);
+					m.add(y, x - dx, LOOP_BLANK);
+				} else if (cnt == 1) {
+					m.add(y + dy, x, LOOP_BLANK);
+					m.add(y, x + dx, LOOP_BLANK);
+				}
+
+				moves.push_back(m);
+			}
+			if (clue == 3) {
+				move m(DIFFICULTY_DIAGONAL_CHAIN);
+
+				if (cnt == 0) {
+					m.add(y - dy, x, LOOP_LINE);
+					m.add(y, x - dx, LOOP_LINE);
+				} else if (cnt == 1) {
+					m.add(y + dy, x, LOOP_LINE);
+					m.add(y, x + dx, LOOP_LINE);
+				}
+
+				moves.push_back(m);
+			}
+			break;
 		}
 	}
 }

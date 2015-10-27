@@ -48,6 +48,7 @@ private:
 	void CheckCornerCell(int y, int x, std::vector<move> &moves);
 	void CheckLineToClue(int y, int x, std::vector<move> &moves);
 	void CheckLineFromClue(int y, int x, std::vector<move> &moves);
+	void CheckDiagonalChain(int y, int x, std::vector<move> &moves);
 	void CheckInOutRule(std::vector<move> &moves);
 
 	SlitherlinkField field;
@@ -58,5 +59,6 @@ private:
 	static const double DIFFICULTY_CORNER_CLUE[4];
 	static const double DIFFICULTY_LINE_TO_CLUE[4];
 	static const double DIFFICULTY_LINE_FROM_CLUE[4];
+	static const double DIFFICULTY_DIAGONAL_CHAIN;
 };
 }
