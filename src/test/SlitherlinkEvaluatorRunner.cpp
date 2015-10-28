@@ -3,6 +3,35 @@
 #include "Test.h"
 
 #include <vector>
+#include <thread>
+#include <mutex>
+
+std::mutex mtx;
+
+void EvaluatorWorker(std::vector<Penciloid::SlitherlinkProblem> &problems, std::vector<double> &scores, int *next_problem)
+{
+	for (;;) {
+		int problem_id;
+		
+		mtx.lock();
+		if (*next_problem >= (problems).size()) {
+			mtx.unlock();
+			break;
+		}
+
+		problem_id = (*next_problem)++;
+		mtx.unlock();
+
+		Penciloid::SlitherlinkEvaluator e;
+		e.Init((problems)[problem_id]);
+
+		double score = e.Evaluate();
+
+		mtx.lock();
+		(scores)[problem_id] = score;
+		mtx.unlock();
+	}
+}
 
 static double cov(std::vector<double> &xs, std::vector<double> &ys)
 {
@@ -23,20 +52,37 @@ static double calc_correl(std::vector<double> xs, std::vector<double> ys)
 
 namespace Penciloid
 {
-void PenciloidTest::SlitherlinkEvaluatorTestWithProblem()
+void PenciloidTest::SlitherlinkEvaluatorTestWithProblem(int n_threads)
 {
-	std::vector<int> heights, widths; std::vector<double> scores;
+	std::vector<int> heights, widths;
+	std::vector<double> scores;
+	std::vector<Penciloid::SlitherlinkProblem> problems;
+	int next_problem = 0;
 
 	for (;;) {
 		SlitherlinkProblem prob;
 		if (!PenciloidTest::InputSlitherlink(std::cin, prob)) break;
 
-		SlitherlinkEvaluator e;
-		e.Init(prob);
-
+		problems.push_back(prob);
 		heights.push_back(prob.GetHeight());
 		widths.push_back(prob.GetWidth());
-		scores.push_back(e.Evaluate());
+		scores.push_back(-3.0);
+	}
+
+	if (n_threads == 1) {
+		for (int i = 0; i < problems.size(); ++i) {
+			SlitherlinkEvaluator e;
+			e.Init(problems[i]);
+			scores[i] = e.Evaluate();
+		}
+	} else {
+		std::vector<std::thread> ths(n_threads);
+
+		for (int i = 0; i < n_threads; ++i) {
+			ths[i] = std::thread(EvaluatorWorker, std::ref(problems), std::ref(scores), &next_problem);
+		}
+
+		for (int i = 0; i < n_threads; ++i) ths[i].join();
 	}
 
 	for (int i = 0; i < heights.size(); ++i) {

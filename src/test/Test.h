@@ -48,7 +48,7 @@ public:
 	static void ConsecutiveSolve(const char* filename);
 	static void ConsecutivePerformanceTest(const char* filename);
 
-	static void SlitherlinkEvaluatorTestWithProblem();
+	static void SlitherlinkEvaluatorTestWithProblem(int n_threads = 1);
 
 	static void RunTestAll();
 };
