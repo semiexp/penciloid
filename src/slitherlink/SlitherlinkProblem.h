@@ -8,6 +8,7 @@ class SlitherlinkProblem
 {
 public:
 	SlitherlinkProblem();
+	SlitherlinkProblem(const SlitherlinkProblem &src);
 	~SlitherlinkProblem();
 
 	void Init(int height_t, int width_t);

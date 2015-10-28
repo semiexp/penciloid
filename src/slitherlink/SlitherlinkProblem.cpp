@@ -7,6 +7,15 @@ SlitherlinkProblem::SlitherlinkProblem()
 {
 	clue = nullptr;
 }
+SlitherlinkProblem::SlitherlinkProblem(const SlitherlinkProblem &src)
+{
+	height = src.height;
+	width = src.width;
+
+	clue = new int[height * width];
+	for (int i = 0; i < height * width; ++i) clue[i] = src.clue[i];
+}
+
 SlitherlinkProblem::~SlitherlinkProblem()
 {
 	if (clue) delete[] clue;
