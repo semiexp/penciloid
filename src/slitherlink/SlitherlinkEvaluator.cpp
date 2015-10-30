@@ -37,7 +37,7 @@ double SlitherlinkEvaluator::Evaluate()
 		EnumerateValidMoves(valid_moves);
 
 		if (valid_moves.size() == 0) {
-		//	field.Debug();
+			// field.Debug();
 			return SCORE_IMPOSSIBLE;
 		}
 
@@ -555,6 +555,9 @@ void SlitherlinkEvaluator::CheckDiagonalChain(int y, int x, std::vector<move> &m
 		if (field.GetSegmentStyleSafe(y - dy, x) != LOOP_UNDECIDED && field.GetSegmentStyleSafe(y, x - dx) != LOOP_UNDECIDED && field.GetClue(y / 2, x / 2) != SlitherlinkField::CLUE_NONE) {
 			cnt = ((field.GetSegmentStyleSafe(y - dy, x) == LOOP_LINE ? 1 : 0) + (field.GetSegmentStyleSafe(y, x - dx) == LOOP_LINE ? 1 : 0) + field.GetClue(y / 2, x / 2)) % 2;
 		}
+		if (field.GetSegmentStyleSafe(y - dy, x - dx * 2) != LOOP_UNDECIDED && field.GetSegmentStyleSafe(y - dy * 2 , x - dx) != LOOP_UNDECIDED && field.GetClue(y / 2, x / 2) != SlitherlinkField::CLUE_NONE) {
+			cnt = ((field.GetSegmentStyleSafe(y - dy, x - dx * 2) == LOOP_LINE ? 1 : 0) + (field.GetSegmentStyleSafe(y - dy * 2, x - dx) == LOOP_LINE ? 1 : 0) + field.GetClue(y / 2, x / 2)) % 2;
+		}
 
 		if (cnt == -1) continue;
 
@@ -573,14 +576,16 @@ void SlitherlinkEvaluator::CheckDiagonalChain(int y, int x, std::vector<move> &m
 				if (field.GetSegmentStyleSafe(y, x + dx) != LOOP_UNDECIDED) {
 					m.add(y + dy, x, ((field.GetSegmentStyleSafe(y, x + dx) == LOOP_LINE) ^ (cnt == 1)) ? LOOP_LINE : LOOP_BLANK);
 				}
-				if (field.GetSegmentStyleSafe(y - dy, x) != LOOP_UNDECIDED) {
-					m.add(y, x - dx, ((field.GetSegmentStyleSafe(y - dy, x) == LOOP_LINE) ^ (cnt == 1)) ? LOOP_LINE : LOOP_BLANK);
+				if (field.GetSegmentStyleSafe(y + dy, x + 2 * dx) != LOOP_UNDECIDED) {
+					m.add(y + 2 * dy, x + dx, ((field.GetSegmentStyleSafe(y + dy, x + 2 * dx) == LOOP_LINE) ^ (cnt == 1)) ? LOOP_LINE : LOOP_BLANK);
 				}
-				if (field.GetSegmentStyleSafe(y, x - dx) != LOOP_UNDECIDED) {
-					m.add(y - dy, x, ((field.GetSegmentStyleSafe(y, x - dx) == LOOP_LINE) ^ (cnt == 1)) ? LOOP_LINE : LOOP_BLANK);
+				if (field.GetSegmentStyleSafe(y + 2 * dy, x + dx) != LOOP_UNDECIDED) {
+					m.add(y + dy, x + 2 * dx, ((field.GetSegmentStyleSafe(y + 2 * dy, x + dx) == LOOP_LINE) ^ (cnt == 1)) ? LOOP_LINE : LOOP_BLANK);
 				}
 
 				moves.push_back(m);
+
+				if (m.xs.size() > 0) break;
 				continue;
 			}
 
