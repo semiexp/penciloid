@@ -505,11 +505,16 @@ void GridLoop<T>::CheckVertex(int y, int x)
 
 		if (IsProperCoordinate(y2, x2)) {
 			LoopSegment &segment = segments[SegmentRoot(SegmentId(y2, x2))];
+			int end = segment.GetAnotherEndSafe(vertex_id);
+
+			if (end == -1) {
+				continue; // just ignore this segment
+			}
 
 			if (segment.segment_style == LOOP_LINE) {
-				line.push_back(NeighborhoodData(y2, x2, segment.GetAnotherEnd(vertex_id), segment.segment_style, -segment.group_root));
+				line.push_back(NeighborhoodData(y2, x2, end, segment.segment_style, -segment.group_root));
 			} else if (segment.segment_style == LOOP_UNDECIDED) {
-				undecided.push_back(NeighborhoodData(y2, x2, segment.GetAnotherEnd(vertex_id), segment.segment_style, -segment.group_root));
+				undecided.push_back(NeighborhoodData(y2, x2, end, segment.segment_style, -segment.group_root));
 			}
 		}
 	}
