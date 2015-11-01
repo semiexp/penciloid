@@ -507,13 +507,12 @@ void GridLoop<T>::CheckVertex(int y, int x)
 			LoopSegment &segment = segments[SegmentRoot(SegmentId(y2, x2))];
 			int end = segment.GetAnotherEndSafe(vertex_id);
 
-			if (end == -1) {
-				continue; // just ignore this segment
-			}
-
 			if (segment.segment_style == LOOP_LINE) {
 				line.push_back(NeighborhoodData(y2, x2, end, segment.segment_style, -segment.group_root));
 			} else if (segment.segment_style == LOOP_UNDECIDED) {
+				if (end == -1) {
+					continue; // just ignore this segment
+				}
 				undecided.push_back(NeighborhoodData(y2, x2, end, segment.segment_style, -segment.group_root));
 			}
 		}
