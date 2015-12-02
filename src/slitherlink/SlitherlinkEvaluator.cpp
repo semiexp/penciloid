@@ -6,15 +6,6 @@
 
 namespace Penciloid
 {
-const double SlitherlinkEvaluator::DIFFICULTY_TWO_LINES = 0.0;
-const double SlitherlinkEvaluator::DIFFICULTY_ADJACENT_LINES[4] = { 0.3, 1.5, 1.5, 1.5 };
-const double SlitherlinkEvaluator::DIFFICULTY_ADJACENT_3 = 3.0;
-const double SlitherlinkEvaluator::DIFFICULTY_DIAGONAL_3 = 3.0;
-const double SlitherlinkEvaluator::DIFFICULTY_CORNER_CLUE[4] = { 0.0, 2.0, 2.0, 2.0 };
-const double SlitherlinkEvaluator::DIFFICULTY_LINE_TO_CLUE[4] = { 0.0, 2.0, 2.0, 2.0 };
-const double SlitherlinkEvaluator::DIFFICULTY_LINE_FROM_CLUE[4] = { 0.0, 4.5, 0.0, 4.5 };
-const double SlitherlinkEvaluator::DIFFICULTY_DIAGONAL_CHAIN = 3.0;
-
 void SlitherlinkEvaluator::Init(SlitherlinkProblem &problem)
 {
 	SlitherlinkMethod method;
@@ -166,7 +157,7 @@ void SlitherlinkEvaluator::CheckTwoLinesRule(std::vector<SlitherlinkEvaluator::m
 					int style = field.GetSegmentStyleSafe(y2, x2);
 
 					if (style == LOOP_UNDECIDED) {
-						moves.push_back(move(y2, x2, LOOP_BLANK, DIFFICULTY_TWO_LINES));
+						moves.push_back(move(y2, x2, LOOP_BLANK, param.two_lines));
 					}
 				}
 			}
@@ -260,7 +251,7 @@ void SlitherlinkEvaluator::CheckTheoremsAbout3(std::vector<move> &moves)
 	for (int y = 0; y < field.GetHeight(); ++y) {
 		for (int x = 0; x < field.GetWidth(); ++x) if (field.GetClue(y, x) == 3) {
 			if (y != field.GetHeight() - 1 && field.GetClue(y + 1, x) == 3) {
-				move m(DIFFICULTY_ADJACENT_3);
+				move m(param.adjacent_3);
 				m.add(y * 2 + 0, x * 2 + 1, LOOP_LINE);
 				m.add(y * 2 + 2, x * 2 + 1, LOOP_LINE);
 				m.add(y * 2 + 4, x * 2 + 1, LOOP_LINE);
@@ -270,7 +261,7 @@ void SlitherlinkEvaluator::CheckTheoremsAbout3(std::vector<move> &moves)
 				moves.push_back(m);
 			}
 			if (x != field.GetWidth() - 1 && field.GetClue(y, x + 1) == 3) {
-				move m(DIFFICULTY_ADJACENT_3);
+				move m(param.adjacent_3);
 				m.add(y * 2 + 1, x * 2 + 0, LOOP_LINE);
 				m.add(y * 2 + 1, x * 2 + 2, LOOP_LINE);
 				m.add(y * 2 + 1, x * 2 + 4, LOOP_LINE);
@@ -281,7 +272,7 @@ void SlitherlinkEvaluator::CheckTheoremsAbout3(std::vector<move> &moves)
 			}
 
 			if (y != field.GetHeight() - 1 && x != field.GetWidth() - 1 && field.GetClue(y + 1, x + 1) == 3) {
-				move m(DIFFICULTY_DIAGONAL_3);
+				move m(param.diagonal_3);
 				m.add(y * 2 + 0, x * 2 + 1, LOOP_LINE);
 				m.add(y * 2 + 1, x * 2 + 0, LOOP_LINE);
 				m.add(y * 2 + 3, x * 2 + 4, LOOP_LINE);
@@ -290,7 +281,7 @@ void SlitherlinkEvaluator::CheckTheoremsAbout3(std::vector<move> &moves)
 				moves.push_back(m);
 			}
 			if (y != field.GetHeight() - 1 && x != 0 && field.GetClue(y + 1, x - 1) == 3) {
-				move m(DIFFICULTY_DIAGONAL_3);
+				move m(param.diagonal_3);
 				m.add(y * 2 + 1, x * 2 + 2, LOOP_LINE);
 				m.add(y * 2 + 0, x * 2 + 1, LOOP_LINE);
 				m.add(y * 2 + 3, x * 2 - 2, LOOP_LINE);
@@ -318,7 +309,7 @@ bool SlitherlinkEvaluator::CheckAdjacentLinesRule(int y, int x, std::vector<move
 	}
 
 	if (n_lines == clue) {
-		move m(DIFFICULTY_ADJACENT_LINES[clue]);
+		move m(param.adjacent_lines[clue]);
 
 		for (int i = 0; i < 4; ++i) {
 			int y2 = y * 2 + 1 + GridConstant::GRID_DY[i], x2 = x * 2 + 1 + GridConstant::GRID_DX[i];
@@ -331,7 +322,7 @@ bool SlitherlinkEvaluator::CheckAdjacentLinesRule(int y, int x, std::vector<move
 		moves.push_back(m);
 	}
 	if (4 - n_blanks == clue) {
-		move m(DIFFICULTY_ADJACENT_LINES[clue]);
+		move m(param.adjacent_lines[clue]);
 
 		for (int i = 0; i < 4; ++i) {
 			int y2 = y * 2 + 1 + GridConstant::GRID_DY[i], x2 = x * 2 + 1 + GridConstant::GRID_DX[i];
@@ -358,14 +349,14 @@ void SlitherlinkEvaluator::CheckCornerCell(int y, int x, std::vector<move> &move
 		if (field.GetSegmentStyleSafe(y * 2 + 1 + dy1 * 2 + dy2, x * 2 + 1 + dx1 * 2 + dx2) == LOOP_BLANK &&
 			field.GetSegmentStyleSafe(y * 2 + 1 + dy2 * 2 + dy1, x * 2 + 1 + dx2 * 2 + dx1) == LOOP_BLANK) {
 			if (clue == 1) {
-				move m(DIFFICULTY_CORNER_CLUE[1]);
+				move m(param.corner_clue[1]);
 				m.add(y * 2 + 1 + dy1, x * 2 + 1 + dx1, LOOP_BLANK);
 				m.add(y * 2 + 1 + dy2, x * 2 + 1 + dx2, LOOP_BLANK);
 				moves.push_back(m);
 			}
 			if (clue == 2) {
 				{
-					move m(DIFFICULTY_CORNER_CLUE[2]);
+					move m(param.corner_clue[2]);
 
 					if (field.GetSegmentStyleSafe(y * 2 + 1 + dy1, x * 2 + 1 + dx1) == LOOP_LINE ||
 						field.GetSegmentStyleSafe(y * 2 + 1 + dy2, x * 2 + 1 + dx2) == LOOP_LINE ||
@@ -392,7 +383,7 @@ void SlitherlinkEvaluator::CheckCornerCell(int y, int x, std::vector<move> &move
 				}
 
 				{
-					move m(DIFFICULTY_CORNER_CLUE[2]);
+					move m(param.corner_clue[2]);
 
 					for (int t = 0; t < 2; ++t) {
 						int sgn = (t == 0 ? 1 : -1);
@@ -415,7 +406,7 @@ void SlitherlinkEvaluator::CheckCornerCell(int y, int x, std::vector<move> &move
 				}
 			}
 			if (clue == 3) {
-				move m(DIFFICULTY_CORNER_CLUE[3]);
+				move m(param.corner_clue[3]);
 				m.add(y * 2 + 1 + dy1, x * 2 + 1 + dx1, LOOP_LINE);
 				m.add(y * 2 + 1 + dy2, x * 2 + 1 + dx2, LOOP_LINE);
 				moves.push_back(m);
@@ -439,7 +430,7 @@ void SlitherlinkEvaluator::CheckLineToClue(int y, int x, std::vector<move> &move
 		if (clue == 1) {
 			if ((field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_LINE && field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_BLANK) || 
 				(field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_LINE && field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_BLANK)) {
-				move m(DIFFICULTY_LINE_TO_CLUE[1]);
+				move m(param.line_to_clue[1]);
 
 				m.add(y * 2 + 1 - dy1, x * 2 + 1 - dx1, LOOP_BLANK);
 				m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, LOOP_BLANK);
@@ -459,7 +450,7 @@ void SlitherlinkEvaluator::CheckLineToClue(int y, int x, std::vector<move> &move
 
 			if (!is_applicable) continue;
 
-			move m(DIFFICULTY_LINE_TO_CLUE[2]);
+			move m(param.line_to_clue[2]);
 
 			if (field.GetSegmentStyleSafe(y * 2 + 1 - dy1, x * 2 + 1 - dx1) == LOOP_LINE) m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, LOOP_BLANK);
 			if (field.GetSegmentStyleSafe(y * 2 + 1 - dy1, x * 2 + 1 - dx1) == LOOP_BLANK) m.add(y * 2 + 1 - dy2, x * 2 + 1 - dx2, LOOP_LINE);
@@ -477,7 +468,7 @@ void SlitherlinkEvaluator::CheckLineToClue(int y, int x, std::vector<move> &move
 		if (clue == 3) {
 			if (field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_LINE ||
 				field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_LINE) {
-				move m(DIFFICULTY_LINE_TO_CLUE[3]);
+				move m(param.line_to_clue[3]);
 
 				if (field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_LINE) m.add(in_y2, in_x2, LOOP_BLANK);
 				if (field.GetSegmentStyleSafe(in_y2, in_x2) == LOOP_LINE) m.add(in_y1, in_x1, LOOP_BLANK);
@@ -504,7 +495,7 @@ void SlitherlinkEvaluator::CheckLineFromClue(int y, int x, std::vector<move> &mo
 		if (clue == 1) {
 			if (field.GetSegmentStyleSafe(y * 2 + 1 - dy1, x * 2 + 1 - dx1) == LOOP_BLANK &&
 				field.GetSegmentStyleSafe(y * 2 + 1 - dy2, x * 2 + 1 - dx2) == LOOP_BLANK) {
-				move m(DIFFICULTY_LINE_FROM_CLUE[1]);
+				move m(param.line_from_clue[1]);
 
 				if (field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_LINE)
 					m.add(in_y2, in_x2, LOOP_BLANK);
@@ -522,7 +513,7 @@ void SlitherlinkEvaluator::CheckLineFromClue(int y, int x, std::vector<move> &mo
 		if (clue == 3) {
 			if (field.GetSegmentStyleSafe(y * 2 + 1 - dy1, x * 2 + 1 - dx1) == LOOP_LINE &&
 				field.GetSegmentStyleSafe(y * 2 + 1 - dy2, x * 2 + 1 - dx2) == LOOP_LINE) {
-				move m(DIFFICULTY_LINE_FROM_CLUE[3]);
+				move m(param.line_from_clue[3]);
 
 				if (field.GetSegmentStyleSafe(in_y1, in_x1) == LOOP_LINE)
 					m.add(in_y2, in_x2, LOOP_BLANK);
@@ -568,7 +559,7 @@ void SlitherlinkEvaluator::CheckDiagonalChain(int y, int x, std::vector<move> &m
 			int clue = field.GetClue(y / 2, x / 2);
 
 			if (clue == 2) {
-				move m(DIFFICULTY_DIAGONAL_CHAIN);
+				move m(param.diagonal_chain);
 
 				if (field.GetSegmentStyleSafe(y + dy, x) != LOOP_UNDECIDED) {
 					m.add(y, x + dx, ((field.GetSegmentStyleSafe(y + dy, x) == LOOP_LINE) ^ (cnt == 1)) ? LOOP_LINE : LOOP_BLANK);
@@ -590,7 +581,7 @@ void SlitherlinkEvaluator::CheckDiagonalChain(int y, int x, std::vector<move> &m
 			}
 
 			if (clue == 1) {
-				move m(DIFFICULTY_DIAGONAL_CHAIN);
+				move m(param.diagonal_chain);
 
 				if (cnt == 0) {
 					m.add(y - dy, x, LOOP_BLANK);
@@ -603,7 +594,7 @@ void SlitherlinkEvaluator::CheckDiagonalChain(int y, int x, std::vector<move> &m
 				moves.push_back(m);
 			}
 			if (clue == 3) {
-				move m(DIFFICULTY_DIAGONAL_CHAIN);
+				move m(param.diagonal_chain);
 
 				if (cnt == 0) {
 					m.add(y - dy, x, LOOP_LINE);

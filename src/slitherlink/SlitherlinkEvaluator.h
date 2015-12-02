@@ -1,4 +1,6 @@
 #include "SlitherlinkField.h"
+#include "SlitherlinkEvaluatorParameter.h"
+
 #include <vector>
 
 namespace Penciloid
@@ -10,6 +12,7 @@ public:
 	// ~SlitherlinkEvaluator();
 
 	void Init(SlitherlinkProblem &problem);
+	void SetParameter(SlitherlinkEvaluatorParameter &p) { param = p; }
 
 	double Evaluate();
 
@@ -52,13 +55,6 @@ private:
 	void CheckInOutRule(std::vector<move> &moves);
 
 	SlitherlinkField field;
-
-	static const double DIFFICULTY_TWO_LINES;
-	static const double DIFFICULTY_ADJACENT_LINES[4];
-	static const double DIFFICULTY_ADJACENT_3, DIFFICULTY_DIAGONAL_3;
-	static const double DIFFICULTY_CORNER_CLUE[4];
-	static const double DIFFICULTY_LINE_TO_CLUE[4];
-	static const double DIFFICULTY_LINE_FROM_CLUE[4];
-	static const double DIFFICULTY_DIAGONAL_CHAIN;
+	SlitherlinkEvaluatorParameter param;
 };
 }
