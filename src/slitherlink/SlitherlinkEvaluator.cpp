@@ -38,7 +38,7 @@ double SlitherlinkEvaluator::Evaluate()
 			for (int i = 0; i < m.xs.size(); ++i) {
 				locality_weight += std::min(1.0, (std::max(abs(last_y - m.ys[i]), abs(last_y - m.ys[i])) - 1) / 4.0);
 			}
-			locality_weight = pow(3.0, locality_weight / m.xs.size() - 1);
+			locality_weight = pow(param.locality_base, locality_weight / m.xs.size() - 1);
 			m.difficulty *= locality_weight;
 		}
 
@@ -50,13 +50,13 @@ double SlitherlinkEvaluator::Evaluate()
 				score_zero = true;
 				break;
 			} else {
-				current_score += pow(m.difficulty / m.xs.size(), -2.0);
+				current_score += pow(m.difficulty / m.xs.size(), -param.alternative_dimension);
 			}
 		}
 
 		if (score_zero) current_score = 0.0;
 		else {
-			current_score = pow(current_score, -1.0 / 2.0);
+			current_score = pow(current_score, -1.0 / param.alternative_dimension);
 		}
 		current_score *= sqrt((field.GetHeight() + 1) * field.GetWidth() + (field.GetWidth() + 1) * field.GetHeight() - field.GetProgress());
 
