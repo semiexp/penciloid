@@ -22,7 +22,6 @@ double SlitherlinkEvaluator::Evaluate()
 	double score = 0.0;
 
 	double last_y = 1e8, last_x = 1e8;
-
 	while (field.GetStatus() == SolverStatus::NORMAL) {
 		std::vector<move> valid_moves;
 		EnumerateValidMoves(valid_moves);
@@ -657,10 +656,11 @@ void SlitherlinkEvaluator::CheckInOutRule(std::vector<move> &moves)
 			} else continue;
 
 			if (uf.Root(cell1 * 2) == uf.Root(cell2 * 2)) {
-				if (field.IsRepresentative(y, x)) moves.push_back(move(y, x, LOOP_BLANK, 3.5 /* TODO */));
+				/* TODO: can the difficulty value be constant? */
+				if (field.IsRepresentative(y, x)) moves.push_back(move(y, x, LOOP_BLANK, param.inout_rule));
 			}
 			if (uf.Root(cell1 * 2) == uf.Root(cell2 * 2 + 1)) {
-				if (field.IsRepresentative(y, x)) moves.push_back(move(y, x, LOOP_LINE, 3.5 /* TODO */));
+				if (field.IsRepresentative(y, x)) moves.push_back(move(y, x, LOOP_LINE, param.inout_rule));
 			}
 		}
 	}
