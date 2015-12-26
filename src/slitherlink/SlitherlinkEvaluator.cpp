@@ -35,7 +35,7 @@ double SlitherlinkEvaluator::Evaluate()
 		for (move &m : valid_moves) {
 			double locality_weight = 0.0;
 			for (int i = 0; i < m.xs.size(); ++i) {
-				locality_weight += std::min(1.0, (std::max(abs(last_y - m.ys[i]), abs(last_y - m.ys[i])) - 1) / 4.0);
+				locality_weight += std::min(1.0, (std::max(abs(last_x - m.xs[i]), abs(last_y - m.ys[i])) - 1) / 5.0);
 			}
 			locality_weight = pow(param.locality_base, locality_weight / m.xs.size() - 1);
 			m.difficulty *= locality_weight;
