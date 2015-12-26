@@ -7,6 +7,9 @@ class SlitherlinkEvaluatorParameter
 public:
 	SlitherlinkEvaluatorParameter() {
 		two_lines = 0.0;
+		avoid_cycle = 1.0;
+		hourglass_rule = 4.0;
+
 		adjacent_lines[0] = 0.6;
 		adjacent_lines[1] = 1.4;
 		adjacent_lines[2] = 1.4;
@@ -33,6 +36,8 @@ public:
 	}
 
 	double two_lines;
+	double avoid_cycle, hourglass_rule;
+
 	double adjacent_lines[4];
 	double adjacent_3, diagonal_3;
 	double corner_clue[4];

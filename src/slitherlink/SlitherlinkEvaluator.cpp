@@ -191,7 +191,7 @@ void SlitherlinkEvaluator::CheckAvoidCycleRule(std::vector<move> &moves)
 
 				if (style == LOOP_UNDECIDED) {
 					if (field.GetSegmentDestination(y2, x2, y, x) == line_destination) {
-						moves.push_back(move(y2, x2, LOOP_BLANK, 1.0 /* TODO */));
+						moves.push_back(move(y2, x2, LOOP_BLANK, param.avoid_cycle));
 					}
 				}
 			}
@@ -238,7 +238,7 @@ void SlitherlinkEvaluator::CheckHourglassRule(int y, int x, std::vector<move> &m
 			if (field.GetSegmentStyleSafe(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d]) == LOOP_UNDECIDED) {
 				if (field.GetSegmentDestination(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d], ty, tx) == line_companion) {
 					// TODO: set the difficulty more carefully
-					moves.push_back(move(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d], LOOP_BLANK, 4.0));
+					moves.push_back(move(ty + GridConstant::GRID_DY[d], tx + GridConstant::GRID_DX[d], LOOP_BLANK, param.hourglass_rule));
 				}
 			}
 		}
