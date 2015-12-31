@@ -278,6 +278,17 @@ void SlitherlinkEvaluator::CheckTheoremsAbout3(std::vector<move> &moves)
 				m.add(y * 2 + 4, x * 2 + 3, LOOP_LINE);
 
 				moves.push_back(m);
+
+				if (field.GetSegmentStyleSafe(y * 2 + 2, x * 2 + 1) == LOOP_UNDECIDED && field.GetSegmentStyleSafe(y * 2 + 1, x * 2 + 2) == LOOP_UNDECIDED &&
+					field.GetSegmentStyleSafe(y * 2 + 2, x * 2 + 3) == LOOP_UNDECIDED && field.GetSegmentStyleSafe(y * 2 + 3, x * 2 + 2) == LOOP_UNDECIDED &&
+					field.GetTotalLines() > 4) {
+					if (field.GetSegmentDestination(y * 2, x * 2 + 3, y * 2, x * 2 + 2) == field.SegmentId(y * 2 + 2, x * 2 + 4)) {
+						moves.push_back(move(y * 2, x * 2 + 3, LOOP_BLANK, param.diagonal_3_avoid_cycle));
+					}
+					if (field.GetSegmentDestination(y * 2 + 3, x * 2, y * 2 + 2, x * 2) == field.SegmentId(y * 2 + 4, x * 2 + 2)) {
+						moves.push_back(move(y * 2 + 3, x * 2, LOOP_BLANK, param.diagonal_3_avoid_cycle));
+					}
+				}
 			}
 			if (y != field.GetHeight() - 1 && x != 0 && field.GetClue(y + 1, x - 1) == 3) {
 				move m(param.diagonal_3);
@@ -287,6 +298,17 @@ void SlitherlinkEvaluator::CheckTheoremsAbout3(std::vector<move> &moves)
 				m.add(y * 2 + 4, x * 2 - 1, LOOP_LINE);
 
 				moves.push_back(m);
+
+				if (field.GetSegmentStyleSafe(y * 2 + 1, x * 2) == LOOP_UNDECIDED && field.GetSegmentStyleSafe(y * 2 + 2, x * 2 + 1) == LOOP_UNDECIDED &&
+					field.GetSegmentStyleSafe(y * 2 + 3, x * 2) == LOOP_UNDECIDED && field.GetSegmentStyleSafe(y * 2 + 2, x * 2 - 1) == LOOP_UNDECIDED &&
+					field.GetTotalLines() > 4) {
+					if (field.GetSegmentDestination(y * 2, x * 2 - 1, y * 2, x * 2) == field.SegmentId(y * 2 + 2, x * 2 - 2)) {
+						moves.push_back(move(y * 2, x * 2 - 1, LOOP_BLANK, param.diagonal_3_avoid_cycle));
+					}
+					if (field.GetSegmentDestination(y * 2 + 3, x * 2 + 2, y * 2 + 2, x * 2 + 2) == field.SegmentId(y * 2 + 4, x * 2)) {
+						moves.push_back(move(y * 2 + 3, x * 2 + 2, LOOP_BLANK, param.diagonal_3_avoid_cycle));
+					}
+				}
 			}
 		}
 	}

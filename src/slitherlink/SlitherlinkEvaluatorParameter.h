@@ -16,6 +16,8 @@ public:
 		adjacent_lines[3] = 1.2;
 		adjacent_3 = 2.7;
 		diagonal_3 = 2.0;
+		diagonal_3_avoid_cycle = 3.0;
+
 		corner_clue[0] = 0.0;
 		corner_clue[1] = 3.2;
 		corner_clue[2] = 3.3;
@@ -39,7 +41,7 @@ public:
 	double avoid_cycle, hourglass_rule;
 
 	double adjacent_lines[4];
-	double adjacent_3, diagonal_3;
+	double adjacent_3, diagonal_3, diagonal_3_avoid_cycle;
 	double corner_clue[4];
 	double line_to_clue[4];
 	double line_from_clue[4];
